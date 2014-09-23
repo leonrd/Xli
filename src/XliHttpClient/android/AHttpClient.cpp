@@ -328,8 +328,9 @@ namespace Xli
                             cval = env->GetStringUTFChars(jval, NULL);
                         }
 
-                        if (!request->responseHeaders.ContainsKey(ckey)) 
+                        if (!request->responseHeaders.ContainsKey(ckey)) {
                             request->responseHeaders.Add(ckey,cval);
+                        }
                         request->responseStatus = (int)responseCode;
                         if (responseMessage!=0)
                         {
