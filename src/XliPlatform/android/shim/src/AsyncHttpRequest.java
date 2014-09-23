@@ -178,8 +178,10 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResp
             	if (key==null) {
             		key="null";
             	}
+            	StringBuilder sb = new StringBuilder();
+                for(String s: entry.getValue()) { sb.append(s); }
                 headers.add(key);
-                headers.add(entry.getValue().toString());
+                headers.add(sb.toString());
             }
 	        String[] result = headers.toArray(new String[headers.size()]);	
 	        return result;
