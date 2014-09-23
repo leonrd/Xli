@@ -121,8 +121,9 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResp
 	@Override
 	protected void onPostExecute(HttpWrappedResponse result)
 	{
-		if (result!=null)
+		if (result!=null) {
 			XliJ.XliJ_HttpCallback(XliJ.HoldObject(result.body), result.headers, result.responseCode, result.responseMessage, result.functionPointer);
+		}
 	}
 	
     //[TODO] Could optimize by changing chunk mode if length known
@@ -170,26 +171,20 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResp
     {
     	ArrayList<String> headers = new ArrayList<String>();
     	try {
-	    	String separator = ",";
-	        Map<String, List<String>> a = connection.getHeaderFields();
-	
-	        for (String key : a.keySet()) {
-	        	if (key != null) {
-	        		headers.add(key);
-	        	} else {
-	        		headers.add("NULL");
-	        	}
-	        	StringBuilder sb = new StringBuilder();
-	            String sep = "";
-	            for(String s: a.get(key)) {
-	                sb.append(sep).append(s);
-	                sep = separator;
-	            }
-	            headers.add(sb.toString());
-	
-	            String[] result = headers.toArray(new String[headers.size()]);	
-	            return result;
-	        }
+	        Map<String, List<String>> headerMap = connection.getHeaderFields();
+	        
+            for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
+            	String key = entry.getKey();
+            	if (key==null) {
+            		key="null";
+            	}
+            	StringBuilder sb = new StringBuilder();
+                for(String s: entry.getValue()) { sb.append(s); }
+                headers.add(key);
+                headers.add(sb.toString());
+            }
+	        String[] result = headers.toArray(new String[headers.size()]);	
+	        return result;
     	} catch (Exception e) {
     		XliJ.XliJ_JavaThrowError(-1,"Error in HeadersToStringArray: "+e.getLocalizedMessage());
     	}
