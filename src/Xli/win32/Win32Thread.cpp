@@ -21,6 +21,36 @@
 #include <windows.h>
 #include <process.h>
 
+// From: http://msdn.microsoft.com/en-us/library/xcb2z8hs.aspx
+const DWORD MS_VC_EXCEPTION = 0x406D1388;
+
+#pragma pack(push,8)
+typedef struct tagTHREADNAME_INFO
+{
+    DWORD dwType; // Must be 0x1000.
+    LPCSTR szName; // Pointer to name (in user addr space).
+    DWORD dwThreadID; // Thread ID (-1=caller thread).
+    DWORD dwFlags; // Reserved for future use, must be zero.
+} THREADNAME_INFO;
+#pragma pack(pop)
+
+void SetThreadName(DWORD dwThreadID, const char* threadName)
+{
+    THREADNAME_INFO info;
+    info.dwType = 0x1000;
+    info.szName = threadName;
+    info.dwThreadID = dwThreadID;
+    info.dwFlags = 0;
+
+    __try
+    {
+        RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+    }
+}
+
 #include <Xli/Thread.h>
 #include <Xli/Console.h>
 
@@ -42,8 +72,6 @@ namespace Xli
 
     ThreadHandle CreateThread(void (*entrypoint)(void*), void* arg)
     {
-        //HANDLE thread = ::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)entrypoint, arg, 0, 0);
-
         Win32ThreadData* data = new Win32ThreadData;
         data->Entrypoint = entrypoint;
         data->Arg = arg;
@@ -57,7 +85,7 @@ namespace Xli
         return (ThreadHandle)thread;
     }
 
-    void WaitForThread(ThreadHandle handle)
+    void JoinThread(ThreadHandle handle)
     {
         DWORD res = ::WaitForSingleObject((HANDLE)handle, INFINITE);
 
@@ -65,6 +93,11 @@ namespace Xli
             Error->WriteLine("XLI ERROR: WaitForSingleObject failed");
         else
             ::CloseHandle((HANDLE)handle);
+    }
+
+    void SetCurrentThreadName(const String& name)
+    {
+        ::SetThreadName(-1, name.Ptr());
     }
 
     void* GetCurrentThread()
@@ -75,5 +108,25 @@ namespace Xli
     void Sleep(int ms)
     {
         ::Sleep(ms);
+    }
+
+    TlsHandle CreateTls(void (*destructor)(void*))
+    {
+        return (TlsHandle)::TlsAlloc();
+    }
+
+    void DeleteTls(TlsHandle handle)
+    {
+        ::TlsFree((DWORD)handle);
+    }
+    
+    void SetTlsValue(TlsHandle handle, void* data)
+    {
+        ::TlsSetValue((DWORD)handle, data);
+    }
+
+    void* GetTlsValue(TlsHandle handle)
+    {
+        return ::TlsGetValue((DWORD)handle);
     }
 }
