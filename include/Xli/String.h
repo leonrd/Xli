@@ -37,16 +37,16 @@ namespace Xli
         friend class Unicode;
         static const int BufSize = 8;
 
-        char* data;
-        char buf[BufSize];
-        int length;
+        char* _data;
+        char _buf[BufSize];
+        int _length;
 
-        void initLength(int len);
-        void init(const char* str, int len);
-        void init(int i);
-        void init(float f);
-        void init(double d);
-        void deinit();
+        void InitLength(int len);
+        void Init(const char* str, int len);
+        void Init(int i);
+        void Init(float f);
+        void Init(double d);
+        void Deinit();
 
     public:
         String();
@@ -108,20 +108,9 @@ namespace Xli
         bool ToBool() const;
 
         bool Equals(const char* str, int len) const;
-        bool Equals(const char* str) const;
-        bool Equals(const String& str) const;
-
         int CompareTo(const char* str, int len) const;
-        int CompareTo(const char* str) const;
-        int CompareTo(const String& str) const;
-
         String Add(const char* str, int len) const;
-        String Add(const char* str) const;
-        String Add(const String& str) const;
-
         void Append(const char* str, int len);
-        void Append(const char* str);
-        void Append(const String& str);
         
         bool operator == (const String& str) const;
         bool operator == (const char* str) const;

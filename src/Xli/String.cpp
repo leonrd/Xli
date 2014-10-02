@@ -39,138 +39,138 @@ namespace Xli
         return len;
     }
 
-    void String::initLength(int len)
+    void String::InitLength(int len)
     {
-        data = len < BufSize - 1 ? buf : new char[len + 1];
-        data[len] = 0;
-        length = len;
+        _data = len < BufSize - 1 ? _buf : new char[len + 1];
+        _data[len] = 0;
+        _length = len;
     }
 
-    void String::init(const char* str, int len)
+    void String::Init(const char* str, int len)
     {
-        initLength(len);
-        memcpy(data, str, len);
+        InitLength(len);
+        memcpy(_data, str, len);
     }
 
-    void String::init(int i)
+    void String::Init(int i)
     {
         char buf[32];
         sprintf_s(buf, 32, "%d", i);
-        init(buf, (int)strlen(buf));
+        Init(buf, (int)strlen(buf));
     }
 
-    void String::init(float f)
+    void String::Init(float f)
     {
         char buf[64];
         sprintf_s(buf, 64, "%f", f);
-        init(buf, GetFloatLength(buf));
+        Init(buf, GetFloatLength(buf));
     }
 
-    void String::init(double d)
+    void String::Init(double d)
     {
         char buf[128];
         sprintf_s(buf, 128, "%lf", d);
-        init(buf, GetFloatLength(buf));
+        Init(buf, GetFloatLength(buf));
     }
 
-    void String::deinit()
+    void String::Deinit()
     {
-        if (data != buf) 
-            delete [] data;
+        if (_data != _buf)
+            delete [] _data;
     }
 
     String::String()
     {
-        length = 0;
-        data = buf;
-        buf[0] = 0;
+        _length = 0;
+        _data = _buf;
+        _buf[0] = 0;
     }
 
     String::String(const String& str)
     {
-        init(str.data, str.length);
+        Init(str._data, str._length);
     }
 
     String::String(const char* str)
     {
-        init(str, !str ? 0 : (int)strlen(str));
+        Init(str, !str ? 0 : (int)strlen(str));
     }
 
     String::String(const char* str, int len)
     {
-        init(str, len);
+        Init(str, len);
     }
 
     String::String(int i)
     {
-        init(i);
+        Init(i);
     }
 
     String::String(float f)
     {
-        init(f);
+        Init(f);
     }
 
     String::String(double d)
     {
-        init(d);
+        Init(d);
     }
 
     String::~String()
     {
-        deinit();
+        Deinit();
     }
 
     char* String::CopyPtr()
     {
-        char* buf = new char[length + 1];
-        buf[length] = 0;
-        memcpy(buf, data, length);
+        char* buf = new char[_length + 1];
+        buf[_length] = 0;
+        memcpy(buf, _data, _length);
         return buf;
     }
 
     char* String::SwapPtr()
     {
-        if (data == buf)
+        if (_data == _buf)
             return CopyPtr();
 
-        *(char**)&buf = data;
-        return data;
+        *(char**)&_buf = _data;
+        return _data;
     }
 
     char* String::Ptr()
     {
-        return data;
+        return _data;
     }
 
     const char* String::Ptr() const
     {
-        return data;
+        return _data;
     }
 
     int String::Length() const
     {
-        return length;
+        return _length;
     }
 
     char& String::operator [] (int index)
     {
 #ifdef XLI_RANGE_CHECK
-        if (index >= length)
+        if (index >= _length)
             XLI_THROW_INDEX_OUT_OF_BOUNDS;
 #endif
 
-        return data[index];
+        return _data[index];
     }
 
     const char& String::operator [] (int index) const
     {
 #ifdef XLI_RANGE_CHECK
-        if (index >= length)
+        if (index >= _length)
             XLI_THROW_INDEX_OUT_OF_BOUNDS;
 #endif
 
-        return data[index];
+        return _data[index];
     }
 
     const char& String::First() const
@@ -180,13 +180,13 @@ namespace Xli
 
     const char& String::Last() const
     {
-        return (*this)[length - 1];
+        return (*this)[_length - 1];
     }
 
     int String::IndexOf(char c, int start) const
     {
-        for (int i = start; i < length; i++)
-            if (data[i] == c) 
+        for (int i = start; i < _length; i++)
+            if (_data[i] == c) 
                 return i;
 
         return -1;
@@ -200,12 +200,12 @@ namespace Xli
     int String::LastIndexOf(char c, int start) const
     {
 #ifdef XLI_RANGE_CHECK
-        if (start >= length)
+        if (start >= _length)
             XLI_THROW_INDEX_OUT_OF_BOUNDS;
 #endif
 
         for (int i = start; i >= 0; i--)
-            if (data[i] == c) 
+            if (_data[i] == c) 
                 return i;
 
         return -1;
@@ -213,37 +213,37 @@ namespace Xli
 
     int String::LastIndexOf(char c) const
     {
-        return LastIndexOf(c, length - 1);
+        return LastIndexOf(c, _length - 1);
     }
 
     String String::Substring(int start, int len) const
     {
 #ifdef XLI_RANGE_CHECK
-        if (start + len > length || start < 0)
+        if (start + len > _length || start < 0)
             XLI_THROW_INDEX_OUT_OF_BOUNDS;
 #endif
 
-        return String(data + start, len);
+        return String(_data + start, len);
     }
 
     String String::Substring(int start) const 
     { 
-        return Substring(start, length - start); 
+        return Substring(start, _length - start); 
     }
 
     String String::Trim() const
     {
         int start = 0;
-        int end = length;
+        int end = _length;
 
         while (start < end) 
-            if (isspace((int)(unsigned char)data[start])) 
+            if (isspace((int)(unsigned char)_data[start])) 
                 start++; 
             else 
                 break;
 
         while (end > start) 
-            if (isspace((int)(unsigned char)data[end - 1])) 
+            if (isspace((int)(unsigned char)_data[end - 1])) 
                 end--; 
             else 
                 break;
@@ -254,16 +254,16 @@ namespace Xli
     String String::Trim(char c) const
     {
         int start = 0;
-        int end = length;
+        int end = _length;
 
         while (start < end) 
-            if (data[start] == c) 
+            if (_data[start] == c) 
                 start++; 
             else 
                 break;
 
         while (end > start) 
-            if (data[end - 1] == c) 
+            if (_data[end - 1] == c) 
                 end--; 
             else 
                 break;
@@ -273,20 +273,20 @@ namespace Xli
 
     String String::ToLower() const
     {
-        String r(data, length);
+        String r(_data, _length);
 
-        for (int i = 0; i < length; i++) 
-            r.data[i] = (char)(unsigned char)tolower((int)(unsigned char)r.data[i]);
+        for (int i = 0; i < _length; i++) 
+            r._data[i] = (char)(unsigned char)tolower((int)(unsigned char)r._data[i]);
 
         return r;
     }
 
     String String::ToUpper() const
     {
-        String r(data, length);
+        String r(_data, _length);
 
-        for (int i = 0; i < length; i++) 
-            r.data[i] = (char)(unsigned char)toupper((int)(unsigned char)r.data[i]);
+        for (int i = 0; i < _length; i++) 
+            r._data[i] = (char)(unsigned char)toupper((int)(unsigned char)r._data[i]);
 
         return r;
     }
@@ -295,51 +295,51 @@ namespace Xli
     {
         int start = 0;
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < _length; i++)
         {
-            if (data[i] == c)
+            if (_data[i] == c)
             {
                 parts.Add(Substring(start, i - start));
                 start = i+1;
             }
         }
 
-        if (start < length)
-            parts.Add(Substring(start, length - start));
+        if (start < _length)
+            parts.Add(Substring(start, _length - start));
     }
 
     String String::Join(char c, const Array<String>& list)
     {
         String r;
-        r.length = -1;
+        r._length = -1;
 
         for (int i = 0; i < list.Length(); i++) 
-            r.length += list[i].Length() + 1;
+            r._length += list[i].Length() + 1;
 
-        if (r.length == -1) 
+        if (r._length == -1) 
             return String();
 
-        r.data = new char[r.length + 1];
+        r._data = new char[r._length + 1];
         int p = 0;
 
         for (int i = 0; i < list.Length(); i++)
         {
-            memcpy(r.data + p, list[i].Ptr(), list[i].Length());
+            memcpy(r._data + p, list[i].Ptr(), list[i].Length());
             p += list[i].Length();
-            r.data[p++] = c;
+            r._data[p++] = c;
         }
 
-        r.data[r.length] = 0;
+        r._data[r._length] = 0;
         return r;
     }
 
     bool String::StartsWith(const String& str) const
     {
-        if (str.length > length) 
+        if (str._length > _length) 
             return false;
 
-        for (int i = 0; i < str.length; i++)
-            if (str.data[i] != data[i]) 
+        for (int i = 0; i < str._length; i++)
+            if (str._data[i] != _data[i]) 
                 return false;
 
         return true;
@@ -347,20 +347,20 @@ namespace Xli
 
     bool String::EndsWith(const String& str) const
     {
-        if (str.length > length)
+        if (str._length > _length)
             return false;
 
-        for (int i = length - str.length; i < length; i++)
-            if (str.data[i - length + str.length] != data[i]) 
+        for (int i = _length - str._length; i < _length; i++)
+            if (str._data[i - _length + str._length] != _data[i]) 
                 return false;
 
         return true;
     }
 
-    String String::Create(int length)
+    String String::Create(int _length)
     {
         String r;
-        r.initLength(length);
+        r.InitLength(_length);
         return r;
     }
 
@@ -411,119 +411,89 @@ namespace Xli
     int String::HexToInt() const
     {
         int i;
-        if (sscanf_s(data, "%x", &i) == 1) return i;
-        if (sscanf_s(data, "%X", &i) == 1) return i;
+        if (sscanf_s(_data, "%x", &i) == 1) return i;
+        if (sscanf_s(_data, "%X", &i) == 1) return i;
         XLI_THROW_INVALID_FORMAT("Unable to convert string(hex) to integer");
     }
 
     int String::ToInt() const
     {
         int i;
-        if (sscanf_s(data, "%d", &i) == 1) return i;
+        if (sscanf_s(_data, "%d", &i) == 1) return i;
         XLI_THROW_INVALID_FORMAT("Unable to convert string to int");
     }
 
     float String::ToFloat() const
     {
         float i;
-        if (sscanf_s(data, "%f", &i) == 1) return i;
-        if (sscanf_s(data, "%e", &i) == 1) return i;
-        if (sscanf_s(data, "%E", &i) == 1) return i;
+        if (sscanf_s(_data, "%f", &i) == 1) return i;
+        if (sscanf_s(_data, "%e", &i) == 1) return i;
+        if (sscanf_s(_data, "%E", &i) == 1) return i;
         XLI_THROW_INVALID_FORMAT("Unable to convert string to float");
     }
 
     double String::ToDouble() const
     {
         double i;
-        if (sscanf_s(data, "%lf", &i) == 1) return i;
-        if (sscanf_s(data, "%le", &i) == 1) return i;
-        if (sscanf_s(data, "%lE", &i) == 1) return i;
+        if (sscanf_s(_data, "%lf", &i) == 1) return i;
+        if (sscanf_s(_data, "%le", &i) == 1) return i;
+        if (sscanf_s(_data, "%lE", &i) == 1) return i;
         XLI_THROW_INVALID_FORMAT("Unable to convert string to double");
     }
 
     bool String::ToBool() const
     {
-        if (!strcmp(data, "true")) return true;
-        if (!strcmp(data, "false")) return false;
-        if (!strcmp(data, "TRUE")) return true;
-        if (!strcmp(data, "FALSE")) return false;
-        if (!strcmp(data, "True")) return true;
-        if (!strcmp(data, "False")) return false;
+        if (!strcmp(_data, "true")) return true;
+        if (!strcmp(_data, "false")) return false;
+        if (!strcmp(_data, "TRUE")) return true;
+        if (!strcmp(_data, "FALSE")) return false;
+        if (!strcmp(_data, "True")) return true;
+        if (!strcmp(_data, "False")) return false;
         XLI_THROW_INVALID_FORMAT("Unable to convert string to bool");
     }
 
     bool String::Equals(const char* str, int len) const
     {
-        if (length != len)
+        if (_length != len)
             return false;
 
-        for (int i = 0; i < length; i++)
-            if (data[i] != str[i]) 
+        for (int i = 0; i < _length; i++)
+            if (_data[i] != str[i]) 
                 return false;
 
         return true;
     }
 
-    bool String::Equals(const char* str) const
-    {
-        return Equals(str, !str ? 0 : (int)strlen(str));
-    }
-
-    bool String::Equals(const String& str) const
-    {
-        return Equals(str.data, str.length);
-    }
-
     int String::CompareTo(const char* str, int len) const
     {
-        int l = length;
+        int l = _length;
         if (len < l) l = len;
 
         for (int i = 0; i < l; i++)
         {
-            if (data[i] == str[i]) 
+            if (_data[i] == str[i]) 
                 continue;
-            else if (data[i] < str[i]) 
+            else if (_data[i] < str[i]) 
                 return -1;
 
             return 1;
         }
 
-        if (length == len) 
+        if (_length == len) 
             return 0;
-        else if (length < len) 
+        else if (_length < len) 
             return -1;
         
         return 1;
     }
 
-    int String::CompareTo(const char* str) const
-    {
-        return CompareTo(str, !str ? 0 : (int)strlen(str));
-    }
-
-    int String::CompareTo(const String& str) const
-    {
-        return CompareTo(str.data, str.length);
-    }
-
     String String::Add(const char* str, int len) const
     {
         String r;
-        r.initLength(length + len);
-        memcpy(r.data, data, length);
-        memcpy(r.data + length, str, len);
+        r.InitLength(_length + len);
+        memcpy(r._data, _data, _length);
+        memcpy(r._data + _length, str, len);
         return r;
-    }
-
-    String String::Add(const char* str) const
-    {
-        return Add(str, !str ? 0 : (int)strlen(str));
-    }
-
-    String String::Add(const String& str) const
-    {
-        return Add(str.data, str.length);
     }
 
     void String::Append(const char* str, int len)
@@ -533,113 +503,103 @@ namespace Xli
         
         String temp = Add(str, len);
 
-        if (temp.data != temp.buf)
+        if (temp._data != temp._buf)
         {    
             // Hack:
-            // 1. Swap data with temp 
-            // 2. Let temp free old data when it goes out of scope, as long as old data does not point to buf which is stack allocated
-            char* newData = temp.data;
-            temp.data = data != buf ? data : temp.buf;
-            data = newData;
-            length = temp.length;
+            // 1. Swap _data with temp 
+            // 2. Let temp free old _data when it goes out of scope, as long as old _data does not point to buf which is stack allocated
+            char* newData = temp._data;
+            temp._data = _data != _buf ? _data : temp._buf;
+            _data = newData;
+            _length = temp._length;
         }
         else
         {
-            // If hack fails we must reallocate the data
-            deinit();
-            init(temp.data, temp.length);
+            // If hack fails we must reallocate the _data
+            Deinit();
+            Init(temp._data, temp._length);
         }
-    }
-    
-    void String::Append(const char* str)
-    {
-        Append(str, !str ? 0 : (int)strlen(str));
-    }
-    
-    void String::Append(const String& str)
-    {
-        Append(str.data, str.length);
     }
     
     bool String::operator == (const String& str) const
     {
-        return Equals(str);
+        return Equals(str._data, str._length);
     }
 
     bool String::operator == (const char* str) const
     {
-        return Equals(str);
+        return Equals(str, !str ? 0 : (int)strlen(str));
     }
 
     bool String::operator != (const String& str) const
     {
-        return !Equals(str);
+        return !Equals(str._data, str._length);
     }
 
     bool String::operator != (const char* str) const
     {
-        return !Equals(str);
+        return !Equals(str, !str ? 0 : (int)strlen(str));
     }
 
     String String::operator + (const String& str) const
     {
-        return Add(str);
+        return Add(str._data, str._length);
     }
 
     String String::operator + (const char* str) const
     {
-        return Add(str);
+        return Add(str, !str ? 0 : (int)strlen(str));
     }
 
     bool String::operator < (const String& str) const
     {
-        return CompareTo(str) < 0;
+        return CompareTo(str._data, str._length) < 0;
     }
 
     bool String::operator < (const char* str) const
     {
-        return CompareTo(str) < 0;
+        return CompareTo(str, !str ? 0 : (int)strlen(str)) < 0;
     }
 
     bool String::operator <= (const String& str) const
     {
-        return CompareTo(str) <= 0;
+        return CompareTo(str._data, str._length) <= 0;
     }
 
     bool String::operator <= (const char* str) const
     {
-        return CompareTo(str) <= 0;
+        return CompareTo(str, !str ? 0 : (int)strlen(str)) <= 0;
     }
 
     bool String::operator > (const String& str) const
     {
-        return CompareTo(str) > 0;
+        return CompareTo(str._data, str._length) > 0;
     }
 
     bool String::operator > (const char* str) const
     {
-        return CompareTo(str) > 0;
+        return CompareTo(str, !str ? 0 : (int)strlen(str)) > 0;
     }
 
     bool String::operator >= (const String& str) const
     {
-        return CompareTo(str) >= 0;
+        return CompareTo(str._data, str._length) >= 0;
     }
 
     bool String::operator >= (const char* str) const
     {
-        return CompareTo(str) >= 0;
+        return CompareTo(str, !str ? 0 : (int)strlen(str)) >= 0;
     }
 
     String& String::operator += (const String& str)
     {
-        Append(str);
+        Append(str._data, str._length);
         return *this;
     }
     
     String& String::operator += (const char* str)
     {
-        Append(str);
+        Append(str, !str ? 0 : (int)strlen(str));
         return *this;
     }
     
@@ -648,39 +608,39 @@ namespace Xli
         if (this == &str) 
             return *this;
 
-        deinit();
-        init(str.data, str.length);
+        Deinit();
+        Init(str._data, str._length);
         return *this;
     }
 
     String& String::operator = (const char* str)
     {
-        if (this->data == str) 
+        if (this->_data == str) 
             return *this;
 
-        deinit();
-        init(str, !str ? 0 : (int)strlen(str));
+        Deinit();
+        Init(str, !str ? 0 : (int)strlen(str));
         return *this;
     }
 
     String& String::operator = (int i)
     {
-        deinit();
-        init(i);
+        Deinit();
+        Init(i);
         return *this;
     }
 
     String& String::operator = (float f)
     {
-        deinit();
-        init(f);
+        Deinit();
+        Init(f);
         return *this;
     }
 
     String& String::operator = (double d)
     {
-        deinit();
-        init(d);
+        Deinit();
+        Init(d);
         return *this;
     }
 }
