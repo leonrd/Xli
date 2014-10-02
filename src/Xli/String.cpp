@@ -371,14 +371,6 @@ namespace Xli
         return buf;
     }
 
-    String String::FromBool(bool b)
-    {
-        if (b)
-            return String("True", 4);
-        else
-            return String("False", 5);
-    }
-
     String String::FromChar(char c)
     {
         return String(&c, 1);

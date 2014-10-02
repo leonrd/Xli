@@ -114,16 +114,14 @@ namespace Xli
         return buf;
     }
 
-    String DefaultTraits::ToString(int i)
+    String DefaultTraits::ToString(char c)
     {
-        return i;
+        return (int)c;
     }
 
-    String DefaultTraits::ToString(unsigned int i)
+    String DefaultTraits::ToString(unsigned char c)
     {
-        char buf[64];
-        sprintf_s(buf, 64, "%u", i);
-        return buf;
+        return (int)c;
     }
 
     String DefaultTraits::ToString(short i)
@@ -137,6 +135,18 @@ namespace Xli
     {
         char buf[64];
         sprintf_s(buf, 64, "%hu", i);
+        return buf;
+    }
+
+    String DefaultTraits::ToString(int i)
+    {
+        return i;
+    }
+
+    String DefaultTraits::ToString(unsigned int i)
+    {
+        char buf[64];
+        sprintf_s(buf, 64, "%u", i);
         return buf;
     }
 
@@ -178,18 +188,8 @@ namespace Xli
         return d;
     }
 
-    String DefaultTraits::ToString(char c)
-    {
-        return String::FromChar(c);
-    }
-
-    String DefaultTraits::ToString(unsigned char c)
-    {
-        return (int)c;
-    }
-
     String DefaultTraits::ToString(bool b)
     {
-        return String::FromBool(b);
+        return b ? "True" : "False";
     }
 }
