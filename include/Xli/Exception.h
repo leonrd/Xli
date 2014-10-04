@@ -23,12 +23,18 @@
 #include <Xli/String.h>
 #include <exception>
 
+#if XLI_PLATFORM_UNIX
+# define XLI_EXPORT_EXCEPTION __attribute__((visibility("default")))
+#else
+# define XLI_EXPORT_EXCEPTION
+#endif
+
 namespace Xli
 {
     /**
         \ingroup XliExceptions
     */
-    class Exception : public std::exception
+    class XLI_EXPORT_EXCEPTION Exception : public std::exception
     {
     public:
         String _message;
@@ -53,7 +59,7 @@ namespace Xli
     */
 
 #define XLI_DECLARE_EXCEPTION_SUB(BaseClass, ClassName, Message) \
-    class ClassName: public BaseClass \
+    class XLI_EXPORT_EXCEPTION ClassName: public BaseClass \
     { \
     public: \
         ClassName(const Xli::String& msg) { _message = ::Xli::String(Message) + ": " + msg; } \
