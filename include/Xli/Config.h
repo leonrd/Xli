@@ -41,6 +41,10 @@
 
 #endif
 
+#if !XLI_PLATFORM_WIN32
+# define XLI_PLATFORM_UNIX 1
+#endif
+
 #ifndef XLI_DEBUG
 # ifndef NDEBUG
 #   define XLI_DEBUG
