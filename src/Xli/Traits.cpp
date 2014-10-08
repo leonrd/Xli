@@ -190,6 +190,6 @@ namespace Xli
 
     String DefaultTraits::ToString(bool b)
     {
-        return b ? "True" : "False";
+        return String::FromBool(b);
     }
 }

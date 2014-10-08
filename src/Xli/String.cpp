@@ -376,6 +376,11 @@ namespace Xli
         return String(&c, 1);
     }
 
+    String String::FromBool(bool b)
+    {
+        return b ? "True" : "False";
+    }
+
     String String::Format(const char* format, va_list argList)
     {
         // TODO: Verify code

@@ -96,6 +96,7 @@ namespace Xli
         static String Create(int length);
         static String HexFromInt(int value);
         static String FromChar(char value);
+        static String FromBool(bool value);
         
         static String Format(const char* format, va_list argList);
         static String Format(const char* format, ...);
