@@ -22,6 +22,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <cstdlib>
+#include <inttypes.h>
 
 namespace Xli
 {
@@ -97,21 +98,21 @@ namespace Xli
         if (pthread_key_create(&handle, destructor))
             XLI_THROW("Failed to create TLS");
 
-        return (TlsHandle)handle;
+        return (TlsHandle)(intptr_t)handle;
     }
 
     void DeleteTls(TlsHandle handle)
     {
-        pthread_key_delete((pthread_key_t)handle);
+        pthread_key_delete((pthread_key_t)(intptr_t)handle);
     }
 
     void SetTlsValue(TlsHandle handle, void* data)
     {
-        pthread_setspecific((pthread_key_t)handle, data);
+        pthread_setspecific((pthread_key_t)(intptr_t)handle, data);
     }
 
     void* GetTlsValue(TlsHandle handle)
     {
-        return pthread_getspecific((pthread_key_t)handle);
+        return pthread_getspecific((pthread_key_t)(intptr_t)handle);
     }
 }
