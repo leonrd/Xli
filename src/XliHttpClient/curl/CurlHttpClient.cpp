@@ -268,9 +268,9 @@ namespace Xli
             while (i != HeadersEnd())
             {
                 header = "";
-                header.Append(GetHeaderKey(i));
-                header.Append(":");
-                header.Append(GetHeaderValue(i));
+                header += GetHeaderKey(i);
+                header += ":";
+                header += GetHeaderValue(i);
                 curlUploadHeaders = curl_slist_append(curlUploadHeaders, header.Ptr());
                 i = HeadersNext(i);
             }
