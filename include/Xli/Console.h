@@ -68,7 +68,7 @@ namespace Xli
 
     XLI_INLINE void PrintLine()
     {
-        Out->Write('\n');
+        Out->WriteLine();
     }
 
     /** @} */

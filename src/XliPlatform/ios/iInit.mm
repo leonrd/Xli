@@ -1,6 +1,7 @@
 #include <Xli/Console.h>
 #include <XliPlatform/PlatformSpecific/iOS.h>
 #import <Foundation/NSObjCRuntime.h>
+#import <Foundation/NSString.h>
 
 namespace Xli
 {

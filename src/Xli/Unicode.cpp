@@ -141,8 +141,8 @@ namespace Xli
         const UTF16* src_end = src_start + len;
 
         String result = String::Create(len * 2);
-        UTF8* dst_start = (UTF8*)result.data;
-        UTF8* dst_end = dst_start + result.length;
+        UTF8* dst_start = (UTF8*)result._data;
+        UTF8* dst_end = dst_start + result._length;
 
         ConversionResult res = ConvertUTF16toUTF8(&src_start, src_end, &dst_start, dst_end, Flags);
 
@@ -150,32 +150,32 @@ namespace Xli
             XLI_THROW("Unicode conversion failed");
 
         // Adjust length
-        result.length = (int)(dst_start - (UTF8*)result.data);
-        result.data[result.length] = 0;
+        result._length = (int)(dst_start - (UTF8*)result._data);
+        result._data[result._length] = 0;
 
         // Check and handle MUTF-8 (FIXME: Simple implementation can be optimized)
         if (flags & UnicodeFlagsModifiedUtf8)
         {
-            for (int i = 0; i < result.length; i++)
+            for (int i = 0; i < result._length; i++)
             {
                 if (result[i] == 0)
                 {
                     Array<char> mutf8;
                     mutf8.Reserve(len * 2);
-                    mutf8.AddRange(result.data, i);
+                    mutf8.AddRange(result._data, i);
                     mutf8.Add((char)(unsigned char)0xC0);
                     mutf8.Add((char)(unsigned char)0x80);
 
-                    for (int j = i + 1; j < result.length; j++)
+                    for (int j = i + 1; j < result._length; j++)
                     {
-                        if (result.data[j] == 0)
+                        if (result._data[j] == 0)
                         {
                             mutf8.Add((char)(unsigned char)0xC0);
                             mutf8.Add((char)(unsigned char)0x80);
                         }
                         else
                         {
-                            mutf8.Add(result.data[j]);
+                            mutf8.Add(result._data[j]);
                         }
                     }
 

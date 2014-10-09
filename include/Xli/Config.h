@@ -20,25 +20,29 @@
 #define __XLI_CONFIG_H__
 
 #if defined(WIN32)
-# define XLI_PLATFORM_WIN32
+# define XLI_PLATFORM_WIN32 1
 # if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #  define XLI_COMPILER_MSVC
 # endif
 
 #elif defined(ANDROID)
-# define XLI_PLATFORM_ANDROID
+# define XLI_PLATFORM_ANDROID 1
 
 #elif defined(__APPLE__)
 # include <TargetConditionals.h>
 # if TARGET_OS_IPHONE
-#   define XLI_PLATFORM_IOS
+#   define XLI_PLATFORM_IOS 1
 # else
-#   define XLI_PLATFORM_OSX
+#   define XLI_PLATFORM_OSX 1
 # endif
 
 #elif defined(__linux)
-# define XLI_PLATFORM_LINUX
+# define XLI_PLATFORM_LINUX 1
 
+#endif
+
+#if !XLI_PLATFORM_WIN32
+# define XLI_PLATFORM_UNIX 1
 #endif
 
 #ifndef XLI_DEBUG
