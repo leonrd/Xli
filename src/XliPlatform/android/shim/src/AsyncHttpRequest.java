@@ -37,12 +37,14 @@ import javax.net.ssl.SSLContext;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResponse> {
+public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 	long requestPointer;
 	boolean verifyHost;
 	
+	
+	
 	@Override
-	protected HttpWrappedResponse doInBackground(Object... params) {
+	protected Boolean doInBackground(Object... params) {
 		String url = (String)params[0];
 		String method = (String)params[1];
 		@SuppressWarnings("unchecked")
@@ -54,15 +56,21 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResp
 		String[] responseHeaders;
 		boolean hasUploadContent = (body != null);
 		HttpURLConnection connection = null;
-		if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return null; }
+		
+		if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
 		try {
 			connection = NewHttpConnection(url,method,hasUploadContent,timeout,requestPointer, verifyHost);
 			if (connection==null) {
-				return new HttpWrappedResponse(null, new String[0], -1, "JavaError (NewHttpConnection): Could not make connection", requestPointer);
+				ResponseBody = null;
+				ResponseHeaders = new String[0];
+				ResponseCode = -1;
+				ResponseMessage = "JavaError (NewHttpConnection): Could not make connection";
+				ResponseFPointer = requestPointer;
+				return true;
 			}
 		} catch (Exception e) {
 			XliJ.XliJ_JavaThrowError(-1, "JavaError (NewHttpConnection): Could not make connection. Check Android permissions");
-			return null;
+			return false;
 		}
 		try {        		
 			//set headers
@@ -71,7 +79,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResp
 				Map.Entry<String, String>pair = (Map.Entry<String, String>)it.next();
 				connection.addRequestProperty(pair.getKey(), pair.getValue());
 			}
-			if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return null; }
+			if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
 			//set content payload
 			if (hasUploadContent)
 			{
@@ -86,7 +94,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResp
 						BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
 
 						while (runningTotal<body.length) {
-							if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return null; }
+							if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
 							out.write(body, (int)runningTotal, (int)Math.min(bufferSize, (body.length-runningTotal)));
 							if ((runningTotal / progressThreshold) > steps) {
 								steps = (runningTotal / progressThreshold);
@@ -104,25 +112,37 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, HttpWrappedResp
 
 			//get result payload
 			BufferedInputStream stream_b = new BufferedInputStream(connection.getInputStream());
-			responseHeaders = HeadersToStringArray(connection);        		
-			return new HttpWrappedResponse(stream_b, responseHeaders, connection.getResponseCode(), connection.getResponseMessage(), requestPointer);
+			responseHeaders = HeadersToStringArray(connection);     
+			ResponseBody = stream_b;
+			ResponseHeaders = responseHeaders;
+			ResponseCode = connection.getResponseCode();
+			ResponseMessage = connection.getResponseMessage();
+			ResponseFPointer = requestPointer;
+			return true;
 		} catch (SocketTimeoutException e) {
 			XliJ.XliJ_HttpTimeoutCallback(requestPointer);
-			return null;
+			return false;
 		} catch (IOException e) {
 			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException: "+e.getLocalizedMessage());
-			return null;
+			return false;
 		}
 	}
+	
+	Object ResponseBody;
+	String[] ResponseHeaders;
+	int ResponseCode;
+	String ResponseMessage;
+	long ResponseFPointer;
+	
 	@Override
 	protected void onProgressUpdate(Integer... progress) {
 		XliJ.XliJ_HttpProgressCallback(requestPointer, progress[0], progress[1], true, 0);
 	}
 	@Override
-	protected void onPostExecute(HttpWrappedResponse result)
+	protected void onPostExecute(Boolean hasResult)
 	{
-		if (result!=null) {
-			XliJ.XliJ_HttpCallback(XliJ.HoldObject(result.body), result.headers, result.responseCode, result.responseMessage, result.functionPointer);
+		if (hasResult) {
+			XliJ.XliJ_HttpCallback(XliJ.HoldObject(ResponseBody), ResponseHeaders, ResponseCode, ResponseMessage, ResponseFPointer);
 		}
 	}
 	

@@ -275,10 +275,14 @@ namespace Xli
             {
                 // no way around the const_cast here, we dont modify the data in java so should be safe.
                 arrayHandle = jni->NewDirectByteBuffer(const_cast<void*>(content), byteLength);
+                if (arrayHandle == NULL) {
+                    XLI_THROW("XliHttp - DirectByteBuffers not supported by this device.");
+                }
             }
 
             jint jresult = jni->CallStaticIntMethod(jni.GetShim(), sendHttpAsyncA, jurl, jmethod, jheaders, arrayHandle,
                                                     jtimeout, (jlong)req, req->GetVerifyHost());
+            AShim::CheckExceptions();
 
             jni->DeleteLocalRef(jurl);
             jni->DeleteLocalRef(jmethod);
@@ -292,6 +296,22 @@ namespace Xli
             }
             //LOGD("out_15");
             return (JObjRef)jresult;
+        }
+
+        void AShim::CheckExceptions()
+        {
+            AJniHelper jni;
+            jthrowable err = jni->ExceptionOccurred();
+            if (err != NULL)
+            {
+                jni->ExceptionDescribe();
+                jni->ExceptionClear();
+
+                jmethodID toString = jni->GetMethodID(jni->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");
+                jstring estring = (jstring) jni->CallObjectMethod(err, toString);
+                jboolean isCopy;
+                XLI_THROW(jni->GetStringUTFChars(estring, &isCopy));
+            }
         }
 
         JObjRef AShim::SendHttpAsync(const HttpRequest* req, String content)

@@ -43,36 +43,52 @@ public class HttpHelper {
     								 	final int timeout, final long requestPointer, final boolean verifyHost) {
     	try
     	{
-    		final AsyncTask[] task = new AsyncTask[1];
-    		task[0]=null;
+    		final AsyncTask task = new AsyncHttpRequest();
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
-         		task[0] = new AsyncHttpRequest();
          		byte[] data = null;
-         		if (body!=null) if (body!=null) data = body.array();
- 				((AsyncTask<Object, Void, HttpWrappedResponse>)(task[0])).execute(url, method, headers, (Integer)timeout, data, (Long)requestPointer, (Boolean)verifyHost);         	
+         		if (body!=null) {
+         			ByteBuffer copyBody = cloneByteBuffer(body);
+                    data = copyBody.array();
+                }
+ 				((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, data, (Long)requestPointer, (Boolean)verifyHost);
              }});
-    		return task[0];
+    		return task;
     	} catch (Exception e) {
     		XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to build Async Http Request: "+e.getLocalizedMessage());
     		return null;
     	}
     }
 
+    public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
+        // Create clone with same capacity as original.
+        final ByteBuffer clone = (original.isDirect()) ?
+            ByteBuffer.allocateDirect(original.capacity()) :
+            ByteBuffer.allocate(original.capacity());
+
+        // Create a read-only copy of the original.
+        // This allows reading from the original without modifying it.
+        final ByteBuffer readOnlyCopy = original.asReadOnlyBuffer();
+
+        // Flip and read from the original.
+        readOnlyCopy.flip();
+        clone.put(readOnlyCopy);
+
+        return clone;
+    }
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public static AsyncTask SendHttpStringAsync(final String url, final String method,
     								 			final HashMap<String,String> headers, final String body,
     								 			final int timeout, final long requestPointer, final boolean verifyHost) {
     	try
     	{
-    		final AsyncTask[] task = new AsyncTask[1]; 		
-    		task[0] = null;
+    		final AsyncTask task = new AsyncHttpRequest();
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
-         		task[0] = new AsyncHttpRequest();
          		byte[] data = null;
          		if (body!=null) data = body.getBytes();
- 				((AsyncTask<Object, Void, HttpWrappedResponse>)(task[0])).execute(url, method, headers, (Integer)timeout, data, (Long)requestPointer, (Boolean)verifyHost);         	
+ 				((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, data, (Long)requestPointer, (Boolean)verifyHost);         	
              }});
-    		return task[0];
+    		return task;
     	} catch (Exception e) {
     		XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to build Async Http Request: "+e.getLocalizedMessage());
     		return null;

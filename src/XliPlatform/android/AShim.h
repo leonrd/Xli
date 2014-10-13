@@ -62,6 +62,8 @@ namespace Xli
             static int kbVisible;
 
             static void CacheMids(JNIEnv *env, jclass shim_class);
+            static void CheckExceptions();
+
             static void RaiseSoftKeyboard();
             static void HideSoftKeyboard();
             static bool KeyboardVisible();
