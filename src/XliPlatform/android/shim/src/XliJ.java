@@ -24,6 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.annotation.SuppressLint;
 import android.app.NativeActivity;
@@ -204,49 +206,97 @@ public class XliJ extends android.app.NativeActivity {
     
     //--------------------------------------------
     // Object Store
+    public static Semaphore _objSem = new Semaphore(1);
     public static SparseArray<Object> _objStore = new SparseArray<Object>();
     public static ArrayList<Integer> _objReservedList = new ArrayList<Integer>();
-    public static int _objKey=0; //This must not be -1 as otherwise the first held object has the key 0 and 0 is null in cpp.
+    public static AtomicInteger _objKey = new AtomicInteger(0); //This must not be -1 as otherwise the first held object has the key 0 and 0 is null in cpp.
     public static int HoldObject(Object obj)
     {
-    	if (obj==null) return -1;
-    	_objKey+=1;
-    	_objStore.put(_objKey, obj);
-    	return _objKey;
+    	try {
+			_objSem.acquire();
+			if (obj==null) return -1;
+	    	int key = _objKey.incrementAndGet();
+	    	_objStore.put(key, obj);
+	    	_objSem.release();
+	    	return key;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
+			return -1;
+		}
+    	
     }
     public static int ReserveObject()
-    {
-    	_objKey+=1;
-    	_objReservedList.add(_objKey);
-    	return _objKey;
+    {    	
+    	try {
+			_objSem.acquire();
+	    	int key = _objKey.incrementAndGet();
+	    	_objReservedList.add(key);
+	    	_objSem.release();
+	    	return key;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
+			return -1;
+		}
+
     }
     public static void PopulateReservedObject(int key, Object obj)
     {
-    	if (key <= _objKey && _objStore.get(key)==null && _objReservedList.contains(key))
-    	{
-    		_objReservedList.remove(_objReservedList.indexOf(key));
-    		_objStore.put(key, obj);
-    	} else {
-    		XliJ_JavaThrowError(-1, "Tried to populate invalid reserved object");
-    	}
+    	try {
+			_objSem.acquire();
+	    	int currentKey = _objKey.get();
+	    	Object stored = _objStore.get(key);
+	    	boolean containsp = _objReservedList.contains(key);
+	    	if (key > currentKey || stored!=null || !containsp)
+	    	{
+	    		XliJ_JavaThrowError(-1, "Tried to populate invalid reserved object");
+	    		return;
+	    	}
+	    	_objReservedList.remove(_objReservedList.indexOf(key));
+			_objStore.put(key, obj);
+			_objSem.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
+		}
+
     }
     public static Object GetObject(int key)
     {
-    	if (key==-1) return null;
-    	Object result = _objStore.get(key);
-    	if (result!=null)
-    	{
-    		return result;
-    	} else {
-    		XliJ_JavaThrowError(-1, "Tried to access invalid object from java object store");
-    		return null;
-    	}    	
+    	try {
+			_objSem.acquire();
+	    	if (key==-1) return null;
+	    	Object result = _objStore.get(key);
+	    	if (result!=null)
+	    	{
+	    		_objSem.release();
+	    		return result;
+	    	} else {
+	    		_objSem.release();
+	    		XliJ_JavaThrowError(-1, "Tried to access invalid object from java object store");
+	    		return null;
+	    	}  
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
+			return null;
+		}
+  	
     }
     public static boolean TryReleaseObject(int key)
     {
-    	if (_objStore.get(key)==null) return false;
-    	_objStore.remove(key);
-    	return true;
+    	try {
+			_objSem.acquire();
+	    	if (_objStore.get(key)==null) return false;
+	    	_objStore.remove(key);
+	    	_objSem.release();
+	    	return true;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");			
+			return false;
+		}
     }
 }
 
