@@ -9,6 +9,7 @@
 #include <CFNetwork/CFHTTPStream.h>
 #include <iostream>
 #include <fstream>
+#include <Xli/Console.h>
 
 namespace Xli
 {
@@ -24,7 +25,6 @@ namespace Xli
         int timeout;
         bool verifyHost;
 
-        CFHTTPMessageRef cachedRequestMessage;
         CFReadStreamRef cachedReadStream;
 
         CFDataRef uploadData;
@@ -54,7 +54,6 @@ namespace Xli
             this->reading = false;
             this->cachedContentStream = 0;
             this->cachedReadStream = 0;
-            this->cachedRequestMessage = 0;
             OnStateChanged(this, HttpRequestStateOpened, 0, 0);
         }
 
@@ -65,7 +64,6 @@ namespace Xli
             state = HttpRequestStateDone;
 
             // spin this off into function
-            if (cachedRequestMessage != 0) CFRelease(cachedRequestMessage);
             if (cachedReadStream!=0)
             {
                 CFReadStreamClose(cachedReadStream);
@@ -164,8 +162,6 @@ namespace Xli
                 CFDictionarySetValue(myDict, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
                 CFReadStreamSetProperty(cachedReadStream, kCFStreamPropertySSLSettings, myDict);
             }
-
-            this->cachedRequestMessage = nHttpReq;
 
             CFOptionFlags optEvents = kCFStreamEventOpenCompleted|kCFStreamEventHasBytesAvailable|kCFStreamEventErrorOccurred|kCFStreamEventEndEncountered;
 
@@ -318,8 +314,6 @@ namespace Xli
                 CFReadStreamClose(this->cachedReadStream);
                 CFRelease(this->cachedReadStream);
             }
-            if (cachedRequestMessage != 0)
-                CFRelease(this->cachedRequestMessage);
             if (cachedReadStream!=0)
                 CFRelease(this->cachedReadStream);
             if (cachedContentStream!=0)
@@ -372,12 +366,14 @@ namespace Xli
 
         static void OnHeadersRecieved(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
         {
+            //get the response
+            CFHTTPMessageRef response = (CFHTTPMessageRef) CFReadStreamCopyProperty (stream, kCFStreamPropertyHTTPResponseHeader);
             //headers
-            CFDictionaryRef nHeaders = CFHTTPMessageCopyAllHeaderFields(request->cachedRequestMessage);
+            CFDictionaryRef nHeaders = CFHTTPMessageCopyAllHeaderFields(response);
             request->NHeadersToHeaders(nHeaders);
             CFRelease(nHeaders);
             //responseStatus
-            CFIndex code = CFHTTPMessageGetResponseStatusCode(request->cachedRequestMessage);
+            CFIndex code = CFHTTPMessageGetResponseStatusCode(response);
             request->responseStatus = (int)code;
 
             //CFRelease(nHeaders); //{TODO} this crashes...why?
@@ -413,11 +409,11 @@ namespace Xli
             if (err.domain == kCFStreamErrorDomainPOSIX)
             {
                 String error = String("Posix Error: ") + String((int)err.error);
-                if (eh!=0) eh->OnRequestError(request);
+                if (eh!=0) eh->OnRequestError(request, error);
             } else if (err.domain == kCFStreamErrorDomainMacOSStatus) {
                 //OSStatus macError = (OSStatus)err.error; {TODO} use this
                 String error = String("OSX Error: ") + String((int)err.error);
-                if (eh!=0) eh->OnRequestError(request);
+                if (eh!=0) eh->OnRequestError(request, error);
             } else if (err.domain == kCFStreamErrorDomainHTTP) {
                 CFStreamErrorHTTP httpErr = (CFStreamErrorHTTP)err.error;
                 String message;
@@ -437,10 +433,10 @@ namespace Xli
                     message += String((int)err.error);
                     break;
                 }
-                if (eh!=0) eh->OnRequestError(request);
+                if (eh!=0) eh->OnRequestError(request, message);
             } else {
                 String error = String("Unidentified Error in XLI Http: ") + String((int)err.error);
-                if (eh!=0) eh->OnRequestError(request);
+                if (eh!=0) eh->OnRequestError(request,error);
             }
         }
 
@@ -449,7 +445,7 @@ namespace Xli
             CHttpRequest* request = (CHttpRequest*)ptr;
             switch (event)
             {
-            case kCFStreamEventOpenCompleted:
+            case kCFStreamEventOpenCompleted:                
                 CHttpRequest::OnHeadersRecieved(request, stream, event);
                 CHttpRequest::OnStateChanged(request, HttpRequestStateHeadersReceived, stream, event);
                 request->StartDownload();
@@ -458,6 +454,7 @@ namespace Xli
                 // {TODO} not currently used but will be needed for upload progress
                 break;
             case kCFStreamEventHasBytesAvailable:
+                Error->WriteLine("heflhshfidfhsdhfsdfhdfshjdhfisdfpisdphfsidfhpsd");
                 if (request->reading == true)
                 {
                     request->dataReady = true;
@@ -477,7 +474,7 @@ namespace Xli
                     CHttpRequest::OnStateChanged(request, HttpRequestStateDone, stream, event);
 
                     if (request->uploadData!=0) CFRelease(request->uploadData);
-                    if (request->cachedRequestMessage!=0) CFRelease(request->cachedRequestMessage);
+
                     if (request->cachedReadStream!=0)
                     {
                         CFReadStreamClose(request->cachedReadStream);

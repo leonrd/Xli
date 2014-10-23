@@ -153,7 +153,7 @@ namespace Xli
         } else {
             HttpEventHandler* eh = client->GetEventHandler();
             if (eh!=0)
-                eh->OnRequestError(const_cast<AHttpRequest*>(this));
+                eh->OnRequestError(const_cast<AHttpRequest*>(this),"XliHttp: Cannot find Http EventHandler");
             else
                 XLI_THROW("XliHttp: Cannot find Http EventHandler");
         }
@@ -179,7 +179,7 @@ namespace Xli
             } else {
                 HttpEventHandler* eh = client->GetEventHandler();
                 if (eh!=0)
-                    eh->OnRequestError(const_cast<AHttpRequest*>(this));
+                    eh->OnRequestError(const_cast<AHttpRequest*>(this),"XliHttp: Cannot find Http EventHandler");
                 else
                     XLI_THROW("XliHttp: Cannot find Http EventHandler");
             }

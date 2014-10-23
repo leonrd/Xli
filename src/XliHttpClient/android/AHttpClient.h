@@ -201,7 +201,7 @@ namespace Xli
             HttpEventHandler* eh = Request->client->GetEventHandler();
             if (eh!=0) {
                 Request->errored = true;
-                eh->OnRequestError(Request);
+                eh->OnRequestError(Request, ErrorMessage);
             }
         }
     };

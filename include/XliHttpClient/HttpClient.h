@@ -91,7 +91,7 @@ namespace Xli
         virtual void OnRequestProgress(HttpRequest* request,int position, int total, bool totalKnown) { }
         virtual void OnRequestAborted(HttpRequest* request) { }
         virtual void OnRequestTimeout(HttpRequest* request) { }
-        virtual void OnRequestError(HttpRequest* request) { }
+        virtual void OnRequestError(HttpRequest* request,String message) { }
     };
 
     /**
