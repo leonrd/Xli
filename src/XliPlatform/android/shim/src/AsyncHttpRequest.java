@@ -24,6 +24,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownServiceException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,60 +73,82 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 			XliJ.XliJ_JavaThrowError(-1, "JavaError (NewHttpConnection): Could not make connection. Check Android permissions");
 			return false;
 		}
-		try {        		
-			//set headers
-			Iterator<Map.Entry<String, String>> it = headers.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry<String, String>pair = (Map.Entry<String, String>)it.next();
-				connection.addRequestProperty(pair.getKey(), pair.getValue());
-			}
-			if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
-			//set content payload
-			if (hasUploadContent)
+		//set headers
+		Iterator<Map.Entry<String, String>> it = headers.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, String>pair = (Map.Entry<String, String>)it.next();
+			connection.addRequestProperty(pair.getKey(), pair.getValue());
+		}
+		if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
+		//set content payload
+		if (hasUploadContent)
+		{
+			if (body!=null)
 			{
-				if (body!=null)
-				{
-					int progressThreshold = Math.max((body.length / 100), 2048);
-					int steps = 1;
-					int runningTotal=0;
-					int bufferSize = 2048;
-					try {
-						connection.setFixedLengthStreamingMode(body.length);
-						BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
+				int progressThreshold = Math.max((body.length / 100), 2048);
+				int steps = 1;
+				int runningTotal=0;
+				int bufferSize = 2048;
+				try {
+					connection.setFixedLengthStreamingMode(body.length);
+					BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
 
-						while (runningTotal<body.length) {
-							if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
-							out.write(body, (int)runningTotal, (int)Math.min(bufferSize, (body.length-runningTotal)));
-							if ((runningTotal / progressThreshold) > steps) {
-								steps = (runningTotal / progressThreshold);
-								publishProgress(runningTotal,body.length);
-							}        							
-							runningTotal+=bufferSize;
-						}
-						publishProgress(body.length,body.length);
-						out.flush();
-					} catch(Exception e) {
-						XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to upload data: "+e.getLocalizedMessage());
+					while (runningTotal<body.length) {
+						if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
+						out.write(body, (int)runningTotal, (int)Math.min(bufferSize, (body.length-runningTotal)));
+						if ((runningTotal / progressThreshold) > steps) {
+							steps = (runningTotal / progressThreshold);
+							publishProgress(runningTotal,body.length);
+						}        							
+						runningTotal+=bufferSize;
 					}
+					publishProgress(body.length,body.length);
+					out.flush();
+				} catch(Exception e) {
+					XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to upload data: "+e.getLocalizedMessage());
 				}
 			}
+		}
 
-			//get result payload
-			BufferedInputStream stream_b = new BufferedInputStream(connection.getInputStream());
-			responseHeaders = HeadersToStringArray(connection);     
-			ResponseBody = stream_b;
-			ResponseHeaders = responseHeaders;
+		// headers
+		responseHeaders = HeadersToStringArray(connection);     		
+		ResponseHeaders = responseHeaders;
+		
+		// responseCode
+		try {
 			ResponseCode = connection.getResponseCode();
-			ResponseMessage = connection.getResponseMessage();
-			ResponseFPointer = requestPointer;
-			return true;
-		} catch (SocketTimeoutException e) {
-			XliJ.XliJ_HttpTimeoutCallback(requestPointer);
-			return false;
 		} catch (IOException e) {
-			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException: "+e.getLocalizedMessage());
+			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (getresponsecode): "+e.getLocalizedMessage());
 			return false;
 		}
+		
+		// responseMessage
+		try {
+			ResponseMessage = connection.getResponseMessage();
+		} catch (IOException e) {
+			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (getresponsemessage): "+e.getLocalizedMessage());
+			return false;
+		}
+		ResponseFPointer = requestPointer;
+		
+		Log.e("XliApp","code:"+ResponseCode);
+		Log.e("XliApp","code:"+ResponseMessage);
+		
+		//result payload
+		BufferedInputStream stream_b;
+		
+		try {
+			stream_b = new BufferedInputStream(connection.getInputStream());
+		} catch (IOException e) {
+			try {
+				stream_b = new BufferedInputStream(connection.getErrorStream());
+			} catch (Exception e2) {
+				XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (getinputstream): "+e.getLocalizedMessage());
+				return false;
+			}			
+		}
+		ResponseBody = stream_b;
+		return true;
 	}
 	
 	Object ResponseBody;
@@ -181,33 +204,40 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
             urlConnection.setDoOutput(hasPayload);
             urlConnection.setRequestMethod(method);
         } catch (IOException e) {
-        	XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException: "+e.getLocalizedMessage());
+        	XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (newHttpConnection): "+e.getLocalizedMessage());
             return null;
         }
         return urlConnection;
     }
 	
-    public static String[] HeadersToStringArray(HttpURLConnection connection)
-    {
-    	ArrayList<String> headers = new ArrayList<String>();
-    	try {
-	        Map<String, List<String>> headerMap = connection.getHeaderFields();
-	        
-            for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
-            	String key = entry.getKey();
-            	if (key==null) {
-            		key="null";
-            	}
-            	StringBuilder sb = new StringBuilder();
-                for(String s: entry.getValue()) { sb.append(s); }
-                headers.add(key);
-                headers.add(sb.toString());
-            }
-	        String[] result = headers.toArray(new String[headers.size()]);	
-	        return result;
-    	} catch (Exception e) {
-    		XliJ.XliJ_JavaThrowError(-1,"Error in HeadersToStringArray: "+e.getLocalizedMessage());
-    	}
-        return null;
+	public static String[] HeadersToStringArray(HttpURLConnection connection)
+	{
+		ArrayList<String> headers = new ArrayList<String>();
+		Map<String, List<String>> headerMap;
+		try {
+			headerMap = connection.getHeaderFields();
+		} catch (Exception e) {
+			XliJ.XliJ_JavaThrowError(-1,"Error in getHeaderFields: "+e.getLocalizedMessage());
+			return null;
+		}
+		if (headerMap!=null){
+			try {
+				for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
+					String key = entry.getKey();
+					if (key==null) {
+						key="null";
+					}
+					StringBuilder sb = new StringBuilder();
+					for(String s: entry.getValue()) { sb.append(s); }
+					headers.add(key);
+					headers.add(sb.toString());
+				}
+				String[] result = headers.toArray(new String[headers.size()]);	
+				return result;
+			} catch (Exception e) {
+				XliJ.XliJ_JavaThrowError(-1,"Error in HeadersToStringArray: "+e.getLocalizedMessage());
+			}
+		}
+		return null;
     }
 }

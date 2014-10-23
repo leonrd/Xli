@@ -344,8 +344,6 @@ namespace Xli
                         env->ReleaseStringUTFChars(jkey, ckey);
                         env->ReleaseStringUTFChars(jval, cval);
                     }
-                } else {
-                    headers = 0;
                 }
                 env->DeleteLocalRef(headers);
                 env->DeleteLocalRef(responseMessage);

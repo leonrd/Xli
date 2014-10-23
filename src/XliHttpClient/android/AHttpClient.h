@@ -201,8 +201,6 @@ namespace Xli
             HttpEventHandler* eh = Request->client->GetEventHandler();
             if (eh!=0) {
                 Request->errored = true;
-                String fullMessage = "HTTP ERROR ACTION: "+ErrorMessage;
-                LOGE(fullMessage.Ptr());
                 eh->OnRequestError(Request);
             }
         }

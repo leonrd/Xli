@@ -34,7 +34,7 @@ public class AsyncInputStreamToStringTask extends AsyncTask<Object, Void, String
 			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "UnsupportedEncodingException: "+e.getLocalizedMessage());
 			return null;
 		} catch (IOException e) {
-			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException: "+e.getLocalizedMessage());
+			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (AsyncInputStreamToStringTask): "+e.getLocalizedMessage());
 			return null;
 		}
     }

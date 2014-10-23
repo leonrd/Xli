@@ -45,7 +45,7 @@ public class AsyncInputStreamToBytesTask extends AsyncTask<Object, Void, Void> {
 				}
 			}			
 		} catch (IOException e) {				
-			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException: "+e.getLocalizedMessage());
+			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (AsyncInputStreamToBytesTask): "+e.getLocalizedMessage());
 		}
 		return null;
 	}
