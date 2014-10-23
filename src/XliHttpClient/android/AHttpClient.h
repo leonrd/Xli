@@ -41,6 +41,7 @@ namespace Xli
         bool verifyHost;
         HashMap<String,String> headers;
 
+        bool errored;
         bool aborted;
         JObjRef javaAsyncHandle;
         JObjRef javaContentHandle;
@@ -155,7 +156,8 @@ namespace Xli
         virtual void Execute()
         {
             HttpEventHandler* eh = Request->client->GetEventHandler();
-            if (eh!=0) eh->OnRequestTimeout(Request);
+            if (eh!=0 && !Request->errored)
+                eh->OnRequestTimeout(Request);
         }
     };
 
@@ -176,8 +178,9 @@ namespace Xli
         virtual void Execute()
         {
             HttpEventHandler* eh = Request->client->GetEventHandler();
-            if (eh!=0) eh->OnRequestProgress(Request, Position, TotalLength,
-                                             LengthKnown);
+            if (eh!=0 && !Request->errored)
+                eh->OnRequestProgress(Request, Position, TotalLength,
+                                      LengthKnown);
         }
     };
 
@@ -196,7 +199,12 @@ namespace Xli
         virtual void Execute()
         {
             HttpEventHandler* eh = Request->client->GetEventHandler();
-            if (eh!=0) eh->OnRequestError(Request);
+            if (eh!=0) {
+                Request->errored = true;
+                String fullMessage = "HTTP ERROR ACTION: "+ErrorMessage;
+                LOGE(fullMessage.Ptr());
+                eh->OnRequestError(Request);
+            }
         }
     };
 
@@ -213,11 +221,12 @@ namespace Xli
             State = state;
             CleanJavaObjs = cleanJavaObjs;
         }
+
         
         virtual void Execute()
         {
             if (CleanJavaObjs) Request->CleanHandles();
-            if (State>0) {
+            if (State>0 && !Request->errored) {
                 Request->state = State;
                 HttpEventHandler* eh = Request->client->GetEventHandler();
                 if (eh!=0) eh->OnRequestStateChanged(Request);

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010-2014 Outracks Technologies
+// Copyright (C) 2010-2014 Outracks chnologies
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 // associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -38,10 +38,11 @@ namespace Xli
         this->client = client;
         this->state = HttpRequestStateOpened;
         this->url = Uri::AutoEncodeUri(url);
-        this->method = method;
+        this->method = method.ToUpper();
         this->timeout = 0;
         this->verifyHost = true;
         this->aborted = false;
+        this->errored = false;
         this->javaAsyncHandle = 0;
         this->javaContentHandle = 0;
         this->responseBody = new ArrayStream(1);
@@ -52,7 +53,7 @@ namespace Xli
     AHttpRequest::~AHttpRequest()
     {
         if (((int)state>(int)HttpRequestStateUnsent) &&
-            ((int)state<(int)HttpRequestStateDone) && !aborted) 
+            ((int)state<(int)HttpRequestStateDone) && !aborted)
             Abort();
         CleanHandles();
     }
@@ -151,7 +152,7 @@ namespace Xli
             javaAsyncHandle = PlatformSpecific::AShim::SendHttpAsync(this);
         } else {
             HttpEventHandler* eh = client->GetEventHandler();
-            if (eh!=0) 
+            if (eh!=0)
                 eh->OnRequestError(const_cast<AHttpRequest*>(this));
             else
                 XLI_THROW("XliHttp: Cannot find Http EventHandler");
@@ -167,9 +168,9 @@ namespace Xli
                 // {TODO} if ashim::abortasynctask works then we need some kind of callback so we know to
                 // cleanup the SessionMap.
                 SessionMap::MarkAborted(this);
-                if (javaAsyncHandle!=0) 
+                if (javaAsyncHandle!=0)
                     PlatformSpecific::AShim::AbortAsyncTask(javaAsyncHandle);
-                
+
                 CleanHandles();
                 aborted = true;
                 HttpEventHandler* eh = client->GetEventHandler();
@@ -177,7 +178,7 @@ namespace Xli
 
             } else {
                 HttpEventHandler* eh = client->GetEventHandler();
-                if (eh!=0) 
+                if (eh!=0)
                     eh->OnRequestError(const_cast<AHttpRequest*>(this));
                 else
                     XLI_THROW("XliHttp: Cannot find Http EventHandler");
@@ -193,6 +194,7 @@ namespace Xli
             HttpEventHandler* eh = client->GetEventHandler();
             if (eh!=0) eh->OnRequestStateChanged(this);
         } else if (!this->javaContentHandle) {
+
             XLI_THROW("HttpRequest->PullContentArray(): In correct state to pull content array but have null contentHandle");
         } else {
             XLI_THROW("HttpRequest->PullContentArray(): Not in valid state for pulling the content array");
@@ -278,7 +280,7 @@ namespace Xli
     {
         if (state == HttpRequestStateDone)
         {
-            return (DataAccessor*)responseBodyRef.Get();            
+            return (DataAccessor*)responseBodyRef.Get();
         } else {
             XLI_THROW("HttpRequest->GetResponseBody(): Not in a valid state to get the response body");
         }
@@ -296,7 +298,7 @@ namespace Xli
                 Xli::AHttpRequest* request = ((Xli::AHttpRequest*)((void*)requestPointer));
 
                 if (SessionMap::IsAborted(request)) return;
-                
+
                 if (body!=-1)
                 {
                     request->javaContentHandle = (JObjRef)body;
@@ -360,11 +362,11 @@ namespace Xli
             {
                 Xli::AHttpRequest* request = ((Xli::AHttpRequest*)((void*)requestPointer));
 
-                if (SessionMap::IsAborted(request)) 
+                if (SessionMap::IsAborted(request))
                 {
                     SessionMap::RemoveSession(request);
                     return;
-                }                  
+                }
 
                 if (content != 0 && byteLength!=-1) {
                     jbyte* jbyteArrayPtr = env->GetByteArrayElements(content, NULL);
@@ -387,7 +389,7 @@ namespace Xli
             {
                 Xli::AHttpRequest* request = ((Xli::AHttpRequest*)((void*)requestPointer));
 
-                if (SessionMap::IsAborted(request)) 
+                if (SessionMap::IsAborted(request))
                 {
                     SessionMap::RemoveSession(request);
                     return;
@@ -439,7 +441,7 @@ namespace Xli
         {
             LOGD("XliHttpRequest: Abort callback");
             if (requestPointer)
-            {                
+            {
                 Xli::AHttpRequest* request = ((Xli::AHttpRequest*)((void*)requestPointer));
                 SessionMap::RemoveSession(request);
             } else {
