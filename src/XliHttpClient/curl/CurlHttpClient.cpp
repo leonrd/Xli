@@ -240,7 +240,7 @@ namespace Xli
             {
                 //XLI_THROW("HttpRequest->SetArrayPulledCallback(): Not in a valid state to send");
                 HttpEventHandler* eh = client->GetEventHandler();
-                if (eh!=0 && !aborted) eh->OnRequestError(this);
+                if (eh!=0 && !aborted) eh->OnRequestError(this,"HttpRequest->SendAsync(): Not in a valid state to send");
                 return;
             }
 
@@ -255,7 +255,7 @@ namespace Xli
             if (!session)
             {
                 HttpEventHandler* eh = client->GetEventHandler();
-                if (eh!=0 && !aborted) eh->OnRequestError(this);
+                if (eh!=0 && !aborted) eh->OnRequestError(this, "HttpRequest->SendAsync(): could not create session");
                 return;
             } 
 
@@ -287,7 +287,7 @@ namespace Xli
                 client->AddSession(session, this);
             } else {
                 HttpEventHandler* eh = client->GetEventHandler();
-                if (eh!=0 && !aborted) eh->OnRequestError(this);
+                if (eh!=0 && !aborted) eh->OnRequestError(this, "HttpRequest->SendAsync(): Failed to set curl options" );
             }
         }
         virtual void SendAsync(const String& content)
@@ -593,7 +593,7 @@ namespace Xli
                 request->onDone();
             } else {
                 HttpEventHandler* eh = this->GetEventHandler();
-                if (eh!=0) eh->OnRequestError(request);
+                if (eh!=0) eh->OnRequestError(request, "Client expected CURLMSG_DONE");
             }
         }
     }
