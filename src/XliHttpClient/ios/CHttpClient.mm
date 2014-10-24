@@ -325,25 +325,6 @@ namespace Xli
             if (eh!=0) eh->OnRequestAborted(this);
         }
 
-        //{TODO} we will always download imediately so clean this up and possibly fold into other function
-        virtual void StartDownload()
-        {
-            if ((this->state==HttpRequestStateHeadersReceived) && (this->cachedContentStream == 0))
-            {
-                this->state = HttpRequestStateLoading;
-                this->reading = true;
-
-                HttpEventHandler* eh = client->GetEventHandler();
-                if (eh!=0) eh->OnRequestStateChanged(this);
-
-                this->cachedContentStream = CFWriteStreamCreateWithAllocatedBuffers(kCFAllocatorDefault, kCFAllocatorDefault);
-                CFWriteStreamOpen(this->cachedContentStream);
-                if (dataReady) OnByteDataRecieved(this, cachedReadStream, NULL);
-            } else {
-                XLI_THROW("Not in correct state to start download");
-            }
-        }
-
         virtual void NHeadersToHeaders(CFDictionaryRef dictRef)
         {
             CFDictionaryApplyFunction(dictRef, NHeaderToHeader, this);
@@ -439,22 +420,35 @@ namespace Xli
                 if (eh!=0) eh->OnRequestError(request,error);
             }
         }
-
+        
         static void AsyncCallback(CFReadStreamRef stream, CFStreamEventType event, void* ptr)
         {
             CHttpRequest* request = (CHttpRequest*)ptr;
             switch (event)
             {
-            case kCFStreamEventOpenCompleted:                
-                CHttpRequest::OnHeadersRecieved(request, stream, event);
-                CHttpRequest::OnStateChanged(request, HttpRequestStateHeadersReceived, stream, event);
-                request->StartDownload();
+            case kCFStreamEventOpenCompleted:
+                if (request->cachedContentStream == 0)
+                {
+                    request->cachedContentStream = CFWriteStreamCreateWithAllocatedBuffers(kCFAllocatorDefault, kCFAllocatorDefault);
+                    CFWriteStreamOpen(request->cachedContentStream);
+                    if (request->dataReady) OnByteDataRecieved(request, request->cachedReadStream, NULL);
+                } else {
+                    XLI_THROW("Not in correct state to start download");
+                }
                 break;
             case kCFStreamEventCanAcceptBytes:
                 // {TODO} not currently used but will be needed for upload progress
                 break;
             case kCFStreamEventHasBytesAvailable:
-                Error->WriteLine("heflhshfidfhsdhfsdfhdfshjdhfisdfpisdphfsidfhpsd");
+                if (request->state == HttpRequestStateSent) {
+                    CHttpRequest::OnHeadersRecieved(request, stream, event);
+                    CHttpRequest::OnStateChanged(request, HttpRequestStateHeadersReceived, stream, event);
+                    
+                    request->state = HttpRequestStateLoading;                    
+                    HttpEventHandler* eh = request->client->GetEventHandler();
+                    if (eh!=0) eh->OnRequestStateChanged(request);
+                    request->reading = true;                    
+                }
                 if (request->reading == true)
                 {
                     request->dataReady = true;
