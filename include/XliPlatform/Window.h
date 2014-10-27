@@ -121,6 +121,7 @@ namespace Xli
         KeyF12 = 123,
 
         KeyMenu = 200,
+        BackButton = 201,
     };
 
     /**

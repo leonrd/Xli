@@ -20,6 +20,7 @@
 import android.annotation.SuppressLint;
 import android.app.NativeActivity;
 import android.content.Context;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -58,7 +59,9 @@ public class Hidden extends View implements View.OnKeyListener { //used to exten
         {
             if (keyEvent.getAction()==KeyEvent.ACTION_DOWN)
             {
-            	if (keyCode == KeyEvent.KEYCODE_BACK) XliJ.HideKeyboard();
+            	if (keyCode == KeyEvent.KEYCODE_BACK) {
+            		XliJ.HideKeyboard();
+            	}
             	XliJ.XliJ_OnKeyDown(keyCode);
             } else if (keyEvent.getAction()==KeyEvent.ACTION_UP) {
             	XliJ.XliJ_OnKeyUp(keyCode);
