@@ -55,16 +55,14 @@ class HiddenInputConnection extends BaseInputConnection {
 
     @Override
     public boolean deleteSurroundingText (int beforeLength, int afterLength) {
-    	//if ((Build.VERSION.SDK_INT < 14) && beforeLength == 1 && afterLength == 0) {
-    		if (beforeLength == 1 && afterLength == 0)
-    		{
-    			XliJ.XliJ_OnKeyDown(KeyEvent.KEYCODE_DEL);
-    			XliJ.XliJ_OnKeyUp(KeyEvent.KEYCODE_DEL);
-    			DummyEditable.PopulateDummyString();
-    		return true;} 
-    		return false;
-    	//}
-        //return super.deleteSurroundingText(beforeLength, afterLength);
+		if (beforeLength == 1 && afterLength == 0)
+		{
+			XliJ.XliJ_OnKeyDown(KeyEvent.KEYCODE_DEL);
+			XliJ.XliJ_OnKeyUp(KeyEvent.KEYCODE_DEL);
+			DummyEditable.PopulateDummyString();
+			return true;
+		} 
+		return false;
     }
 
     @Override

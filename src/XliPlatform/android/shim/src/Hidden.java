@@ -61,6 +61,7 @@ public class Hidden extends View implements View.OnKeyListener { //used to exten
             {
             	if (keyCode == KeyEvent.KEYCODE_BACK) {
             		XliJ.HideKeyboard();
+            		return true;
             	}
             	XliJ.XliJ_OnKeyDown(keyCode);
             } else if (keyEvent.getAction()==KeyEvent.ACTION_UP) {
@@ -72,18 +73,6 @@ public class Hidden extends View implements View.OnKeyListener { //used to exten
     }
     @Override
     public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
-        {
-            if (keyEvent.getAction()==KeyEvent.ACTION_DOWN)
-            {
-                if (keyCode == KeyEvent.KEYCODE_DEL) { XliJ.XliJ_OnKeyDown(KeyEvent.KEYCODE_DEL); }
-                XliJ.XliJ_OnKeyDown(keyCode);
-            } else if (keyEvent.getAction()==KeyEvent.ACTION_UP) {
-                if (keyCode == KeyEvent.KEYCODE_DEL) { XliJ.XliJ_OnKeyUp(KeyEvent.KEYCODE_DEL); }
-                XliJ.XliJ_OnKeyUp(keyCode);
-            }
-            return true;
-        }
         return super.onKeyPreIme(keyCode, keyEvent);
     }
 
