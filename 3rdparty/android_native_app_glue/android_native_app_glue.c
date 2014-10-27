@@ -198,7 +198,6 @@ static void process_input(struct android_app* app, struct android_poll_source* s
 
         if (!skip_predispatch) {
             if (AInputQueue_preDispatchEvent(app->inputQueue, event)) {
-                AInputQueue_finishEvent(app->inputQueue, event, 1);
                 continue;
             }
         }
