@@ -184,14 +184,25 @@ static void android_app_destroy(struct android_app* android_app) {
     // Can't touch android_app object after this.
 }
 
+
+// The google version of this is buggy on various devices (e.g. nexus 4)
+// See here for details
+// stackoverflow.com/questions/15913080/crash-when-closing-soft-keyboard-while-using-native-activity
 static void process_input(struct android_app* app, struct android_poll_source* source) {
     AInputEvent* event = NULL;
+    int skip_predispatch;
     while (AInputQueue_getEvent(app->inputQueue, &event) >= 0) {
-        //LOGV("New input event: type=%d\n", AInputEvent_getType(event));
-        if (AInputQueue_preDispatchEvent(app->inputQueue, event)) {
-            AInputQueue_finishEvent(app->inputQueue, event, 1);
-            continue;
+
+        skip_predispatch =  AInputEvent_getType(event)  == AINPUT_EVENT_TYPE_KEY
+            && AKeyEvent_getKeyCode(event) == AKEYCODE_BACK;
+
+        if (!skip_predispatch) {
+            if (AInputQueue_preDispatchEvent(app->inputQueue, event)) {
+                AInputQueue_finishEvent(app->inputQueue, event, 1);
+                continue;
+            }
         }
+        
         int32_t handled = 0;
         if (app->onInputEvent != NULL) handled = app->onInputEvent(app, event);
         AInputQueue_finishEvent(app->inputQueue, event, handled);

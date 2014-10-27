@@ -327,19 +327,19 @@ namespace Xli
             //       We do however capture the back key here as it is the most
             //       reliable place to capture it and also ensures the user can
             //       control when the app returns to the 'desktop'
-            // if (AKeyEvent_getKeyCode(event) == AKEYCODE_BACK) {
-            //     int32_t action = AKeyEvent_getAction(event);
-            //     if (action == AKEY_EVENT_ACTION_UP) {
-            //         // we only release on 'up' and minimize keyboard doesnt give
-            //         // us a down event. This way we get a consistent behaviour
-            //         // at the expense of a little detail. This may have to
-            //         // be reviewed but feels good for now
-            //         LOGD("-------------- NATIVE BACK UP-DOWN");
-            //         GlobalEventHandler->OnKeyDown(GlobalWindow, BackButton);
-            //         GlobalEventHandler->OnKeyUp(GlobalWindow, BackButton);
-            //     }
-            //     return 0; // <-- prevent default handler
-            // };
+            if (AKeyEvent_getKeyCode(event) == AKEYCODE_BACK) {
+                int32_t action = AKeyEvent_getAction(event);
+                if (action == AKEY_EVENT_ACTION_UP) {
+                    // we only release on 'up' and minimize keyboard doesnt give
+                    // us a down event. This way we get a consistent behaviour
+                    // at the expense of a little detail. This may have to
+                    // be reviewed but feels good for now
+                    // LOGD("-------------- NATIVE BACK UP-DOWN");
+                    GlobalEventHandler->OnKeyDown(GlobalWindow, BackButton);
+                    GlobalEventHandler->OnKeyUp(GlobalWindow, BackButton);
+                }
+                return 0; // <-- prevent default handler
+            };
 
             int32_t kcode=0;
             switch (AInputEvent_getType(event))
