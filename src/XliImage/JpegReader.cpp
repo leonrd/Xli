@@ -24,7 +24,7 @@
 
 extern "C"
 {
-    #include <jpeglib.h>
+#include <jpeglib.h>
 }
 
 namespace Xli
@@ -192,6 +192,17 @@ namespace Xli
     ImageReader* Jpeg::CreateReader(Stream* input)
     {
         return new JpegReader(input);
+    }
+    ImageReader* Jpeg::SafeCreateReader(Stream* input)
+    {
+        try
+        {
+            return new JpegReader(input);
+        }
+        catch (const Xli::Exception& e)
+        {
+            return 0;
+        }
     }
 
     Bitmap* Jpeg::Load(Stream* input)
