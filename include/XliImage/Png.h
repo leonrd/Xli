@@ -33,7 +33,6 @@ namespace Xli
     public:
         static ImageWriter* CreateWriter(Stream* output, int width, int height, Format format);
         static ImageReader* CreateReader(Stream* input);
-        static ImageReader* SafeCreateReader(Stream* input);
 
 
         static Bitmap* Load(Stream* input);

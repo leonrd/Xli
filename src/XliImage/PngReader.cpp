@@ -199,19 +199,6 @@ namespace Xli
     {
         return new PngReader(input);
     }
-
-    ImageReader* Png::SafeCreateReader(Stream* input)
-    {
-        try
-        {
-            return new PngReader(input);
-        }
-        catch (const Xli::Exception& e)
-        {
-            return 0;
-        }
-    }
-
     
     Bitmap* Png::Load(Stream* input)
     {
