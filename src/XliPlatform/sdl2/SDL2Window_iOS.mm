@@ -45,22 +45,10 @@ namespace Xli
             if (this->fullscreen)
             {                
                 UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
-                if (orien == UIInterfaceOrientationPortrait || orien == UIInterfaceOrientationPortraitUpsideDown)
-                {
-                    return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale), 0);
-                } else {
-                    return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.height * scale), 0);
-                }
+                return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale), 0);
             } else {
-                UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
-                if (orien == UIInterfaceOrientationPortrait || orien == UIInterfaceOrientationPortraitUpsideDown)
-                {
-                    return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale),
-                                    (int)([UIApplication sharedApplication].statusBarFrame.size.height * scale));
-                } else {
-                    return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.height * scale),
-                                    (int)([UIApplication sharedApplication].statusBarFrame.size.width * scale));
-                }
+                return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale),
+                                (int)([UIApplication sharedApplication].statusBarFrame.size.height * scale));
             }            
         }
 

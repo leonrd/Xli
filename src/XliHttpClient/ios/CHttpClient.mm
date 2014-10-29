@@ -9,7 +9,6 @@
 #include <CFNetwork/CFHTTPStream.h>
 #include <iostream>
 #include <fstream>
-#include <Xli/Console.h>
 
 namespace Xli
 {
