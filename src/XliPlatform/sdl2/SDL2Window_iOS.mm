@@ -39,16 +39,38 @@ namespace Xli
             return Vector2i(0, 0);
         }
 
+        bool statusSizeSupportsOrientation;
         Vector2i SDL2Window::GetStatusBarSize() 
         {
             int scale = [[UIScreen mainScreen] scale];
             if (this->fullscreen)
-            {                
-                UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
-                return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale), 0);
+            {
+                if (statusSizeSupportsOrientation) {
+                    return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale), 0);
+                } else {                    
+                    UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
+                    if (orien == UIInterfaceOrientationPortrait || orien == UIInterfaceOrientationPortraitUpsideDown)
+                    {
+                        return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale), 0);
+                    } else {
+                        return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.height * scale), 0);
+                    }
+                }                
             } else {
-                return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale),
-                                (int)([UIApplication sharedApplication].statusBarFrame.size.height * scale));
+                if (statusSizeSupportsOrientation) {
+                    return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale),
+                                    (int)([UIApplication sharedApplication].statusBarFrame.size.height * scale));
+                } else {
+                    UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
+                    if (orien == UIInterfaceOrientationPortrait || orien == UIInterfaceOrientationPortraitUpsideDown)
+                    {
+                        return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale),
+                                        (int)([UIApplication sharedApplication].statusBarFrame.size.height * scale));
+                    } else {
+                        return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.height * scale),
+                                        (int)([UIApplication sharedApplication].statusBarFrame.size.width * scale));
+                    }
+                }
             }            
         }
 
@@ -56,7 +78,9 @@ namespace Xli
         {
             int width, height;
             SDL_GetWindowSize(((SDL2Window*)GetMainWindow())->window, &width, &height);
-            this->keyboardSize = Vector2i(width,0);            
+            this->keyboardSize = Vector2i(width,0);
+
+            statusSizeSupportsOrientation = ([[[UIDevice currentDevice] systemVersion] compare:@"8.0" options:NSNumericSearch] != NSOrderedAscending);
             
             NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
             NSOperationQueue *queue = [NSOperationQueue mainQueue];
