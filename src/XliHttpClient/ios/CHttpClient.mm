@@ -299,7 +299,13 @@ namespace Xli
 
         virtual void Abort()
         {
+            this->HardStop();
+            HttpEventHandler* eh = client->GetEventHandler();
+            if (eh!=0) eh->OnRequestAborted(this);
+        }
 
+        virtual void HardStop()
+        {
             // {TODO} Can we guarentee instant termination?
             //        If so we dont need to worry about post destroy callbacks
 
@@ -319,10 +325,7 @@ namespace Xli
                 CFRelease(this->responseMessage);
             if (uploadData!=0)
                 CFRelease(this->uploadData);
-
-            HttpEventHandler* eh = client->GetEventHandler();
-            if (eh!=0) eh->OnRequestAborted(this);
-        }
+        }        
 
         virtual void NHeadersToHeaders(CFDictionaryRef dictRef)
         {
@@ -390,16 +393,19 @@ namespace Xli
                 if (eh!=0) eh->OnRequestError(request,error);
             }
         }
-
+        
         static void OnByteDataRecieved(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
         {
             UInt8 buff[1024];
             CFIndex nBytesRead = CFReadStreamRead(stream, buff, 1024);
 
             if(nBytesRead>0)
-            {
+            {                
                 if (!CFHTTPMessageAppendBytes(request->responseMessage, buff, nBytesRead)) {
-                    Error->WriteLine("{TODO} handle error in OnByteDataRecieved:MessageAppendBytes");
+                    request->HardStop();
+                    HttpEventHandler* eh = request->client->GetEventHandler();
+                    if (eh!=0) eh->OnRequestError(request, "Error appending bytes to response message");
+                    return;
                 }
 
                 request->readPosition += nBytesRead;
@@ -469,10 +475,7 @@ namespace Xli
                 break;
             case kCFStreamEventEndEncountered:
                 if (request->state != HttpRequestStateLoading) {
-                    Error->WriteLine("-----1-----");
                     CHttpRequest::OnHeadersRecieved(request, stream, event);
-                } else {
-                    Error->WriteLine("-----2-----");
                 }
                 request->state = HttpRequestStateDone;
                 if (!request->errored)
