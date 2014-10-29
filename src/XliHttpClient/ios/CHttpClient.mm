@@ -33,12 +33,12 @@ namespace Xli
 
         HashMap<String,String> responseHeaders;
         bool dataReady;
-        bool reading;
         int readPosition;
         int responseStatus;
-        CFWriteStreamRef cachedContentStream;
         Buffer* responseBody;
         bool errored;
+
+        CFHTTPMessageRef responseMessage;
 
     public:
         CHttpRequest(HttpClient* client, String url, String method)
@@ -50,10 +50,9 @@ namespace Xli
             this->method = method;
             this->timeout = 0;
             this->verifyHost = true;
-            this->readPosition = 0;            
-            this->reading = false;
-            this->cachedContentStream = 0;
+            this->readPosition = 0;
             this->cachedReadStream = 0;
+            this->responseMessage = 0;
             OnStateChanged(this, HttpRequestStateOpened, 0, 0);
         }
 
@@ -71,14 +70,14 @@ namespace Xli
             }
             if (cachedReadStream!=0)
                 CFRelease(cachedReadStream);
-            if (cachedContentStream!=0)
-                CFRelease(cachedContentStream);
+            if (responseMessage!=0)
+                CFRelease(responseMessage);
             if (uploadData!=0)
                 CFRelease(uploadData);
         }
 
         virtual String GetMethod() const { return method; }
-        virtual String GetUrl() const { return url; }        
+        virtual String GetUrl() const { return url; }
         virtual HttpRequestState GetState() const { return state; }
         virtual int GetTimeout() const { return timeout; }
         virtual void SetTimeout(int timeout)
@@ -157,7 +156,7 @@ namespace Xli
             CFReadStreamSetProperty(cachedReadStream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanTrue);
             if (!verifyHost)
             {
-                CFMutableDictionaryRef myDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, 
+                CFMutableDictionaryRef myDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
                                                                           &kCFTypeDictionaryValueCallBacks);
                 CFDictionarySetValue(myDict, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
                 CFReadStreamSetProperty(cachedReadStream, kCFStreamPropertySSLSettings, myDict);
@@ -300,7 +299,13 @@ namespace Xli
 
         virtual void Abort()
         {
+            this->HardStop();
+            HttpEventHandler* eh = client->GetEventHandler();
+            if (eh!=0) eh->OnRequestAborted(this);
+        }
 
+        virtual void HardStop()
+        {
             // {TODO} Can we guarentee instant termination?
             //        If so we dont need to worry about post destroy callbacks
 
@@ -316,14 +321,11 @@ namespace Xli
             }
             if (cachedReadStream!=0)
                 CFRelease(this->cachedReadStream);
-            if (cachedContentStream!=0)
-                CFRelease(this->cachedContentStream);
+            if (responseMessage!=0)
+                CFRelease(this->responseMessage);
             if (uploadData!=0)
                 CFRelease(this->uploadData);
-            
-            HttpEventHandler* eh = client->GetEventHandler();
-            if (eh!=0) eh->OnRequestAborted(this);
-        }
+        }        
 
         virtual void NHeadersToHeaders(CFDictionaryRef dictRef)
         {
@@ -332,7 +334,7 @@ namespace Xli
         static void NHeaderToHeader(const void* key, const void* value, void* ptr)
         {
             CHttpRequest* request = (CHttpRequest*)ptr;
-            if (!request->responseHeaders.ContainsKey((char*)key)) 
+            if (!request->responseHeaders.ContainsKey((char*)key))
                 request->responseHeaders.Add((char*)key, (char*)value);
         }
 
@@ -343,35 +345,6 @@ namespace Xli
                 HttpEventHandler* eh = request->client->GetEventHandler();
                 if (eh!=0) eh->OnRequestStateChanged(request);
             }
-        }
-
-        static void OnHeadersRecieved(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
-        {
-            //get the response
-            CFHTTPMessageRef response = (CFHTTPMessageRef) CFReadStreamCopyProperty (stream, kCFStreamPropertyHTTPResponseHeader);
-            //headers
-            CFDictionaryRef nHeaders = CFHTTPMessageCopyAllHeaderFields(response);
-            request->NHeadersToHeaders(nHeaders);
-            CFRelease(nHeaders);
-            //responseStatus
-            CFIndex code = CFHTTPMessageGetResponseStatusCode(response);
-            request->responseStatus = (int)code;
-
-            //CFRelease(nHeaders); //{TODO} this crashes...why?
-        }
-
-        static void OnByteDataRecieved(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
-        {
-            UInt8 buff[1024];
-            CFIndex nBytesRead = CFReadStreamRead(stream, buff, 1024);
-
-            if(nBytesRead>0)
-            {
-                CFWriteStreamWrite(request->cachedContentStream, (UInt8*)(&buff), (CFIndex)nBytesRead);
-                request->readPosition += nBytesRead;
-            }
-            HttpEventHandler* eh = request->client->GetEventHandler();
-            if (eh!=0) eh->OnRequestProgress(request, request->readPosition, 0, false);
         }
 
         static void OnTimeout(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
@@ -421,17 +394,63 @@ namespace Xli
             }
         }
         
+        static void OnByteDataRecieved(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
+        {
+            UInt8 buff[1024];
+            CFIndex nBytesRead = CFReadStreamRead(stream, buff, 1024);
+
+            if(nBytesRead>0)
+            {                
+                if (!CFHTTPMessageAppendBytes(request->responseMessage, buff, nBytesRead)) {
+                    request->HardStop();
+                    HttpEventHandler* eh = request->client->GetEventHandler();
+                    if (eh!=0) eh->OnRequestError(request, "Error appending bytes to response message");
+                    return;
+                }
+
+                request->readPosition += nBytesRead;
+            }
+            // OnByteDataRecieved is called during header download but we only want on progress during body download
+            if (request->state > HttpRequestStateHeadersReceived) {
+                HttpEventHandler* eh = request->client->GetEventHandler();
+                if (eh!=0) eh->OnRequestProgress(request, request->readPosition, 0, false);
+            }
+        }
+
+        static void OnHeadersRecieved(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
+        {
+            //get the response
+            CFHTTPMessageRef response = (CFHTTPMessageRef) CFReadStreamCopyProperty (stream, kCFStreamPropertyHTTPResponseHeader);
+
+            //CFHTTPMessageRef response = request->responseMessage;
+            
+            //headers
+            CFDictionaryRef nHeaders = CFHTTPMessageCopyAllHeaderFields(response); //(request->responseMessage);
+            request->NHeadersToHeaders(nHeaders);
+            CFRelease(nHeaders);
+            
+            //responseStatus
+            CFIndex code = CFHTTPMessageGetResponseStatusCode(response); //request->responseMessage
+            request->responseStatus = (int)code;
+
+            CHttpRequest::OnStateChanged(request, HttpRequestStateHeadersReceived, stream, event);
+            CHttpRequest::OnStateChanged(request, HttpRequestStateLoading, stream, event);
+        }
+
         static void AsyncCallback(CFReadStreamRef stream, CFStreamEventType event, void* ptr)
         {
             CHttpRequest* request = (CHttpRequest*)ptr;
             switch (event)
             {
             case kCFStreamEventOpenCompleted:
-                if (request->cachedContentStream == 0)
+
+                if (request->responseMessage == 0)
                 {
-                    request->cachedContentStream = CFWriteStreamCreateWithAllocatedBuffers(kCFAllocatorDefault, kCFAllocatorDefault);
-                    CFWriteStreamOpen(request->cachedContentStream);
-                    if (request->dataReady) OnByteDataRecieved(request, request->cachedReadStream, NULL);
+                    request->responseMessage = CFHTTPMessageCreateEmpty (NULL, FALSE);
+                    if (request->dataReady) {
+                        // Not sure this is necessary.
+                        OnByteDataRecieved(request, request->cachedReadStream, NULL);
+                    }
                 } else {
                     XLI_THROW("Not in correct state to start download");
                 }
@@ -440,29 +459,26 @@ namespace Xli
                 // {TODO} not currently used but will be needed for upload progress
                 break;
             case kCFStreamEventHasBytesAvailable:
+                
+                CHttpRequest::OnByteDataRecieved(request, stream, event);
+                
                 if (request->state == HttpRequestStateSent) {
-                    CHttpRequest::OnHeadersRecieved(request, stream, event);
-                    CHttpRequest::OnStateChanged(request, HttpRequestStateHeadersReceived, stream, event);
-                    
-                    request->state = HttpRequestStateLoading;                    
-                    HttpEventHandler* eh = request->client->GetEventHandler();
-                    if (eh!=0) eh->OnRequestStateChanged(request);
-                    request->reading = true;                    
-                }
-                if (request->reading == true)
-                {
-                    request->dataReady = true;
-                    CHttpRequest::OnByteDataRecieved(request, stream, event);
-                } else {
-                    request->dataReady = true;
+                    //CFHTTPMessageRef response = (CFHTTPMessageRef) CFReadStreamCopyProperty (stream, kCFStreamPropertyHTTPResponseHeader);
+                    CFHTTPMessageRef response = request->responseMessage;
+                    if (CFHTTPMessageIsHeaderComplete(response)) {
+                        CHttpRequest::OnHeadersRecieved(request, stream, event);
+                    }                    
                 }
                 break;
             case kCFStreamEventErrorOccurred:
                 CHttpRequest::OnError(request, stream, event);
                 break;
             case kCFStreamEventEndEncountered:
+                if (request->state != HttpRequestStateLoading) {
+                    CHttpRequest::OnHeadersRecieved(request, stream, event);
+                }
                 request->state = HttpRequestStateDone;
-                if (!request->errored) 
+                if (!request->errored)
                 {
                     request->getContentArray();
                     CHttpRequest::OnStateChanged(request, HttpRequestStateDone, stream, event);
@@ -483,18 +499,25 @@ namespace Xli
         {
             if (state == HttpRequestStateDone && !errored)
             {
-                CFStringRef prop = CFSTR("kCFStreamPropertyDataWritten");
-                CFDataRef streamDataHandle = (CFDataRef)CFWriteStreamCopyProperty(cachedContentStream, prop);
-                long len = CFDataGetLength(streamDataHandle);
+                CFDataRef streamDataHandle = CFHTTPMessageCopyBody(responseMessage);
+                long len = 0;
+                if (streamDataHandle) {
+                    len = CFDataGetLength(streamDataHandle);
+                }
                 readPosition = len;
 
                 responseBody = Buffer::Create((int)len);
-                CFDataGetBytes(streamDataHandle, CFRangeMake(0,len), (UInt8*)responseBody->GetPtr());
 
-                CFWriteStreamClose(cachedContentStream);
-                CFRelease(cachedContentStream);
-                CFRelease(streamDataHandle);
-                cachedContentStream = 0;
+                if (len>0) {
+                    CFDataGetBytes(streamDataHandle, CFRangeMake(0,len), (UInt8*)responseBody->GetPtr());
+                }
+
+
+                CFRelease(responseMessage);
+                responseMessage = 0;
+                if (streamDataHandle) {
+                    CFRelease(streamDataHandle);
+                }
             } else {
                 XLI_THROW("Not in correct state to get content array"); // {TODO} error needed here
             }

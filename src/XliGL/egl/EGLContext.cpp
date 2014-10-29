@@ -171,7 +171,9 @@ namespace Xli
             }
 
             if (eglMakeCurrent(display, surface, surface, wnd != 0 ? context : 0) == EGL_FALSE)
+            {
                 XLI_THROW("Unable to make EGL context current");
+            }
         }
 
         virtual bool IsCurrent()
