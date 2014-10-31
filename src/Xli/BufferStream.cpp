@@ -172,4 +172,9 @@ namespace Xli
         else if (pos > len)
             pos = len;
     }
+
+	DataAccessor* BufferStream::CreateDataAccessor()
+	{
+		return this->buf;
+	}
 }

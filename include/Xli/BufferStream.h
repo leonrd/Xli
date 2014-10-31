@@ -51,6 +51,8 @@ namespace Xli
 
         virtual int GetPosition() const;
         virtual int GetLength() const;
+
+		virtual DataAccessor* CreateDataAccessor();
     };
 }
 
