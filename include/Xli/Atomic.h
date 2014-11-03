@@ -30,7 +30,7 @@ namespace Xli
     inline int AtomicIncrement(int* ptr)
     {
 #ifdef XLI_COMPILER_MSVC
-        return _InterlockedIncrement((volatile long*)&ptr);
+        return _InterlockedIncrement((volatile long*)ptr);
 #else
         return __sync_add_and_fetch(ptr, 1);
 #endif
@@ -39,7 +39,7 @@ namespace Xli
     inline int AtomicDecrement(int* ptr)
     {
 #ifdef XLI_COMPILER_MSVC
-        return _InterlockedDecrement((volatile long*)&ptr);
+        return _InterlockedDecrement((volatile long*)ptr);
 #else
         return __sync_sub_and_fetch(ptr, 1);
 #endif
