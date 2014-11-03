@@ -54,7 +54,18 @@ namespace Xli
 
         int GetComponentCount()
         {
-            return CGImageGetBitsPerPixel(image.CGImage) / CGImageGetBitsPerComponent(image.CGImage);
+            
+            int c = 0;
+            CGColorSpaceRef cs = CGImageGetColorSpace(image.CGImage);
+            CGColorSpaceRef bcs = CGColorSpaceGetBaseColorSpace(cs);
+            if (bcs==NULL)
+            {
+                c = CGColorSpaceGetNumberOfComponents(cs);
+            } else {
+                c = CGColorSpaceGetNumberOfComponents(bcs);
+            }
+            
+            return c;
         }
 
         virtual int GetBufferSize()
@@ -83,7 +94,8 @@ namespace Xli
             if (format == FormatRGBA_8_8_8_8_UInt_Normalize)
             {
                 CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-                CGContextRef imgcontext = CGBitmapContextCreate(targetBuffer, width, height, 8, 4 * width, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+                CGContextRef imgcontext = CGBitmapContextCreate(targetBuffer, width, height, 8, 4 * width, colorSpace,
+                                                                kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
                 CGColorSpaceRelease(colorSpace);
                 CGContextClearRect(imgcontext, CGRectMake(0, 0, width, height));
                 CGContextTranslateCTM(imgcontext, 0, 0);
