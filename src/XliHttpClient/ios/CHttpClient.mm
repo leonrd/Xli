@@ -64,11 +64,11 @@ namespace Xli
             // spin this off into function
             if (cachedReadStream!=0)
             {
+                CFReadStreamSetClient(cachedReadStream, kCFStreamEventNone, NULL, NULL);
+                CFReadStreamUnscheduleFromRunLoop(cachedReadStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
                 CFReadStreamClose(cachedReadStream);
                 CFRelease(cachedReadStream);
             }
-            if (cachedReadStream!=0)
-                CFRelease(cachedReadStream);
             if (responseMessage!=0)
                 CFRelease(responseMessage);
             if (uploadData!=0)
@@ -315,11 +315,10 @@ namespace Xli
 
             if (cachedReadStream!=0)
             {
+                CFReadStreamSetClient(cachedReadStream, kCFStreamEventNone, NULL, NULL);
+                CFReadStreamUnscheduleFromRunLoop(cachedReadStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
                 CFReadStreamClose(this->cachedReadStream);
-                CFRelease(this->cachedReadStream);
             }
-            if (cachedReadStream!=0)
-                CFRelease(this->cachedReadStream);
             if (responseMessage!=0)
                 CFRelease(this->responseMessage);
             if (uploadData!=0)
@@ -439,6 +438,7 @@ namespace Xli
         static void AsyncCallback(CFReadStreamRef stream, CFStreamEventType event, void* ptr)
         {
             CHttpRequest* request = (CHttpRequest*)ptr;
+            request->AddRef();
             switch (event)
             {
             case kCFStreamEventOpenCompleted:
@@ -481,17 +481,18 @@ namespace Xli
                 {
                     request->getContentArray();
                     CHttpRequest::OnStateChanged(request, HttpRequestStateDone, stream, event);
-
+                    
                     if (request->uploadData!=0) CFRelease(request->uploadData);
-
                     if (request->cachedReadStream!=0)
                     {
+                        CFReadStreamSetClient(request->cachedReadStream, kCFStreamEventNone, NULL, NULL);
+                        CFReadStreamUnscheduleFromRunLoop(request->cachedReadStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
                         CFReadStreamClose(request->cachedReadStream);
-                        CFRelease(request->cachedReadStream);
                     }
                 }
                 break;
             }
+            request->Release();
         }
 
         virtual void getContentArray()
