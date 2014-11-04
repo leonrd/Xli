@@ -52,8 +52,8 @@ namespace Xli
             virtual void Execute();
         };
 
-        void EnqueueCrossThreadEvent(Window* wnd, WindowAction* action);
-        void ProcessCrossThreadEvents(Window* wnd);
+        void EnqueueCrossThreadEvent(WindowAction* action);
+        void ProcessCrossThreadEvents();
     };
 };
 

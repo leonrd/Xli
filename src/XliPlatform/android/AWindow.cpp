@@ -47,8 +47,6 @@ namespace Xli
         class AWindow: public Window
         {
         public:
-            MutexQueue<WindowAction*> ctActionQueue;
-
             AWindow()
             {
                 int nativeFlags = 0;
@@ -532,9 +530,11 @@ namespace Xli
 
             Out->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_INFO)));
             Error->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_WARN)));
+            
+            AJniHelper::Init();
 
-            // Wait for the native window to be initialized from another thread here. Because something in the shim expects it to be.
-            // TODO: Clean up the shim and remove this for better maintainability and faster start up.
+            // Wait for the native window to be initialized from another thread here.
+            // TODO: Remove this for better maintainability and faster start up.
             while (!GlobalInit)
             {
                 Window::ProcessMessages();
@@ -547,8 +547,6 @@ namespace Xli
 
                 usleep(10000);
             }
-
-            AJniHelper::Init();
         }
 
         void Android::SetLogTag(const char* tag)
@@ -566,16 +564,17 @@ namespace Xli
             return AndroidActivity->clazz;
         }
 
-        void EnqueueCrossThreadEvent(Window* wnd, WindowAction* action)
+        static MutexQueue<WindowAction*> ctActionQueue;
+        void EnqueueCrossThreadEvent(WindowAction* action)
         {
-            ((AWindow*)wnd)->ctActionQueue.Enqueue(action);
+            ctActionQueue.Enqueue(action);
         }
 
-        void ProcessCrossThreadEvents(Window* wnd)
+        void ProcessCrossThreadEvents()
         {
-            while ((((AWindow*)wnd)->ctActionQueue.Count() > 0))
+            while ((ctActionQueue.Count() > 0))
             {
-                WindowAction* action = ((AWindow*)wnd)->ctActionQueue.Dequeue();
+                WindowAction* action = ctActionQueue.Dequeue();
                 action->Execute();
                 delete action;
             }
@@ -651,6 +650,6 @@ namespace Xli
         }
 
         if (GlobalWindow)
-            PlatformSpecific::ProcessCrossThreadEvents(GlobalWindow);
+            PlatformSpecific::ProcessCrossThreadEvents();
     }
 }

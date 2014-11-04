@@ -64,14 +64,14 @@ namespace Xli
         PlatformLib::Init();
 
         DisplaySettings settings;
-        if (Display::GetCount() > 0 && 
-            Display::GetCurrentSettings(0, settings) && 
+        if (Display::GetCount() > 0 &&
+            Display::GetCurrentSettings(0, settings) &&
             settings.RefreshRate > 0)
             _maxFps = settings.RefreshRate;
         else
             _maxFps = 60;
     }
-    
+
     void Application::SetMaxFps(int value)
     {
         _maxFps = value;
@@ -94,7 +94,7 @@ namespace Xli
     void Application::OnInit(Window* wnd)
     {
     }
-    
+
     void Application::OnLoad(Window* wnd)
     {
     }

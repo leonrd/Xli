@@ -34,35 +34,39 @@ namespace Xli
     namespace PlatformSpecific
     {
         void CTTextAction::Execute() 
-        { 
-            GlobalEventHandler->OnTextInput(GlobalWindow, this->Text); 
+        {
+            if (GlobalWindow) {
+                GlobalEventHandler->OnTextInput(GlobalWindow, this->Text);
+            }
         }
         void CTKeyAction::Execute() 
-        { 
-            if (this->KeyDown)
-            {
-                GlobalEventHandler->OnKeyDown(GlobalWindow, this->KeyEvent);
-            } else {
-                GlobalEventHandler->OnKeyUp(GlobalWindow, this->KeyEvent); 
-            }    
+        {
+            if (GlobalWindow) {
+                if (this->KeyDown)
+                {
+                    GlobalEventHandler->OnKeyDown(GlobalWindow, this->KeyEvent);
+                } else {
+                    GlobalEventHandler->OnKeyUp(GlobalWindow, this->KeyEvent); 
+                }
+            }
         }
 
         extern "C"
         {
             void JNICALL XliJ_OnKeyUp (JNIEnv *env , jobject obj, jint keyCode) 
             {
-                EnqueueCrossThreadEvent(GlobalWindow, new CTKeyAction((AKeyEvent)keyCode, false));
+                EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, false));
             }
 
             void JNICALL XliJ_OnKeyDown (JNIEnv *env , jobject obj, jint keyCode) 
             {
-                EnqueueCrossThreadEvent(GlobalWindow, new CTKeyAction((AKeyEvent)keyCode, true));
+                EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, true));
             }
 
             void JNICALL XliJ_OnTextInput (JNIEnv *env , jobject obj, jstring keyChars) 
             {
                 const char* jChars = env->GetStringUTFChars((jstring)keyChars, NULL);        
-                EnqueueCrossThreadEvent(GlobalWindow, new CTTextAction(String(jChars)));
+                EnqueueCrossThreadEvent(new CTTextAction(String(jChars)));
                 env->ReleaseStringUTFChars((jstring)keyChars, jChars);
             }
 
@@ -70,7 +74,7 @@ namespace Xli
             {
                 char const* cerrorMessage = env->GetStringUTFChars(errorMessage, NULL);
                 String finalMessage = String("JavaThrown:")+String(cerrorMessage); 
-                EnqueueCrossThreadEvent(GlobalWindow, new CTError(finalMessage, errorCode));
+                EnqueueCrossThreadEvent(new CTError(finalMessage, errorCode));
                 env->ReleaseStringUTFChars(errorMessage, cerrorMessage);
             }
         }
