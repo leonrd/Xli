@@ -25,11 +25,12 @@
 #include <unistd.h>
 
 #include <XliPlatform/PlatformSpecific/Android.h>
+#include <XliPlatform/Window.h>
+#include <Xli/Console.h>
+#include "ACrossThread.h"
 #include "AJniHelper.h"
 #include "AShim.h"
-#include <Xli/MutexQueue.h>
-#include <Xli/Console.h>
-#include <XliPlatform/Window.h>
+
 
 Xli::WindowEventHandler* GlobalEventHandler = 0;
 Xli::Window* GlobalWindow = 0;
@@ -563,22 +564,6 @@ namespace Xli
         {
             return AndroidActivity->clazz;
         }
-
-        static MutexQueue<WindowAction*> ctActionQueue;
-        void EnqueueCrossThreadEvent(WindowAction* action)
-        {
-            ctActionQueue.Enqueue(action);
-        }
-
-        void ProcessCrossThreadEvents()
-        {
-            while ((ctActionQueue.Count() > 0))
-            {
-                WindowAction* action = ctActionQueue.Dequeue();
-                action->Execute();
-                delete action;
-            }
-        }
     }
 
     void InitWindow()
@@ -650,6 +635,6 @@ namespace Xli
         }
 
         if (GlobalWindow)
-            PlatformSpecific::ProcessCrossThreadEvents();
+            PlatformSpecific::CTQueue::ProcessCrossThreadEvents();
     }
 }

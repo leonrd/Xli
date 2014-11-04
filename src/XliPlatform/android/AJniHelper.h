@@ -20,7 +20,7 @@
 #define __XLI_AJNI_ANDROID_H__
 
 #include <jni.h>
-#include "CTKeyAction.h"
+#include "ACrossThread.h"
 #include "AShim.h"
 
 namespace Xli

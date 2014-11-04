@@ -100,6 +100,7 @@ if (XLI_PLATFORM_ANDROID)
 
     set(SRC ${SRC}
         android/AFileSystem.cpp
+        android/ACrossThread.cpp    
         android/AJniHelper.cpp
         android/AMessageBox.cpp
         android/AShim.cpp

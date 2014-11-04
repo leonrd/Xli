@@ -18,11 +18,12 @@
 //
 
 #include <XliPlatform/PlatformSpecific/Android.h>
-#include "AJniHelper.h"
+#include <XliPlatform/Window.h>
 #include <XliHttpClient.h>
 #include <pthread.h>
 #include <stdarg.h>
-#include <XliPlatform/Window.h>
+#include "ACrossThread.h"
+#include "AJniHelper.h"
 
 #define DEBUG_JNI
 
@@ -55,18 +56,18 @@ namespace Xli
         {
             void JNICALL XliJ_OnKeyUp (JNIEnv *env , jobject obj, jint keyCode) 
             {
-                EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, false));
+                CTQueue::EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, false));
             }
 
             void JNICALL XliJ_OnKeyDown (JNIEnv *env , jobject obj, jint keyCode) 
             {
-                EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, true));
+                CTQueue::EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, true));
             }
 
             void JNICALL XliJ_OnTextInput (JNIEnv *env , jobject obj, jstring keyChars) 
             {
                 const char* jChars = env->GetStringUTFChars((jstring)keyChars, NULL);        
-                EnqueueCrossThreadEvent(new CTTextAction(String(jChars)));
+                CTQueue::EnqueueCrossThreadEvent(new CTTextAction(String(jChars)));
                 env->ReleaseStringUTFChars((jstring)keyChars, jChars);
             }
 
@@ -74,7 +75,7 @@ namespace Xli
             {
                 char const* cerrorMessage = env->GetStringUTFChars(errorMessage, NULL);
                 String finalMessage = String("JavaThrown:")+String(cerrorMessage); 
-                EnqueueCrossThreadEvent(new CTError(finalMessage, errorCode));
+                CTQueue::EnqueueCrossThreadEvent(new CTError(finalMessage, errorCode));
                 env->ReleaseStringUTFChars(errorMessage, cerrorMessage);
             }
         }

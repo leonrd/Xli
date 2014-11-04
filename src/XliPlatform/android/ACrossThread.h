@@ -20,6 +20,7 @@
 #define __XLI_CTKEY_ANDROID_H__
 
 #include "AKeyEvent.h"
+#include <Xli/MutexQueue.h>
 
 namespace Xli
 {
@@ -52,8 +53,13 @@ namespace Xli
             virtual void Execute();
         };
 
-        void EnqueueCrossThreadEvent(WindowAction* action);
-        void ProcessCrossThreadEvents();
+        class CTQueue
+        {
+        public:
+            static MutexQueue<WindowAction*> ctActionQueue;
+            static void EnqueueCrossThreadEvent(WindowAction* action);
+            static void ProcessCrossThreadEvents();
+        };            
     };
 };
 
