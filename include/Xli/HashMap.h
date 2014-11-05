@@ -300,6 +300,7 @@ namespace Xli
         bool Remove(const TKey& key)
         {
             int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
+            int firstX = x;
 
             while (true)
             {
@@ -321,6 +322,9 @@ namespace Xli
 
                 if (x >= bucketCount) 
                     x -= bucketCount;
+
+                if (x == firstX)
+                    return false;
             }
         }
 
