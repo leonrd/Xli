@@ -53,8 +53,7 @@ namespace Xli
         }
 
         int GetComponentCount()
-        {
-            
+        {            
             int c = 0;
             CGColorSpaceRef cs = CGImageGetColorSpace(image.CGImage);
             CGColorSpaceRef bcs = CGColorSpaceGetBaseColorSpace(cs);
@@ -64,7 +63,9 @@ namespace Xli
             } else {
                 c = CGColorSpaceGetNumberOfComponents(bcs);
             }
-            
+            if (CGImageGetAlphaInfo(image.CGImage) != kCGImageAlphaNone) {
+                c+=1;
+            }
             return c;
         }
 
