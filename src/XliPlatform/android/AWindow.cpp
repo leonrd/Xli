@@ -410,6 +410,7 @@ namespace Xli
                         // be reviewed but feels good for now
                         GlobalEventHandler->OnKeyDown(GlobalWindow, BackButton);
                         GlobalEventHandler->OnKeyUp(GlobalWindow, BackButton);
+                        return 1;
                     }
                 };
                 if (AKeyEvent_getKeyCode(event) == AKEYCODE_MENU) {
@@ -422,6 +423,7 @@ namespace Xli
                         LOGD("-------------- NATIVE MENU UP");
                         GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
                     }
+                    return 1;
                 };
             }
 
