@@ -408,22 +408,21 @@ namespace Xli
                         // us a down event. This way we get a consistent behaviour
                         // at the expense of a little detail. This may have to
                         // be reviewed but feels good for now
-                        GlobalEventHandler->OnKeyDown(GlobalWindow, BackButton);
-                        GlobalEventHandler->OnKeyUp(GlobalWindow, BackButton);
-                        return 1;
+                        bool r1 = GlobalEventHandler->OnKeyDown(GlobalWindow, BackButton);
+                        bool r2 = GlobalEventHandler->OnKeyUp(GlobalWindow, BackButton);
+                        return (r1 || r2);
                     }
                 };
                 if (AKeyEvent_getKeyCode(event) == AKEYCODE_MENU) {
                     int32_t action = AKeyEvent_getAction(event);
                     if (action == AKEY_EVENT_ACTION_DOWN) {
                         LOGD("-------------- NATIVE MENU DOWN");
-                        GlobalEventHandler->OnKeyDown(GlobalWindow, KeyMenu);
+                        return GlobalEventHandler->OnKeyDown(GlobalWindow, KeyMenu);
                     }
                     if (action == AKEY_EVENT_ACTION_UP) {
                         LOGD("-------------- NATIVE MENU UP");
-                        GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
-                    }
-                    return 1;
+                        return GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
+                    }                    
                 };
             }
 
