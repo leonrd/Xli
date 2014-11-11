@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <Xli/String.h>
 #include <Xli/Console.h>
+#include <UIKit/UIKit.h>
 
 namespace Xli
 {
@@ -95,8 +96,6 @@ namespace Xli
         {
             switch (type)
             {
-            case iOS::DeviceTypeUNKNOWN:
-                return 0.0f;
             case iOS::DeviceTypeIPHONE_1G:
                 return 163.0f;
             case iOS::DeviceTypeIPHONE_3G:
@@ -168,7 +167,9 @@ namespace Xli
             case iOS::DeviceTypeSIMULATOR:
                 return 163.0f;
             }
-            return 0.0f;
+
+            float scale = [[UIScreen mainScreen] scale];
+            return 163.0 * scale;
         }
     }
 

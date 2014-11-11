@@ -315,7 +315,7 @@ namespace Xli
                 SLDataSink audioSnk = {&loc_outmix, NULL};
 
                 result = (*GlobalAAudioEngine->EngineEngine)->CreateAudioPlayer(GlobalAAudioEngine->EngineEngine, &playerObject, &audioSrc, &audioSnk, 2, ids, req);
-                assert(SL_RESULT_SUCCESS == result);
+                if (result != SL_RESULT_SUCCESS) XLI_THROW("Failed to create audio player");
             } else {
 
                 SLDataLocator_URI locatorIn = {SL_DATALOCATOR_URI, (SLchar *)path.Ptr()};
@@ -325,7 +325,7 @@ namespace Xli
                 SLDataSink audioSnk = {&loc_outmix, NULL};
 
                 result = (*GlobalAAudioEngine->EngineEngine)->CreateAudioPlayer(GlobalAAudioEngine->EngineEngine, &playerObject, &audioSrc, &audioSnk, 2, ids, req);
-                assert(SL_RESULT_SUCCESS == result);
+                if (result != SL_RESULT_SUCCESS) XLI_THROW("Failed to create audio player");
             }
 
             (void)result;

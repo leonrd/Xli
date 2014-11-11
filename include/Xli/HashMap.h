@@ -50,6 +50,7 @@ namespace Xli
 
         int bucketCount;
         int count;
+        int dummies;
 
         void rehash(int newSize)
         {
@@ -59,6 +60,7 @@ namespace Xli
             int oldSize = bucketCount;
             bucketCount = newSize;
             count = 0;
+            dummies = 0;
 
             for (int i = 0; i < bucketCount; i++) 
                 buckets[i].State = BucketStateEmpty;
@@ -97,6 +99,7 @@ namespace Xli
                 buckets[i].State = BucketStateEmpty;
 
             count = 0;
+            dummies = 0;
         }
 
         ~HashMap()
@@ -214,15 +217,15 @@ namespace Xli
                 buckets[i].State = BucketStateEmpty;
 
             count = 0;
+            dummies = 0;
         }
 
         TValue& operator [] (const TKey& key)
         {
-            if (count > (bucketCount / 8) * 5) 
+            if (count + dummies > (bucketCount / 8) * 5)
                 expand();
             
             int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
-            int firstX = x;
 
             while (true)
             {
@@ -243,19 +246,12 @@ namespace Xli
 
                 if (x >= bucketCount) 
                     x -= bucketCount;
-
-                if (x == firstX)
-                {
-                    rehash(bucketCount);
-                    x = firstX;
-                    continue;
-                }
             }
         }
 
         void Add(const TKey& key, const TValue& value)
         {
-            if (count > (bucketCount / 8) * 5) 
+            if (count + dummies > (bucketCount / 8) * 5)
                 expand();
 
             int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
@@ -263,31 +259,32 @@ namespace Xli
 
             while (true)
             {
-                if (buckets[x].State == BucketStateUsed)
+                switch (buckets[x].State)
                 {
-                    if (Traits<TKey>::Equals(buckets[x].Key, key)) 
-                        XLI_THROW("Map already contains the given key");
-                }
-                else if (buckets[x].State == BucketStateEmpty)
-                {
+		case BucketStateEmpty:
                     buckets[x].State = BucketStateUsed;
                     buckets[x].Key = key;
                     buckets[x].Value = value;
                     count++;
                     return;
+
+		case BucketStateDummy:
+                    buckets[x].State = BucketStateUsed;
+                    buckets[x].Key = key;
+                    buckets[x].Value = value;
+                    count++;
+                    dummies--;
+                    return;
+
+                case BucketStateUsed:
+                    if (Traits<TKey>::Equals(buckets[x].Key, key))
+                        XLI_THROW("Map already contains the given key");
                 }
 
                 x++;
 
                 if (x >= bucketCount) 
                     x -= bucketCount;
-
-                if (x == firstX)
-                {
-                    rehash(bucketCount);
-                    x = firstX;
-                    continue;
-                }
             }
         }
 
@@ -309,6 +306,12 @@ namespace Xli
                     {
                         buckets[x].State = BucketStateDummy;
                         count--;
+                        dummies++;
+
+                        if (count + dummies < (bucketCount / 8) * 3 &&
+			    bucketCount > 8)
+                            rehash(bucketCount / 2);
+
                         return true;
                     }
                 }
@@ -327,7 +330,6 @@ namespace Xli
         bool ContainsKey(const TKey& key) const
         {
             int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
-            int firstX = x;
 
             while (true)
             {
@@ -345,16 +347,12 @@ namespace Xli
 
                 if (x >= bucketCount) 
                     x -= bucketCount;
-
-                if (x == firstX) 
-                    return false;
             }
         }
 
         bool TryGetValue(const TKey& key, TValue& value) const
         {
             int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
-            int firstX = x;
 
             while (true)
             {
@@ -375,9 +373,6 @@ namespace Xli
 
                 if (x >= bucketCount) 
                     x -= bucketCount;
-                
-                if (x == firstX)
-                    return false;
             }
         }
 
