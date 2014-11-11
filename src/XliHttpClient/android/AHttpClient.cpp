@@ -45,6 +45,7 @@ namespace Xli
         this->errored = false;
         this->javaAsyncHandle = 0;
         this->javaContentHandle = 0;
+        this->responseStatus = 0;
         this->responseBody = new ArrayStream(1);
         HttpEventHandler* eh = client->GetEventHandler();
         if (eh!=0) eh->OnRequestStateChanged(this);
@@ -305,6 +306,7 @@ namespace Xli
                 } else {
                     request->javaContentHandle = 0;
                 }
+                request->responseStatus = (int)responseCode;
                 if (headers)
                 {
                     int headerCount = (env->GetArrayLength(headers) / 2);
@@ -334,7 +336,6 @@ namespace Xli
                         if (!request->responseHeaders.ContainsKey(ckey)) {
                             request->responseHeaders.Add(ckey,cval);
                         }
-                        request->responseStatus = (int)responseCode;
                         if (responseMessage!=0)
                         {
                             char const* rmess = env->GetStringUTFChars(responseMessage, NULL);
