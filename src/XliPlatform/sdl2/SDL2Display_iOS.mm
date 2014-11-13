@@ -175,10 +175,7 @@ namespace Xli
 
     float Display::GetDensity(int displayIndex)
     {
-        PlatformSpecific::iOS::DeviceType dType = PlatformSpecific::iOS::GetDeviceType();
-        float dpi = PlatformSpecific::GetDeviceDpi(dType);
-        // the scale factor is to bring it in line with android.
-        return dpi / 160.0f;
+        return [[UIScreen mainScreen] scale];
     }
     
     Vector2 Display::GetDpi(int displayIndex)
