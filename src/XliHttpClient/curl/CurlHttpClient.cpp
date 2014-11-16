@@ -403,9 +403,10 @@ namespace Xli
             }
         }
 
-        virtual void onDone()
+        virtual void onDone( int code )
         {
             state = HttpRequestStateDone;
+            responseStatus = code;
 
             if (aborted) //{TODO} spin this off?
             {
@@ -590,7 +591,9 @@ namespace Xli
             if (messageType == CURLMSG_DONE)
             {
                 // we need to find errors here
-                request->onDone();
+                long http_code = 0;
+                curl_easy_getinfo (session, CURLINFO_RESPONSE_CODE, &http_code);
+                request->onDone((int)http_code);
             } else {
                 HttpEventHandler* eh = this->GetEventHandler();
                 if (eh!=0) eh->OnRequestError(request, "Client expected CURLMSG_DONE");
