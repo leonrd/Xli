@@ -30,7 +30,6 @@
 #include <stdlib.h>
 #include <cstring>
 #include <stdlib.h>
-#include <Xli/Console.h>
 
 namespace Xli
 {
