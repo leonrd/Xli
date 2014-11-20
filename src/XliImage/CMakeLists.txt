@@ -6,18 +6,14 @@ file(GLOB SRC
     Format.cpp
     ImageReader.cpp
     ImageWriter.cpp
+    JpegReader.cpp
     JpegWriter.cpp
     Ktx.cpp
+    PngReader.cpp
     PngWriter.cpp
     Texture.cpp)
 
 set(LIBS Xli)
-
-if (XLI_PLATFORM_IOS)
-    set(SRC ${SRC} UIImageReader.mm)
-else()
-    set(SRC ${SRC} JpegReader.cpp PngReader.cpp)
-endif()
 
 set(JPEG_INC ../../3rdparty/jpeg)
 
