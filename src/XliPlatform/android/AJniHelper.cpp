@@ -132,7 +132,7 @@ namespace Xli
         static void CacheNativeActivity(jclass* shim_class, JNIEnv* env, jobject activity) 
         {
             jmethodID mid = env->GetStaticMethodID(*shim_class, "CacheActivity", "(Landroid/app/NativeActivity;)V");
-            (jint)env->CallObjectMethod(*shim_class, mid, activity);
+            env->CallStaticVoidMethod(*shim_class, mid, activity);
         }
 
 
