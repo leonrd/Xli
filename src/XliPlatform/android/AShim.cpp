@@ -178,6 +178,8 @@ namespace Xli
             jfieldID jd = jni->GetFieldID( metricsClass, "density", "F" );
             jobject result = jni->CallStaticObjectMethod(shimClass, getDisplayMetrics);
             jfloat d = (jfloat)jni->GetFloatField(result, jd);
+            jni->DeleteLocalRef(result);
+            jni->DeleteLocalRef(metricsClass);
             //LOGD("out_8");
             return (float)d;
         }
@@ -193,6 +195,8 @@ namespace Xli
             jobject result = jni->CallStaticObjectMethod(shimClass, getDisplayMetrics);
             jfloat jx = (jfloat)jni->GetFloatField(result, xDpi);
             jfloat jy = (jfloat)jni->GetFloatField(result, yDpi);
+            jni->DeleteLocalRef(result);
+            jni->DeleteLocalRef(metricsClass);
             //LOGD("out_9");
             return Vector2((float)jx, (float)jy);
         }
