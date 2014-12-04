@@ -59,7 +59,6 @@ namespace Xli
 
         void AShim::CacheMids(JNIEnv *env, jclass shimClass)
         {
-            //LOGD("in_0");
             LOGD("Caching Mids");
             raiseKeyboard = env->GetStaticMethodID(shimClass, "RaiseKeyboard", "()V");
             hideKeyboard = env->GetStaticMethodID(shimClass, "HideKeyboard", "()V");
@@ -107,7 +106,6 @@ namespace Xli
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
             LOGD("Mids Cached");
-            //LOGD("out_0");
         }
 
         void AShim::RaiseSoftKeyboard()
@@ -131,47 +129,38 @@ namespace Xli
 
         int AShim::GetKeyboardSize()
         {
-            //LOGD("in_4");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jint result = (jint)jni->CallStaticIntMethod(shimClass, getKeyboardSize);
-            //LOGD("out_4");
             return (int)result;
         }
 
         void AShim::HideStatusBar()
         {
-            //LOGD("in_5");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jni->CallStaticVoidMethod(shimClass, hideStatusBar);
             //{TODO} When this is working, go fix AWindow statusbar methods
-            //LOGD("out_5");
         }
 
         void AShim::ShowStatusBar()
         {
-            //LOGD("in_6");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jni->CallStaticVoidMethod(shimClass, showStatusBar);
             //{TODO} When this is working, go fix AWindow statusbar methods
-            //LOGD("out_6");
         }
 
         float AShim::GetStatusBarHeight()
         {
-            //LOGD("in_7");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jfloat height = jni->CallStaticFloatMethod(shimClass, getStatusBarHeight);
-            //LOGD("out_7");
             return (float)height;
         }
 
         float AShim::GetDensity()
         {
-            //LOGD("in_8");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jclass metricsClass = jni->FindClass("android/util/DisplayMetrics");
@@ -180,13 +169,11 @@ namespace Xli
             jfloat d = (jfloat)jni->GetFloatField(result, jd);
             jni->DeleteLocalRef(result);
             jni->DeleteLocalRef(metricsClass);
-            //LOGD("out_8");
             return (float)d;
         }
 
         Vector2 AShim::GetDpi()
         {
-            //LOGD("in_9");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jclass metricsClass = jni->FindClass("android/util/DisplayMetrics");
@@ -197,39 +184,31 @@ namespace Xli
             jfloat jy = (jfloat)jni->GetFloatField(result, yDpi);
             jni->DeleteLocalRef(result);
             jni->DeleteLocalRef(metricsClass);
-            //LOGD("out_9");
             return Vector2((float)jx, (float)jy);
         }
 
         bool AShim::KeyboardVisible()
         {
-            //LOGD("in_10");
             return kbVisible;
-            //LOGD("out_10");
         }
 
         bool AShim::HasVibrator()
         {
-            //LOGD("in_11");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jboolean jresult = jni->CallStaticBooleanMethod(shimClass, hasVibrator);
-            //LOGD("out_11");
             return (bool)jresult;
         }
 
         void AShim::VibrateForMilliseconds(int milliseconds)
         {
-            //LOGD("in_12");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jni->CallStaticVoidMethod(shimClass, vibrateForMilliseconds, (jint)milliseconds);
-            //LOGD("out_12");
         }
 
         int AShim::ShowMessageBox(const String& message, const String& caption, int buttons, int hints)
         {
-            //LOGD("in_13");
             //setup for call
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
@@ -240,24 +219,20 @@ namespace Xli
 
             //call
             int result = (int)jni->CallStaticIntMethod(shimClass, showMessageBox, jcaption, jmessage, (jint)buttons, (jint)hints);
-            //LOGD("out_13");
             return result;
         }
 
         bool AShim::ConnectedToNetwork()
         {
-            //LOGD("in_14");
             //setup for call
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jboolean jresult = jni->CallStaticBooleanMethod(shimClass, connectedToNetwork);
-            //LOGD("out_14");
             return (bool)jresult;
         }
 
         JObjRef AShim::SendHttpAsync(const HttpRequest* req, const void* content, long byteLength)
         {
-            //LOGD("in_15");
             AJniHelper jni;
 
             String url = req->GetUrl();
@@ -291,10 +266,8 @@ namespace Xli
             if (jresult==-1)
             {
                 LOGE("AShim [SendHttpAsync]: Could not create async http request");
-                //LOGD("out_15");
                 return 0;
             }
-            //LOGD("out_15");
             return (JObjRef)jresult;
         }
 
@@ -316,7 +289,6 @@ namespace Xli
 
         JObjRef AShim::SendHttpAsync(const HttpRequest* req, String content)
         {
-            //LOGD("in_16");
             AJniHelper jni;
 
             String url = req->GetUrl();
@@ -348,10 +320,8 @@ namespace Xli
             if (jresult==-1)
             {
                 LOGE("AShim [SendHttpAsync]: Could not create async http request");
-                //LOGD("out_16");
                 return 0;
             }
-            //LOGD("out_16");
             return (JObjRef)jresult;
         }
 
@@ -388,15 +358,12 @@ namespace Xli
 
         void AShim::AbortAsyncTask(JObjRef task)
         {
-            //LOGD("in_18");
             AJniHelper jni;
             jni->CallStaticVoidMethod(jni.GetShim(), abortAsyncTask, (jint)task);
-            //LOGD("out_18");
         }
 
         String AShim::HeadersToString(const HttpRequest* req)
         {
-            //LOGD("in_19");
             String result = "";
             AJniHelper jni;
             int i = req->HeadersBegin();
@@ -405,58 +372,48 @@ namespace Xli
                 result += req->GetHeaderKey(i) + ":" + req->GetHeaderValue(i) + "\n";
                 i = req->HeadersNext(i);
             }
-            //LOGD("out_19");
             return result;
         }
 
         String AShim::InputStreamToString(jobject bufferedInputStream)
         {
-            //LOGD("in_20");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jmethodID mid = jni->GetStaticMethodID(shimClass, "InputStreamToString", "(Ljava/io/InputStream;)Ljava/lang/String;");
             if (!mid) {
                 LOGE("Unable to get InputStreamToString mid");
-                //LOGD("out_20");
                 return "";
             }
             jstring jresult = (jstring)jni->CallStaticObjectMethod(shimClass, mid, bufferedInputStream,(jint)1024);
             String result = jni.GetString(jresult);
             jni->DeleteLocalRef(jresult);
-            //LOGD("out_20");
             return result;
         }
 
         JObjRef AShim::AsyncInputStreamToString(JObjRef bufferedInputStream, HttpRequest* request)
         {
-            //LOGD("in_21");
             AJniHelper jni;
             jint result = jni->CallStaticIntMethod(jni.GetShim(), asyncInputStreamToString, (jint)bufferedInputStream, (long)request);
-            //LOGD("in_21");
             if (result==-1) return 0;
             return (JObjRef)result;
         }
 
         JObjRef AShim::AsyncInputStreamToByteArray(JObjRef bufferedInputStream, HttpRequest* request)
         {
-            //LOGD("in_22");
             AJniHelper jni;
             jint result = jni->CallStaticIntMethod(jni.GetShim(), asyncInputStreamToByteArray, (jint)bufferedInputStream, (long)request);
-            //LOGD("in_22");
             if (result == -1) return 0;
             return (JObjRef)result;
         }
 
         int AShim::ReadBytesFromInputStream(jobject bufferedInputStream, int bytesToRead, void* dst)
         {
-            //LOGD("in_23");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
 
             jmethodID mid = jni->GetStaticMethodID(shimClass, "ReadBytesFromInputStream", "(Ljava/io/BufferedInputStream;I)[B");
             if (!mid) {
                 LOGE("Unable to get ReadBytesFromInputStream mid");
-                //LOGD("out_23");
                 return 0;
             }
             jbyteArray jbytes = (jbyteArray)jni->CallStaticObjectMethod(shimClass, mid, bufferedInputStream, (jint)bytesToRead);
@@ -466,80 +423,63 @@ namespace Xli
                 int result = (int)len;
                 jni->DeleteLocalRef(jbytes);
                 //jni->DeleteLocalRef((jobject)len);
-                //LOGD("out_23");
                 return result;
             } else {
-                //LOGD("out_23");
                 return -1;
             }
-            //LOGD("out_23");
         }
 
         void AShim::InitDefaultCookieManager()
         {
-            //LOGD("in_24");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jni->CallStaticVoidMethod(shimClass, initDefaultCookieManager);
-            //LOGD("out_24");
         }
 
 
         AAssetManager* AShim::GetAssetManager()
         {
-            //LOGD("in_25");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jobject assetManager = jni->CallStaticObjectMethod(shimClass, getAssetManager);
             jni->NewGlobalRef(assetManager);
             AAssetManager* result = AAssetManager_fromJava(jni.GetEnv(), assetManager);
-            //LOGD("out_25");
             return result;
         }
 
         bool AShim::RegisterNativeFunctions(JNINativeMethod native_funcs[], int funcCount)
         {
-            //LOGD("in_26");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
             jint attached = jni->RegisterNatives(shimClass, native_funcs, (jint)funcCount);
-            //LOGD("out_26");
             return (attached >= 0);
         }
 
         JObjRef AShim::HoldObject(jobject obj)
         {
-            //LOGD("in_27");
             AJniHelper jni;
             jint result = jni->CallStaticIntMethod(jni.GetShim(), holdObject, obj);
-            //LOGD("out_27");
             return (JObjRef)result;
         }
 
         jobject AShim::GetObject(JObjRef objKey)
         {
-            //LOGD("in_27");
             AJniHelper jni;
             jobject result = jni->CallStaticObjectMethod(jni.GetShim(), getObject, (jint)objKey);
-            //LOGD("out_27");
             return result;
         }
 
         bool AShim::TryReleaseObject(JObjRef objKey)
         {
-            //LOGD("in_28");
             AJniHelper jni;
             bool result = (bool)jni->CallStaticBooleanMethod(jni.GetShim(), tryReleaseObject, (jint)objKey);
-            //LOGD("out_28");
             return result;
         }
 
         jobject AShim::GetHeaderMap()
         {
-            //LOGD("in_28");
             AJniHelper jni;
             jobject result = jni->CallStaticObjectMethod(jni.GetShim(), getHeaderMap);
-            //LOGD("out_28");
             return result;
         }
     }
