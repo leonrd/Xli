@@ -27,10 +27,8 @@
 
 namespace Xli
 {
-    static int GetFloatLength(const char* str)
+    static int GetFloatLength(const char* str, int len)
     {
-        int len = (int)strlen(str);
-
         while (len > 1 && str[len - 1] == '0')
             len--;
 
@@ -56,22 +54,22 @@ namespace Xli
     void String::Init(int i)
     {
         char buf[32];
-        sprintf_s(buf, 32, "%d", i);
-        Init(buf, (int)strlen(buf));
+        int len = sprintf_s(buf, 32, "%d", i);
+        Init(buf, len);
     }
 
     void String::Init(float f)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%f", f);
-        Init(buf, GetFloatLength(buf));
+        int len = sprintf_s(buf, 64, "%f", f);
+        Init(buf, GetFloatLength(buf, len));
     }
 
     void String::Init(double d)
     {
         char buf[128];
-        sprintf_s(buf, 128, "%lf", d);
-        Init(buf, GetFloatLength(buf));
+        int len = sprintf_s(buf, 128, "%lf", d);
+        Init(buf, GetFloatLength(buf, len));
     }
 
     void String::Deinit()

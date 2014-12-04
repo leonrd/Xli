@@ -110,8 +110,8 @@ namespace Xli
     String DefaultTraits::ToString(void* p)
     {
         char buf[64];
-        sprintf_s(buf, 64, "0x%llx", (unsigned long long int)p);
-        return buf;
+        int len = sprintf_s(buf, 64, "0x%llx", (unsigned long long int)p);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(char c)
@@ -127,15 +127,15 @@ namespace Xli
     String DefaultTraits::ToString(short i)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%hd", i);
-        return buf;
+        int len = sprintf_s(buf, 64, "%hd", i);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(unsigned short i)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%hu", i);
-        return buf;
+        int len = sprintf_s(buf, 64, "%hu", i);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(int i)
@@ -146,36 +146,36 @@ namespace Xli
     String DefaultTraits::ToString(unsigned int i)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%u", i);
-        return buf;
+        int len = sprintf_s(buf, 64, "%u", i);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(long i)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%ld", i);
-        return buf;
+        int len = sprintf_s(buf, 64, "%ld", i);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(unsigned long i)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%lu", i);
-        return buf;
+        int len = sprintf_s(buf, 64, "%lu", i);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(long long i)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%lld", i);
-        return buf;
+        int len = sprintf_s(buf, 64, "%lld", i);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(unsigned long long i)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%llu", i);
-        return buf;
+        int len = sprintf_s(buf, 64, "%llu", i);
+        return String(buf, len);
     }
 
     String DefaultTraits::ToString(float f)
