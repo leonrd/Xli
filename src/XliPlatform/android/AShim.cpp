@@ -114,7 +114,7 @@ namespace Xli
         {
             // LOGD("in_RaiseSoftKeyboard");
             AJniHelper jni;
-            jni->CallObjectMethod(jni.GetShim(), raiseKeyboard);
+            jni->CallStaticVoidMethod(jni.GetShim(), raiseKeyboard);
             kbVisible = 1;
             // LOGD("out_RaiseSoftKeyboard");
         }
@@ -124,7 +124,7 @@ namespace Xli
             // LOGD("in_HideSoftKeyboard");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jni->CallObjectMethod(shimClass, hideKeyboard);
+            jni->CallStaticVoidMethod(shimClass, hideKeyboard);
             kbVisible = 0;
             // LOGD("out_HideSoftKeyboard");
         }
@@ -144,7 +144,7 @@ namespace Xli
             //LOGD("in_5");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jni->CallObjectMethod(shimClass, hideStatusBar);
+            jni->CallStaticVoidMethod(shimClass, hideStatusBar);
             //{TODO} When this is working, go fix AWindow statusbar methods
             //LOGD("out_5");
         }
@@ -154,7 +154,7 @@ namespace Xli
             //LOGD("in_6");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jni->CallObjectMethod(shimClass, showStatusBar);
+            jni->CallStaticVoidMethod(shimClass, showStatusBar);
             //{TODO} When this is working, go fix AWindow statusbar methods
             //LOGD("out_6");
         }
@@ -213,11 +213,9 @@ namespace Xli
             //LOGD("in_11");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jobject jresult = jni->CallObjectMethod(shimClass, hasVibrator);
-            bool result = (bool)jresult;
-            jni->DeleteLocalRef(jresult);
+            jboolean jresult = jni->CallStaticBooleanMethod(shimClass, hasVibrator);
             //LOGD("out_11");
-            return (bool)result;
+            return (bool)jresult;
         }
 
         void AShim::VibrateForMilliseconds(int milliseconds)
@@ -225,7 +223,7 @@ namespace Xli
             //LOGD("in_12");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jni->CallObjectMethod(shimClass, vibrateForMilliseconds, (jint)milliseconds);
+            jni->CallStaticVoidMethod(shimClass, vibrateForMilliseconds, (jint)milliseconds);
             //LOGD("out_12");
         }
 
@@ -252,11 +250,9 @@ namespace Xli
             //setup for call
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jobject jresult = jni->CallObjectMethod(shimClass, connectedToNetwork);
-            bool result = (bool)jresult;
-            jni->DeleteLocalRef(jresult);
+            jboolean jresult = jni->CallStaticBooleanMethod(shimClass, connectedToNetwork);
             //LOGD("out_14");
-            return (bool)result;
+            return (bool)jresult;
         }
 
         JObjRef AShim::SendHttpAsync(const HttpRequest* req, const void* content, long byteLength)
@@ -394,7 +390,7 @@ namespace Xli
         {
             //LOGD("in_18");
             AJniHelper jni;
-            jni->CallObjectMethod(jni.GetShim(), abortAsyncTask, (jint)task);
+            jni->CallStaticVoidMethod(jni.GetShim(), abortAsyncTask, (jint)task);
             //LOGD("out_18");
         }
 
@@ -424,7 +420,7 @@ namespace Xli
                 //LOGD("out_20");
                 return "";
             }
-            jstring jresult = (jstring)jni->CallObjectMethod(shimClass, mid, bufferedInputStream,(jint)1024);
+            jstring jresult = (jstring)jni->CallStaticObjectMethod(shimClass, mid, bufferedInputStream,(jint)1024);
             String result = jni.GetString(jresult);
             jni->DeleteLocalRef(jresult);
             //LOGD("out_20");
@@ -463,7 +459,7 @@ namespace Xli
                 //LOGD("out_23");
                 return 0;
             }
-            jbyteArray jbytes = (jbyteArray)jni->CallObjectMethod(shimClass, mid, bufferedInputStream, (jint)bytesToRead);
+            jbyteArray jbytes = (jbyteArray)jni->CallStaticObjectMethod(shimClass, mid, bufferedInputStream, (jint)bytesToRead);
             if (jbytes != 0) {
                 jsize len = jni->GetArrayLength(jbytes);
                 jni->GetByteArrayRegion(jbytes, 0, len, (jbyte*)dst);
@@ -484,7 +480,7 @@ namespace Xli
             //LOGD("in_24");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jni->CallObjectMethod(shimClass, initDefaultCookieManager);
+            jni->CallStaticVoidMethod(shimClass, initDefaultCookieManager);
             //LOGD("out_24");
         }
 
@@ -494,7 +490,7 @@ namespace Xli
             //LOGD("in_25");
             AJniHelper jni;
             jclass shimClass = jni.GetShim();
-            jobject assetManager = jni->CallObjectMethod(shimClass, getAssetManager);
+            jobject assetManager = jni->CallStaticObjectMethod(shimClass, getAssetManager);
             jni->NewGlobalRef(assetManager);
             AAssetManager* result = AAssetManager_fromJava(jni.GetEnv(), assetManager);
             //LOGD("out_25");
