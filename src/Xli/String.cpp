@@ -22,14 +22,19 @@
 #include <Xli/Exception.h>
 #include <cctype>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+
+#ifndef XLI_COMPILER_MSVC
+# define sprintf_s snprintf
+# define sscanf_s sscanf
+# define vsnprintf_s(buf, bufSize, maxCount, format, argList) vsnprintf(buf, bufSize, format, argList)
+#endif
 
 namespace Xli
 {
-    static int GetFloatLength(const char* str)
+    static int GetFloatLength(const char* str, int len)
     {
-        int len = (int)strlen(str);
-
         while (len > 1 && str[len - 1] == '0')
             len--;
 
@@ -41,7 +46,7 @@ namespace Xli
 
     void String::InitLength(int len)
     {
-        _data = len < BufSize - 1 ? _buf : new char[len + 1];
+        _data = len < BufSize - 1 ? _buf : (char *)malloc(len + 1);
         _data[len] = 0;
         _length = len;
     }
@@ -55,28 +60,28 @@ namespace Xli
     void String::Init(int i)
     {
         char buf[32];
-        sprintf_s(buf, 32, "%d", i);
-        Init(buf, (int)strlen(buf));
+        int len = sprintf_s(buf, 32, "%d", i);
+        Init(buf, len);
     }
 
     void String::Init(float f)
     {
         char buf[64];
-        sprintf_s(buf, 64, "%f", f);
-        Init(buf, GetFloatLength(buf));
+        int len = sprintf_s(buf, 64, "%f", f);
+        Init(buf, GetFloatLength(buf, len));
     }
 
     void String::Init(double d)
     {
         char buf[128];
-        sprintf_s(buf, 128, "%lf", d);
-        Init(buf, GetFloatLength(buf));
+        int len = sprintf_s(buf, 128, "%lf", d);
+        Init(buf, GetFloatLength(buf, len));
     }
 
     void String::Deinit()
     {
         if (_data != _buf)
-            delete [] _data;
+            free(_data);
     }
 
     String::String()
@@ -123,7 +128,7 @@ namespace Xli
 
     char* String::CopyPtr()
     {
-        char* buf = new char[_length + 1];
+        char* buf = (char *)malloc(_length + 1);
         buf[_length] = 0;
         memcpy(buf, _data, _length);
         return buf;
@@ -134,8 +139,13 @@ namespace Xli
         if (_data == _buf)
             return CopyPtr();
 
-        *(char**)&_buf = _data;
-        return _data;
+        char *result = _data;
+
+        _buf[0] = '\0';
+        _length = 0;
+        _data = _buf;
+
+        return result;
     }
 
     char* String::Ptr()
@@ -319,7 +329,7 @@ namespace Xli
         if (r._length == -1) 
             return String();
 
-        r._data = new char[r._length + 1];
+        r._data = (char *)malloc(r._length + 1);
         int p = 0;
 
         for (int i = 0; i < list.Length(); i++)

@@ -64,13 +64,10 @@
 
 #ifdef XLI_COMPILER_MSVC // Visual C++ specific
 # define XLI_FUNCTION __FUNCTION__ //__FUNCSIG__
+# define XLI_NORETURN __declspec(noreturn)
 #else
-# define sscanf_s(str, ...) sscanf(str, __VA_ARGS__)
-# define sprintf_s(buf, bufSize, format, ...) sprintf(buf, format, __VA_ARGS__)
-# define vsnprintf_s(buf, bufSize, maxCount, format, argList) vsprintf(buf, format, argList)
 # define XLI_FUNCTION __PRETTY_FUNCTION__
+# define XLI_NORETURN __attribute__((noreturn))
 #endif
-
-
 
 #endif

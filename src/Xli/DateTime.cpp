@@ -22,6 +22,10 @@
 #include <Xli/Time.h>
 #include <cstdio>
 
+#ifndef XLI_COMPILER_MSVC
+# define sscanf_s sscanf
+#endif
+
 namespace Xli
 {
     bool DateTime::IsLeapYear(int year)

@@ -255,7 +255,6 @@ namespace Xli
                 expand();
 
             int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
-            int firstX = x;
 
             while (true)
             {
