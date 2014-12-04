@@ -22,6 +22,7 @@
 #include <Xli/Exception.h>
 #include <cctype>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 namespace Xli
@@ -41,7 +42,7 @@ namespace Xli
 
     void String::InitLength(int len)
     {
-        _data = len < BufSize - 1 ? _buf : new char[len + 1];
+        _data = len < BufSize - 1 ? _buf : (char *)malloc(len + 1);
         _data[len] = 0;
         _length = len;
     }
@@ -76,7 +77,7 @@ namespace Xli
     void String::Deinit()
     {
         if (_data != _buf)
-            delete [] _data;
+            free(_data);
     }
 
     String::String()
@@ -123,7 +124,7 @@ namespace Xli
 
     char* String::CopyPtr()
     {
-        char* buf = new char[_length + 1];
+        char* buf = (char *)malloc(_length + 1);
         buf[_length] = 0;
         memcpy(buf, _data, _length);
         return buf;
@@ -324,7 +325,7 @@ namespace Xli
         if (r._length == -1) 
             return String();
 
-        r._data = new char[r._length + 1];
+        r._data = (char *)malloc(r._length + 1);
         int p = 0;
 
         for (int i = 0; i < list.Length(); i++)
