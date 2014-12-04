@@ -134,8 +134,13 @@ namespace Xli
         if (_data == _buf)
             return CopyPtr();
 
-        *(char**)&_buf = _data;
-        return _data;
+        char *result = _data;
+
+        _buf[0] = '\0';
+        _length = 0;
+        _data = _buf;
+
+        return result;
     }
 
     char* String::Ptr()
