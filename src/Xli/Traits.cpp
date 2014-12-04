@@ -20,6 +20,10 @@
 #include <Xli/Traits.h>
 #include <cstdio>
 
+#ifndef XLI_COMPILER_MSVC
+# define sprintf_s snprintf
+#endif
+
 namespace Xli
 {
     UInt32 DefaultTraits::Hash(const UInt8* data, int size)

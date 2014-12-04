@@ -25,6 +25,12 @@
 #include <cstdlib>
 #include <cstring>
 
+#ifndef XLI_COMPILER_MSVC
+# define sprintf_s snprintf
+# define sscanf_s sscanf
+# define vsnprintf_s(buf, bufSize, maxCount, format, argList) vsnprintf(buf, bufSize, format, argList)
+#endif
+
 namespace Xli
 {
     static int GetFloatLength(const char* str, int len)
