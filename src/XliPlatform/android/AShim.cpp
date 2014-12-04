@@ -241,7 +241,7 @@ namespace Xli
             jstring jmessage = jni->NewStringUTF(message.Ptr());
 
             //call
-            int result = (int)jni->CallObjectMethod(shimClass, showMessageBox, jcaption, jmessage, (jint)buttons, (jint)hints);
+            int result = (int)jni->CallStaticIntMethod(shimClass, showMessageBox, jcaption, jmessage, (jint)buttons, (jint)hints);
             //LOGD("out_13");
             return result;
         }
