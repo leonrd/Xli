@@ -27,12 +27,14 @@ import java.nio.ByteBuffer;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 
 public class HttpHelper {
@@ -61,16 +63,18 @@ public class HttpHelper {
 
     public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
         // Create clone with same capacity as original.
+    	int capacity = original.capacity();
+    	Log.e("XliApp","&&&&&&& NEW CAPACITY: "+capacity);
         final ByteBuffer clone = (original.isDirect()) ?
-            ByteBuffer.allocateDirect(original.capacity()) :
-            ByteBuffer.allocate(original.capacity());
+            ByteBuffer.allocateDirect(capacity) :
+            ByteBuffer.allocate(capacity);
 
         // Create a read-only copy of the original.
         // This allows reading from the original without modifying it.
         final ByteBuffer readOnlyCopy = original.asReadOnlyBuffer();
 
         // Flip and read from the original.
-        readOnlyCopy.flip();
+        readOnlyCopy.position(0);
         clone.put(readOnlyCopy);
 
         return clone;
