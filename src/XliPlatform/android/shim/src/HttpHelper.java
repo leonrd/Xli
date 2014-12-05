@@ -34,7 +34,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 
 public class HttpHelper {
@@ -64,7 +63,6 @@ public class HttpHelper {
     public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
         // Create clone with same capacity as original.
     	int capacity = original.capacity();
-    	Log.e("XliApp","&&&&&&& NEW CAPACITY: "+capacity);
         final ByteBuffer clone = (original.isDirect()) ?
             ByteBuffer.allocateDirect(capacity) :
             ByteBuffer.allocate(capacity);
