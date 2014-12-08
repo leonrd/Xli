@@ -46,12 +46,7 @@ public class HttpHelper {
     	{
     		final AsyncTask task = new AsyncHttpRequest();
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
-         		byte[] data = null;
-         		if (body!=null) {
-         			ByteBuffer copyBody = cloneByteBuffer(body);
-                    data = copyBody.array();
-                }
- 				((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, data, (Long)requestPointer, (Boolean)verifyHost);
+ 				((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, body, (Long)requestPointer, (Boolean)verifyHost);
              }});
     		return task;
     	} catch (Exception e) {
@@ -60,24 +55,6 @@ public class HttpHelper {
     	}
     }
 
-    public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
-        // Create clone with same capacity as original.
-    	int capacity = original.capacity();
-        final ByteBuffer clone = (original.isDirect()) ?
-            ByteBuffer.allocateDirect(capacity) :
-            ByteBuffer.allocate(capacity);
-
-        // Create a read-only copy of the original.
-        // This allows reading from the original without modifying it.
-        final ByteBuffer readOnlyCopy = original.asReadOnlyBuffer();
-
-        // Flip and read from the original.
-        readOnlyCopy.position(0);
-        clone.put(readOnlyCopy);
-
-        return clone;
-    }
-    
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public static AsyncTask SendHttpStringAsync(final String url, final String method,
     								 			final HashMap<String,String> headers, final String body,
@@ -86,8 +63,8 @@ public class HttpHelper {
     	{
     		final AsyncTask task = new AsyncHttpRequest();
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
-         		byte[] data = null;
-         		if (body!=null) data = body.getBytes();
+         		ByteBuffer data = null;         		
+         		if (body!=null) data = ByteBuffer.wrap(body.getBytes());
  				((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, data, (Long)requestPointer, (Boolean)verifyHost);         	
              }});
     		return task;

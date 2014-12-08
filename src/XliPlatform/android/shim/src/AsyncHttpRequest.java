@@ -22,9 +22,8 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.UnknownServiceException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,8 +41,6 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 	long requestPointer;
 	boolean verifyHost;
 	
-	
-	
 	@Override
 	protected Boolean doInBackground(Object... params) {
 		String url = (String)params[0];
@@ -51,7 +48,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 		@SuppressWarnings("unchecked")
 		HashMap<String,String> headers = (HashMap<String,String>)params[2];
 		int timeout = (Integer)params[3];
-		byte[] body = (byte[])params[4];
+		ByteBuffer body = (ByteBuffer)params[4];
 		requestPointer = (Long)params[5];
 		verifyHost = (Boolean)params[6];
 		String[] responseHeaders;
@@ -84,29 +81,36 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 		if (hasUploadContent)
 		{
 			if (body!=null)
-			{
-				int progressThreshold = Math.max((body.length / 100), 2048);
+			{				
+				int length = body.capacity();
+				int progressThreshold = Math.max((length / 100), 2048);
 				int steps = 1;
 				int runningTotal=0;
 				int bufferSize = 2048;
+				body.clear();
+				byte[] block = new byte[bufferSize];
 				try {
-					connection.setFixedLengthStreamingMode(body.length);
+					connection.setFixedLengthStreamingMode(length);
 					BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
 
-					while (runningTotal<body.length) {
+					while (runningTotal<length) {
 						if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
-						out.write(body, (int)runningTotal, (int)Math.min(bufferSize, (body.length-runningTotal)));
+						
+						int thisSendSize = (int)Math.min(bufferSize, (length-runningTotal));
+						body.get(block, 0, thisSendSize);
+						out.write(block, 0, thisSendSize);
 						if ((runningTotal / progressThreshold) > steps) {
 							steps = (runningTotal / progressThreshold);
-							publishProgress(runningTotal,body.length);
+							publishProgress(runningTotal,length);
 						}        							
 						runningTotal+=bufferSize;
 					}
-					publishProgress(body.length,body.length);
+					publishProgress(runningTotal, length);
 					out.flush();
 				} catch(Exception e) {
 					XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to upload data: "+e.getLocalizedMessage());
 				}
+				body=null;
 			}
 		}
 
@@ -130,9 +134,6 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 			return false;
 		}
 		ResponseFPointer = requestPointer;
-		
-		Log.e("XliApp","code:"+ResponseCode);
-		Log.e("XliApp","code:"+ResponseMessage);
 		
 		//result payload
 		BufferedInputStream stream_b;
