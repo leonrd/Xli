@@ -416,11 +416,9 @@ namespace Xli
                 if (AKeyEvent_getKeyCode(event) == AKEYCODE_MENU) {
                     int32_t action = AKeyEvent_getAction(event);
                     if (action == AKEY_EVENT_ACTION_DOWN) {
-                        LOGD("-------------- NATIVE MENU DOWN");
                         return GlobalEventHandler->OnKeyDown(GlobalWindow, KeyMenu);
                     }
                     if (action == AKEY_EVENT_ACTION_UP) {
-                        LOGD("-------------- NATIVE MENU UP");
                         return GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
                     }                    
                 };
