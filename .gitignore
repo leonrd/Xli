@@ -37,3 +37,6 @@ xcuserdata/
 /src/XliPlatform/android/shim/.project
 /src/XliPlatform/android/shim/.settings/org.eclipse.jdt.core.prefs
 XliTest
+!/3rdparty/curl/lib/
+!/3rdparty/curl/Makefile
+!/3rdparty/curl/projects/Windows/VC*/lib/
