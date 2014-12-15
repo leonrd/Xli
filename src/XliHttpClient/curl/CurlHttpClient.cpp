@@ -26,7 +26,6 @@
 #include "CurlHttpClient.h"
 
 #include <curl/curl.h>
-#include <pthread.h>
 #include <stdlib.h>
 #include <cstring>
 #include <stdlib.h>
