@@ -48,35 +48,7 @@ namespace Xli
             atexit(Xli::ShutdownCurlHttp);
             HttpInitialized = 1;
         }
-    }    
-
-    class SessionMap
-    {
-    public:
-        static HashMap<HttpRequest*, CURL*> abortedTable;
-        static bool IsAborted(HttpRequest* requestHandle)
-        {
-            return abortedTable.ContainsKey(requestHandle);
-        }
-        static CURL* PopSession(HttpRequest* requestHandle)
-        {
-            CURL* session;
-            bool found = abortedTable.TryGetValue(requestHandle, session);
-            if (found)
-            {
-                abortedTable.Remove(requestHandle);
-                return session;
-            } else {
-                XLI_THROW("XLIHTTP: PopSession - request not found in abortedTable");
-            }
-        }        
-        static void MarkAborted(HttpRequest* requestHandle, CURL* session)
-        {
-            if (!abortedTable.ContainsKey(requestHandle))
-                abortedTable.Add(requestHandle, session);
-        }
-    };
-    HashMap<HttpRequest*, CURL*> SessionMap::abortedTable;
+    }
     
     class CurlHttpRequest : public HttpRequest
     {
@@ -95,8 +67,6 @@ namespace Xli
         CURL* curlSession;
         bool requestOwnsUploadData;
 
-        bool aborted;
-
         Managed<BufferStream> uploadBuffer;
 
         HashMap<String,String> responseHeaders;
@@ -105,7 +75,8 @@ namespace Xli
         int responseStatus;
 
     public:
-
+        bool aborted;
+        
         CurlHttpRequest(CurlHttpClient* client, String url, String method)
         {
             this->client = client;
@@ -178,6 +149,10 @@ namespace Xli
         virtual CURLcode SetCurlRequestOptions(CURL* session, const void* content, int byteLength)
         {
             CURLcode result = CURLE_OK;
+
+            // set tpref
+            if (result == CURLE_OK) result = curl_easy_setopt(session, CURLOPT_PRIVATE, (void*)this);
+            
             // set method option
             if (method == "GET") 
             {
@@ -306,10 +281,7 @@ namespace Xli
         {
             if (!aborted)
             {
-                // {TODO} Can we guarentee instant termination?
-                //        If so we dont need to worry about post destroy callbacks
                 client->RemoveSession(curlSession);
-                SessionMap::MarkAborted(this, curlSession);
                 curlSession = 0;
                 aborted = true;
 
@@ -408,16 +380,28 @@ namespace Xli
             state = HttpRequestStateDone;
             responseStatus = code;
 
-            if (aborted) //{TODO} spin this off?
+            if (!aborted)
             {
-                CURL* session = SessionMap::PopSession(this);
-                curl_easy_cleanup(session);
+                curl_easy_cleanup(curlSession);
             }
 
             responseBodyRef = new BufferRef((void*)responseBody->GetPtr(), responseBody->GetLength(), (Object*)responseBody.Get());
 
             HttpEventHandler* eh = client->GetEventHandler();
             if (eh!=0 && !aborted) eh->OnRequestStateChanged(this);
+        }
+
+        virtual void onError(int errorCode, String errorMessage)
+        {
+            state = HttpRequestStateDone;
+
+            if (!aborted)
+            {
+                curl_easy_cleanup(curlSession);
+            }
+
+            HttpEventHandler* eh = client->GetEventHandler();
+            if (eh!=0 && !aborted) eh->OnRequestError(this, errorMessage);
         }
 
     private:
@@ -428,7 +412,7 @@ namespace Xli
             // if the session is aborted then we want to skip this. We cant say
             // we did the job though so we pass back 0 and accept this may indicate
             // that this method caused the problem
-            if (SessionMap::IsAborted(request)) return 0;
+            if (request->aborted) return 0;
             
             size_t maxCopyLength = (size * nmemb);
             size_t copyLength = 0;
@@ -445,7 +429,7 @@ namespace Xli
 
             // if the session is aborted then we want to skip this but not 
             // cause curl to think this method caused the problem.
-            if (SessionMap::IsAborted(request)) return (size * nmemb);
+            if (request->aborted) return (size * nmemb);
 
             size_t bytesPulled = (size * nmemb);
             if (bytesPulled > 0)
@@ -472,7 +456,7 @@ namespace Xli
 
             // if the session is aborted then we want to skip this but not 
             // cause curl to think this method caused the problem.
-            if (SessionMap::IsAborted(request)) return (size * nmemb);
+            if (request->aborted) return (size * nmemb);
 
             size_t bytesRead = 0;
 
@@ -491,9 +475,8 @@ namespace Xli
         {
             CurlHttpRequest* request = (CurlHttpRequest*)clientp;
 
-            if (SessionMap::IsAborted(request))
+            if (request->aborted)
             {                
-                // CURL* session = SessionMap::PopSession(request);{TODO} we need to know what gets called
                 // curl_easy_cleanup(session);
                 return CURLE_ABORTED_BY_CALLBACK;
             }
@@ -528,14 +511,7 @@ namespace Xli
     }
 
     CurlHttpClient::~CurlHttpClient()
-    {
-        int i = sessionTable.Begin();
-        while (i != sessionTable.End())
-        {
-            CurlHttpRequest* request = sessionTable.GetValue(i);
-            request->Abort(); // abort also calls RemoveSession in the client
-            i = sessionTable.Next(i);
-        }
+    {        
         //{TODO} find all curlcodes in this file and add checks for them
         CURLMcode result = curl_multi_cleanup(multiSession); 
     }
@@ -557,19 +533,12 @@ namespace Xli
 
     void CurlHttpClient::AddSession(CURL* session, CurlHttpRequest* request)
     {
-        sessionTable.Add(session, request);
         CURLMcode result = curl_multi_add_handle(multiSession, session);
     }
 
     void CurlHttpClient::RemoveSession(CURL* session)
     {
-        if (sessionTable.ContainsKey(session))
-        {
-            sessionTable.Remove(session);
-            curl_multi_remove_handle(multiSession, session);            
-        } else {
-            XLI_THROW("Could not remove HttpRequest session as none found in session table");
-        }
+        curl_multi_remove_handle(multiSession, session);            
     }
 
     void CurlHttpClient::Update()
@@ -577,23 +546,30 @@ namespace Xli
         int msgRemaining;
         int runningHandles;
         CURLMsg* msg;
-        CURL* session;
-        CurlHttpRequest* request;
+        CURL* session = 0;
+        CurlHttpRequest* request = 0;
         CURLMSG messageType;
+        CURLcode resultState;
 
         CURLMcode pCode = curl_multi_perform(multiSession, &runningHandles);
 
         while (NULL != (msg = curl_multi_info_read(multiSession, &msgRemaining)))
         {
             session = msg->easy_handle;
-            request = sessionTable[session];
-            messageType = msg->msg;
+            char* tmp = (char*)&request;
+            CURLcode ss = curl_easy_getinfo (session, CURLINFO_PRIVATE, tmp);
+            
+            messageType = msg->msg;            
             if (messageType == CURLMSG_DONE)
             {
-                // we need to find errors here
-                long http_code = 0;
-                curl_easy_getinfo (session, CURLINFO_RESPONSE_CODE, &http_code);
-                request->onDone((int)http_code);
+                resultState = msg->data.result;
+                if (resultState == CURLE_OK) {
+                    long http_code = 0;
+                    curl_easy_getinfo (session, CURLINFO_RESPONSE_CODE, &http_code);
+                    request->onDone((int)http_code);
+                } else {
+                    request->onError((int)resultState, CurlErrorToString(resultState));
+                }
             } else {
                 HttpEventHandler* eh = this->GetEventHandler();
                 if (eh!=0) eh->OnRequestError(request, "Client expected CURLMSG_DONE");
