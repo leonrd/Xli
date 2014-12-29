@@ -48,7 +48,7 @@ namespace Xli
             HttpInitialized = 1;
         }
     }
-    
+
     class CurlHttpRequest : public HttpRequest
     {
     private:
@@ -75,7 +75,7 @@ namespace Xli
 
     public:
         bool aborted;
-        
+
         CurlHttpRequest(CurlHttpClient* client, String url, String method)
         {
             this->client = client;
@@ -151,9 +151,9 @@ namespace Xli
 
             // set tpref
             if (result == CURLE_OK) result = curl_easy_setopt(session, CURLOPT_PRIVATE, (void*)this);
-            
+
             // set method option
-            if (method == "GET") 
+            if (method == "GET")
             {
                 result = curl_easy_setopt(session, CURLOPT_HTTPGET, 1);
             } else if (method == "POST") {
@@ -161,7 +161,7 @@ namespace Xli
             } else if (method == "PUT") {
                 result = curl_easy_setopt(session, CURLOPT_UPLOAD, 1);
             } else if (method == "OPTIONS" || method == "HEAD" || method == "TRACE" || method == "DELETE") {
-                curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, method.Ptr()); 
+                curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, method.Ptr());
             } else {
                 return CURLE_FAILED_INIT;
             }
@@ -191,7 +191,7 @@ namespace Xli
             } else if (method == "HEAD") {
                 if (content!=0 && byteLength>0) result = CURLE_FAILED_INIT;
                 if (result == CURLE_OK) result = curl_easy_setopt(session, CURLOPT_NOBODY, 1);
-            } else if (method == "POST") {                
+            } else if (method == "POST") {
                 if (byteLength <= 0)
                 {
                     if (result == CURLE_OK) result = curl_easy_setopt(session, CURLOPT_POSTFIELDSIZE, -1);
@@ -207,7 +207,7 @@ namespace Xli
 
             return result;
         }
-        
+
         virtual void SendAsync(const void* content, int byteLength)
         {
             if (state != HttpRequestStateOpened)
@@ -231,7 +231,7 @@ namespace Xli
                 HttpEventHandler* eh = client->GetEventHandler();
                 if (eh!=0 && !aborted) eh->OnRequestError(this, "HttpRequest->SendAsync(): could not create session");
                 return;
-            } 
+            }
 
             // Set curl options
             CURLcode result = SetCurlRequestOptions(session, content, byteLength);
@@ -239,13 +239,18 @@ namespace Xli
             //Add headers
             int i = HeadersBegin();
             String header;
+            String key;
             while (i != HeadersEnd())
             {
                 header = "";
-                header += GetHeaderKey(i);
-                header += ":";
-                header += GetHeaderValue(i);
-                curlUploadHeaders = curl_slist_append(curlUploadHeaders, header.Ptr());
+                key = GetHeaderKey(i);
+                if (key.Length()>0)
+                {
+                    header += key;
+                    header += ":";
+                    header += GetHeaderValue(i);
+                    curlUploadHeaders = curl_slist_append(curlUploadHeaders, header.Ptr());
+                }
                 i = HeadersNext(i);
             }
             curl_easy_setopt(session, CURLOPT_HTTPHEADER, curlUploadHeaders);
@@ -268,7 +273,7 @@ namespace Xli
         {
             requestOwnsUploadData = true;
             void* raw = malloc(content.Length());
-            memcpy(raw, content.Ptr(), content.Length());                
+            memcpy(raw, content.Ptr(), content.Length());
             SendAsync(raw, content.Length());
         }
         virtual void SendAsync()
@@ -412,7 +417,7 @@ namespace Xli
             // we did the job though so we pass back 0 and accept this may indicate
             // that this method caused the problem
             if (request->aborted) return 0;
-            
+
             size_t maxCopyLength = (size * nmemb);
             size_t copyLength = 0;
             if (maxCopyLength > 0 && !request->uploadBuffer->AtEnd())
@@ -426,7 +431,7 @@ namespace Xli
         {
             CurlHttpRequest* request = (CurlHttpRequest*)userdata;
 
-            // if the session is aborted then we want to skip this but not 
+            // if the session is aborted then we want to skip this but not
             // cause curl to think this method caused the problem.
             if (request->aborted) return (size * nmemb);
 
@@ -434,16 +439,24 @@ namespace Xli
             if (bytesPulled > 0)
             {
                 String fullHeader((char*)ptr, bytesPulled);
-                int splitPos = fullHeader.IndexOf(':');
-                if (splitPos > 0)
-                {
-                    String key = fullHeader.Substring(0, splitPos);
-                    String val = fullHeader.Substring(splitPos+1);
-                    if (!request->responseHeaders.ContainsKey(key)) 
-                        request->responseHeaders.Add(key, val);
-                } else {
-                    if (!request->responseHeaders.ContainsKey(fullHeader)) 
-                        request->responseHeaders.Add(fullHeader, "");
+                if (fullHeader.Length() > 0) {
+                    int end = fullHeader.Length();
+                    if (fullHeader[end-1]=='\n') end-=1;
+                    if (fullHeader[end-1]=='\r') end-=1;
+                    fullHeader = fullHeader.Substring(0, end);
+                    int splitPos = fullHeader.IndexOf(':');
+                    if (splitPos > 0)
+                    {
+                        String key = fullHeader.Substring(0, splitPos);
+                        String val = fullHeader.Substring(splitPos+1);
+                        if (!request->responseHeaders.ContainsKey(key)) {
+                            request->responseHeaders.Add(key, val);
+                        }
+                    } else {
+                        if (!request->responseHeaders.ContainsKey(fullHeader)) {
+                            request->responseHeaders.Add(fullHeader, "");
+                        }
+                    }
                 }
             }
             return bytesPulled;
@@ -453,7 +466,7 @@ namespace Xli
         {
             CurlHttpRequest* request = (CurlHttpRequest*)userdata;
 
-            // if the session is aborted then we want to skip this but not 
+            // if the session is aborted then we want to skip this but not
             // cause curl to think this method caused the problem.
             if (request->aborted) return (size * nmemb);
 
@@ -475,7 +488,7 @@ namespace Xli
             CurlHttpRequest* request = (CurlHttpRequest*)clientp;
 
             if (request->aborted)
-            {                
+            {
                 // curl_easy_cleanup(session);
                 return CURLE_ABORTED_BY_CALLBACK;
             }
@@ -510,9 +523,9 @@ namespace Xli
     }
 
     CurlHttpClient::~CurlHttpClient()
-    {        
+    {
         //{TODO} find all curlcodes in this file and add checks for them
-        CURLMcode result = curl_multi_cleanup(multiSession); 
+        CURLMcode result = curl_multi_cleanup(multiSession);
     }
 
     HttpRequest* CurlHttpClient::CreateRequest(const String& method, const String& url)
@@ -537,7 +550,7 @@ namespace Xli
 
     void CurlHttpClient::RemoveSession(CURL* session)
     {
-        curl_multi_remove_handle(multiSession, session);            
+        curl_multi_remove_handle(multiSession, session);
     }
 
     void CurlHttpClient::Update()
@@ -557,12 +570,13 @@ namespace Xli
             session = msg->easy_handle;
             char* tmp = (char*)&request;
             CURLcode ss = curl_easy_getinfo (session, CURLINFO_PRIVATE, tmp);
-            
-            messageType = msg->msg;            
+
+            messageType = msg->msg;
             if (messageType == CURLMSG_DONE)
             {
                 resultState = msg->data.result;
-                if (resultState == CURLE_OK) {
+                if (resultState == CURLE_OK)
+                {
                     long http_code = 0;
                     curl_easy_getinfo (session, CURLINFO_RESPONSE_CODE, &http_code);
                     request->onDone((int)http_code);
