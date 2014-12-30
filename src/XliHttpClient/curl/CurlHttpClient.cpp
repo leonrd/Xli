@@ -244,7 +244,7 @@ namespace Xli
             {
                 header = "";
                 key = GetHeaderKey(i);
-                if (key.Length()>0)
+                if (key.Length() > 0)
                 {
                     header += key;
                     header += ":";
@@ -444,17 +444,19 @@ namespace Xli
                     if (fullHeader[end-1]=='\n') end-=1;
                     if (fullHeader[end-1]=='\r') end-=1;
                     fullHeader = fullHeader.Substring(0, end);
-                    int splitPos = fullHeader.IndexOf(':');
-                    if (splitPos > 0)
-                    {
-                        String key = fullHeader.Substring(0, splitPos);
-                        String val = fullHeader.Substring(splitPos+1);
-                        if (!request->responseHeaders.ContainsKey(key)) {
-                            request->responseHeaders.Add(key, val);
-                        }
-                    } else {
-                        if (!request->responseHeaders.ContainsKey(fullHeader)) {
-                            request->responseHeaders.Add(fullHeader, "");
+                    if (fullHeader.Length() > 0) {
+                        int splitPos = fullHeader.IndexOf(':');
+                        if (splitPos > 0)
+                        {
+                            String key = fullHeader.Substring(0, splitPos);
+                            String val = fullHeader.Substring(splitPos+1);
+                            if (!request->responseHeaders.ContainsKey(key)) {
+                                request->responseHeaders.Add(key, val);
+                            }
+                        } else {
+                            if (!request->responseHeaders.ContainsKey(fullHeader)) {
+                                request->responseHeaders.Add(fullHeader, "");
+                            }
                         }
                     }
                 }
