@@ -17,29 +17,36 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import android.text.SpannableStringBuilder;
+package com.Shim;
 
-public class DummyEditable extends SpannableStringBuilder {
-	public static String DUMMY;
-    DummyEditable(CharSequence source) {
-        super(source);
+import android.annotation.SuppressLint;
+import android.app.NativeActivity;
+import android.content.Context;
+import android.os.Vibrator;
+
+
+public class VibratorHelper {
+    @SuppressLint("NewApi")
+	public static boolean HasVibrator(final NativeActivity activity)
+    {
+    	Vibrator vibrator = (Vibrator)activity.getSystemService(Context.VIBRATOR_SERVICE);
+    	if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
+    	{
+    		return vibrator.hasVibrator();
+    	} else {
+    		return true;
+    	}
     }
-    @Override
-    public SpannableStringBuilder replace(final int start, final int end, CharSequence tb, int tbstart, int tbend) {
-        if (tbend > tbstart) {
-            super.replace(0, length(), "", 0, 0);
-            return super.replace(0, 0, tb, tbstart, tbend);
-        }
-        else if (end > start) {
-            super.replace(0, length(), "", 0, 0);
-            return super.replace(0, 0, DUMMY, 0, DUMMY.length());
-        }
-        return super.replace(start, end, tb, tbstart, tbend);
+    
+    public static void VibrateUsingPattern(long[] pattern, int repeat)
+    {
+    	Vibrator vibrator = (Vibrator)XliJ.nActivity.getSystemService(Context.VIBRATOR_SERVICE);
+    	vibrator.vibrate(pattern, repeat);
     }
-    public static void PopulateDummyString()
-    {    	
-    	DummyEditable.DUMMY = "";
-        for (int i = 0; i < Math.max(0, (500 - DummyEditable.DUMMY.length())); i++)
-            DummyEditable.DUMMY += "\0";
+    
+    public static void VibrateForMilliseconds(int milliseconds)
+    {
+    	Vibrator vibrator = (Vibrator)XliJ.nActivity.getSystemService(Context.VIBRATOR_SERVICE);
+    	vibrator.vibrate(milliseconds);
     }
 }

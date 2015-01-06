@@ -17,6 +17,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+package com.Shim;
+
 import android.annotation.SuppressLint;
 import android.app.NativeActivity;
 import android.graphics.Rect;

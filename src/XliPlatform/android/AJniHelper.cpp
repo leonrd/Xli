@@ -85,11 +85,6 @@ namespace Xli
         static pthread_key_t JniThreadKey;
         static pthread_key_t JniShimKey;
 
-        static unsigned char shimApkData[] = 
-        {
-            #include "shim/apk.inc"
-        };
-
         static void JniDestroyThread(void* value)
         {
             LOGD("JNI: Detaching current thread");
@@ -98,8 +93,6 @@ namespace Xli
             AndroidActivity->vm->DetachCurrentThread();
             pthread_setspecific(JniThreadKey, NULL);
         }
-
-        int AJniHelper::shim_loaded = 0;
 
         static void JniDestroyShim(void* value)
         {
@@ -152,15 +145,9 @@ namespace Xli
                 if (AndroidActivity->vm->AttachCurrentThread(&env, NULL) != JNI_OK)
                     XLI_THROW("JNI ERROR: Failed to attach current thread");
 
-                if (!shim_loaded) 
-                {
-                    LOGD("Loading shim");
-                    AJniHelper::shim_loaded = PrepareAssetJar("XliShimJ.apk","XliJ");
-                    LOGD("Done loading");
-                }
-
+                jclass tmpCls = GetCustomClass("com/Shim/XliJ");
                 jclass *shim_class = new jclass;
-                *shim_class = GetAssetClass("XliShimJ.apk","XliJ");
+                *shim_class = reinterpret_cast<jclass>(env->NewGlobalRef(tmpCls));
 
                 pthread_setspecific(JniThreadKey, (void*)env);
                 pthread_setspecific(JniShimKey, (void*)shim_class);
@@ -183,15 +170,7 @@ namespace Xli
 
         jclass AJniHelper::GetShim()
         {
-            if (!shim_loaded) 
-            { 
-                LOGE("Shim isnt loaded yet");
-                return 0;
-            } 
-            else 
-            {
-                return shim;
-            }
+            return shim;
         }
 
         jmethodID AJniHelper::FindMethod(const char* className, const char* methodName, const char* methodSig)
@@ -304,69 +283,23 @@ namespace Xli
             jstring strClassName = env->NewStringUTF(class_path);
             jclass classIWant = (jclass)env->CallObjectMethod(cls, findClass, strClassName);
         }
-
-        int AJniHelper::PrepareAssetJar(const char* file_name, const char* class_name) 
-        {
-            return PrepareAssetJar(file_name, class_name, 1);
-        }
-
-        int AJniHelper::PrepareAssetJar(const char* file_name, const char* class_name, int package)
-        {
-            jmethodID get_dir = GetInstanceMethod("getDir","(Ljava/lang/String;I)Ljava/io/File;");
-            if (!get_dir) { LOGE("Could not find get_dir"); return 0; }
-
-            //dex-file
-            jobject dex_dir_file = env->CallObjectMethod(AndroidActivity->clazz, get_dir, env->NewStringUTF("dex"), (jint)0);
-            if (!dex_dir_file) { LOGE("Could not find dex_dir_file"); return 0; }
-
-            //Find destination file
-            jobject dex_file = GetInstance("java/io/File","(Ljava/io/File;Ljava/lang/String;)V", dex_dir_file, env->NewStringUTF(file_name));
-            if (!dex_file) { LOGE("Could not find dex_file"); return 0; }
-            
-            //get destination path
-            jmethodID getAbsPath = env->GetMethodID(env->FindClass("java/io/File"), "getAbsolutePath", "()Ljava/lang/String;");
-            jstring dex_internal_path = (jstring)env->CallObjectMethod(dex_file, getAbsPath);
-            const char *filepath = env->GetStringUTFChars(dex_internal_path, 0);
-            
-            //write apk
-            FILE* appConfigFile = fopen(filepath, "w+");
-            int file_len = sizeof(shimApkData);
-            LOGI("App config file created successfully. Writing config data ...\n");
-            int32_t res = fwrite((void*)shimApkData, sizeof(char), file_len, appConfigFile);
-            if (file_len != res)
-            {
-                LOGE("Error generating apk.\n");
-                return 0;
-            }
-            fclose(appConfigFile);
-            env->ReleaseStringUTFChars(dex_internal_path, filepath);
-            return 1;
-        }
-
-
-        jclass AJniHelper::GetAssetClass(const char* file_name, const char* class_name)
-        {
-            jmethodID get_dir = GetInstanceMethod("getDir","(Ljava/lang/String;I)Ljava/io/File;");
-
-            jobject dex_dir_file = env->CallObjectMethod(AndroidActivity->clazz, get_dir, env->NewStringUTF("dex"), (jint)0);
-            jclass file_cls = env->FindClass("java/io/File");
-            jmethodID getAbsPath = env->GetMethodID(file_cls, "getAbsolutePath", "()Ljava/lang/String;");
-
-            jclass dexloader_cls = env->FindClass("dalvik/system/DexClassLoader");
-            jmethodID load_class = env->GetMethodID(dexloader_cls, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-            jmethodID get_classloader = GetInstanceMethod("getClassLoader","()Ljava/lang/ClassLoader;");
-            jobject classloader = env->CallObjectMethod(AndroidActivity->clazz, get_classloader);
-
-            jobject dex_file = GetInstance("java/io/File","(Ljava/io/File;Ljava/lang/String;)V", dex_dir_file, env->NewStringUTF(file_name));
-            jobject outdex_dir_file = env->CallObjectMethod(AndroidActivity->clazz, get_dir, env->NewStringUTF("outdex"), (jint)0);
-            jstring dex_optimized_out_path = (jstring)env->CallObjectMethod(outdex_dir_file, getAbsPath);
-            jstring dex_internal_path = (jstring)env->CallObjectMethod(dex_file, getAbsPath);
-
-            jobject dexloader = GetInstance("dalvik/system/DexClassLoader", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)V", dex_internal_path, dex_optimized_out_path, NULL, classloader);
-
-            jclass loaded = (jclass)env->CallObjectMethod(dexloader, load_class, env->NewStringUTF(class_name));
-            jclass globalClass = reinterpret_cast<jclass>(env->NewGlobalRef(loaded));
-            return globalClass;
-        }
     }
 }
+
+jint JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+    LOGE ("\n\n&&&&&&&&&&&&& BOOOYA MOTHERFUCKER &&&&&&&&&&&&&&&\n\n");
+
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOGE ("&&&&&&& GetEnv failed &&&&&&");
+        return -1;
+    }
+
+    jclass shimClass = env->FindClass("com/Shim/XliJ");
+
+    LOGE ("\n\n&&&&&&&&&&&&& BOOOYA FOTHERMUCKER &&&&&&&&&&&&&&&\n\n");
+    
+    return JNI_VERSION_1_6;
+}
+

@@ -17,6 +17,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+package com.Shim;
+
 import android.os.Build;
 import android.text.Editable;
 import android.text.Selection;

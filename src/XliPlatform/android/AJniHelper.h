@@ -55,9 +55,6 @@ namespace Xli
             jobject GetInstance(const char* class_name, const char* constructor_sig, ...);
             jobject GetInstance(jclass cls, const char* constructor_sig, ...);
             jclass GetCustomClass(const char* class_path);
-            int PrepareAssetJar(const char* file_name, const char* class_name);
-            int PrepareAssetJar(const char* file_name, const char* class_name, int package);
-            jclass GetAssetClass(const char* file_name, const char* class_name);
         };        
 
         class CTError : public WindowAction

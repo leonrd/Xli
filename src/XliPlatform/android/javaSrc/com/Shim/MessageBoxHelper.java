@@ -17,6 +17,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+package com.Shim;
 
 import android.app.AlertDialog;
 import android.app.NativeActivity;
