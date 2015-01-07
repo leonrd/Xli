@@ -54,6 +54,7 @@ namespace Xli
         jmethodID AShim::asyncInputStreamToString;
         jmethodID AShim::asyncInputStreamToByteArray;
         jmethodID AShim::getHeaderMap;
+        jmethodID AShim::getUnoSurface;        
         jmethodID AShim::sendHttpAsyncA;
         jmethodID AShim::sendHttpAsyncB;
 
@@ -80,6 +81,7 @@ namespace Xli
             asyncInputStreamToString = env->GetStaticMethodID(shimClass, "AsyncInputStreamToString", "(IJ)I");
             asyncInputStreamToByteArray = env->GetStaticMethodID(shimClass, "AsyncInputStreamToByteArray", "(IJ)I");
             getHeaderMap = env->GetStaticMethodID(shimClass, "GetHeaderMap","()Ljava/lang/Object;");
+            getUnoSurface = env->GetStaticMethodID(shimClass, "GetUnoSurface","()Landroid/view/Surface;");
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
 
@@ -103,6 +105,7 @@ namespace Xli
             if (!asyncInputStreamToString) XLI_THROW("Cannot cache mid for asyncInputStreamToString.");
             if (!asyncInputStreamToByteArray) XLI_THROW("Cannot cache mid for asyncInputStreamToByteArray.");
             if (!getHeaderMap) XLI_THROW("Cannot cache mid for getHeaderMap.");
+            if (!getUnoSurface) XLI_THROW("Cannot cache mid for getUnoSurface.");            
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
             LOGD("Mids Cached");
@@ -480,6 +483,13 @@ namespace Xli
         {
             AJniHelper jni;
             jobject result = jni->CallStaticObjectMethod(jni.GetShim(), getHeaderMap);
+            return result;
+        }
+
+        jobject AShim::GetUnoSurface()
+        {
+            AJniHelper jni;
+            jobject result = jni->CallStaticObjectMethod(jni.GetShim(), getUnoSurface);
             return result;
         }
     }

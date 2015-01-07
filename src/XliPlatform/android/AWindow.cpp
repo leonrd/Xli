@@ -20,6 +20,8 @@
 #include "../../../3rdparty/android_native_app_glue/android_native_app_glue.h"
 
 #include <android/window.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 #include <cstdlib>
 #include <errno.h>
 #include <unistd.h>
@@ -34,9 +36,9 @@
 
 Xli::WindowEventHandler* GlobalEventHandler = 0;
 Xli::Window* GlobalWindow = 0;
+volatile int GlobalInit = 0;
 
 static struct android_app* GlobalAndroidApp = 0;
-static volatile int GlobalInit = 0;
 static int GlobalWidth = 0;
 static int GlobalHeight = 0;
 static int GlobalFlags = 0;
@@ -168,7 +170,10 @@ namespace Xli
 
             virtual void* GetNativeHandle()
             {
-                return GlobalAndroidApp->window;
+                //return GlobalAndroidApp->window;
+                jobject unoSurface = AShim::GetUnoSurface();
+                AJniHelper jni;
+                return (void*)ANativeWindow_fromSurface(jni.GetEnv(), unoSurface);
             }
 
             virtual void SetTitle(const String& title)
@@ -462,9 +467,9 @@ namespace Xli
             switch (cmd)
             {
             case APP_CMD_INIT_WINDOW:
-                GlobalInit = 1;
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnNativeHandleChanged(GlobalWindow);
+                // GlobalInit = 1;
+                // if (GlobalEventHandler)
+                //     GlobalEventHandler->OnNativeHandleChanged(GlobalWindow);
 
                 break;
 
@@ -529,9 +534,7 @@ namespace Xli
             AndroidActivity = app->activity;
 
             Out->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_INFO)));
-            Error->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_WARN)));
-            
-            AJniHelper::Init();
+            Error->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_WARN)));           
 
             // Wait for the native window to be initialized from another thread here.
             // TODO: Remove this for better maintainability and faster start up.
@@ -584,8 +587,10 @@ namespace Xli
 
     Vector2i Window::GetScreenSize()
     {
-        int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
-        int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
+        //int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
+        //int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
+    	int w = (int)AShim::GetUnoSurfaceWidth();
+    	int h = (int)AShim::GetUnoSurfaceHeight();
         return Vector2i(w, h);
     }
 
@@ -620,8 +625,10 @@ namespace Xli
         if (GlobalInit && !GlobalAndroidApp->destroyRequested)
         {
             // Detect window resize / screen rotation
-            int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
-            int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
+        	int w = (int)AShim::GetUnoSurfaceWidth();
+        	int h = (int)AShim::GetUnoSurfaceHeight();
+            //int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
+            //int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
 
             if (w != GlobalWidth || h != GlobalHeight)
             {

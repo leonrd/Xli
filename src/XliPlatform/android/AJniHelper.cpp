@@ -29,6 +29,7 @@
 
 extern Xli::WindowEventHandler* GlobalEventHandler;
 extern Xli::Window* GlobalWindow;
+extern int GlobalInit;
 
 namespace Xli
 {
@@ -78,6 +79,14 @@ namespace Xli
                 CTQueue::EnqueueCrossThreadEvent(new CTError(finalMessage, errorCode));
                 env->ReleaseStringUTFChars(errorMessage, cerrorMessage);
             }
+
+            void JNICALL XliJ_UnoSurfaceReady (JNIEnv *env , jobject obj, jobject unoSurface)
+            {
+                LOGD("\n\nUnoSurface: Ready on c++ side\n\n\n");
+                GlobalInit = 1;
+                if (GlobalEventHandler)
+                    GlobalEventHandler->OnNativeHandleChanged(GlobalWindow);
+            }
         }
 
         struct ANativeActivity* AndroidActivity = 0;
@@ -103,7 +112,7 @@ namespace Xli
             pthread_setspecific(JniShimKey, NULL);
         }
 
-        static void AttachNativeCallbacks(jclass* shim_class, JNIEnv *l_env)
+        static void AttachNativeCallbacks(jclass shim_class, JNIEnv* l_env)
         {
             LOGD("Registering native functions");
             static JNINativeMethod native_funcs[] = {
@@ -111,9 +120,10 @@ namespace Xli
                 {(char* const)"XliJ_OnKeyDown", (char* const)"(I)V", (void *)&XliJ_OnKeyDown},
                 {(char* const)"XliJ_OnTextInput", (char* const)"(Ljava/lang/String;)V", (void *)&XliJ_OnTextInput},
                 {(char* const)"XliJ_JavaThrowError", (char* const)"(ILjava/lang/String;)V", (void *)&XliJ_JavaThrowError},
+                {(char* const)"XliJ_UnoSurfaceReady", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_UnoSurfaceReady},
             };
             // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(*shim_class, native_funcs, 4);
+            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 5);
             if (attached < 0) {
                 LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
                 XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");
@@ -122,20 +132,16 @@ namespace Xli
             }
         }
 
-        static void CacheNativeActivity(jclass* shim_class, JNIEnv* env, jobject activity) 
-        {
-            jmethodID mid = env->GetStaticMethodID(*shim_class, "CacheActivity", "(Landroid/app/NativeActivity;)V");
-            env->CallStaticVoidMethod(*shim_class, mid, activity);
-        }
-
-
-        void AJniHelper::Init()
+        void AJniHelper::Init(JNIEnv* env, jclass shim_class)
         {
             if (pthread_key_create(&JniThreadKey, JniDestroyThread))
                 LOGE("JNI ERROR: Unable to create pthread key"); // Not fatal
 
             if (pthread_key_create(&JniShimKey, JniDestroyShim))
                 LOGE("JNI ERROR: Unable to create shim pthread key"); // Not fatal
+
+            AShim::CacheMids(env, shim_class);
+            AttachNativeCallbacks(shim_class, env);
         }
 
         AJniHelper::AJniHelper()
@@ -151,9 +157,6 @@ namespace Xli
 
                 pthread_setspecific(JniThreadKey, (void*)env);
                 pthread_setspecific(JniShimKey, (void*)shim_class);
-                AShim::CacheMids(env, *shim_class);
-                CacheNativeActivity(shim_class, env, AndroidActivity->clazz);
-                AttachNativeCallbacks(shim_class, env);
             }
 
             jclass* shim_p = reinterpret_cast<jclass*>(pthread_getspecific(JniShimKey));
@@ -162,7 +165,7 @@ namespace Xli
             {
                 shim = *shim_p;
             } 
-            else 
+            else
             {
                 LOGE("could not get shim");
             }
@@ -288,7 +291,8 @@ namespace Xli
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
-    LOGE ("\n\n&&&&&&&&&&&&& BOOOYA MOTHERFUCKER &&&&&&&&&&&&&&&\n\n");
+    LOGE ("----------");    
+    LOGE ("Jni_OnLoad");
 
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -297,8 +301,9 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     }
 
     jclass shimClass = env->FindClass("com/Shim/XliJ");
+    Xli::PlatformSpecific::AJniHelper::Init(env, shimClass);
 
-    LOGE ("\n\n&&&&&&&&&&&&& BOOOYA FOTHERMUCKER &&&&&&&&&&&&&&&\n\n");
+    LOGE ("----------");
     
     return JNI_VERSION_1_6;
 }

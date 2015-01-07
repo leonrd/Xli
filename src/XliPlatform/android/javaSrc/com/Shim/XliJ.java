@@ -39,12 +39,14 @@ import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Surface;
 
 public class XliJ extends android.app.NativeActivity {
 	
 	//--------------------------------------------
 	// Cached Activity
 	public static NativeActivity nActivity;
+	public static Surface nRootSurface;    
     public static void CacheActivity(final NativeActivity activity) { nActivity = activity; }
 	
 	//--------------------------------------------
@@ -60,9 +62,18 @@ public class XliJ extends android.app.NativeActivity {
     public static native void XliJ_HttpErrorCallback(long requestPointer, int errorCode, String errorMessage);
     public static native void XliJ_HttpAbortedCallback(long requestPointer);
     public static native void XliJ_JavaThrowError(int code, String throwMessage);
+    public static native void XliJ_UnoSurfaceReady(Surface unoSurface);
     
     //--------------------------------------------
     // System
+    public static void RootSurfaceChanged(Surface unoSurface)
+    {
+        nRootSurface = unoSurface;
+        XliJ_UnoSurfaceReady(unoSurface);
+    }
+    public static Surface GetUnoSurface() {
+        return nRootSurface;
+    }
     public static void HideStatusBar() {
     	SystemHelper.hideStatusBar(nActivity);
     }
@@ -80,7 +91,7 @@ public class XliJ extends android.app.NativeActivity {
     public static AssetManager GetAssetManager()
     {
         return nActivity.getAssets();
-    }
+    }   
 
     //--------------------------------------------
     // Vibration

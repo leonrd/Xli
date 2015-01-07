@@ -34,7 +34,7 @@ namespace Xli
             static int shim_loaded;
 
         public:
-            static void Init();
+            static void Init(JNIEnv* env, jclass shim_class);
 
             AJniHelper();
 
