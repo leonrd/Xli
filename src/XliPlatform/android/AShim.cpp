@@ -502,14 +502,14 @@ namespace Xli
         int AShim::GetUnoSurfaceWidth()
         {
             AJniHelper jni;
-            int result = (int)jni->CallStaticObjectMethod(jni.GetShim(), getUnoSurfaceWidth);
+            int result = (int)jni->CallStaticIntMethod(jni.GetShim(), getUnoSurfaceWidth);
             return result;
         }
 
         int AShim::GetUnoSurfaceHeight()
         {
             AJniHelper jni;
-            int result = (int)jni->CallStaticObjectMethod(jni.GetShim(), getUnoSurfaceHeight);
+            int result = (int)jni->CallStaticIntMethod(jni.GetShim(), getUnoSurfaceHeight);
             return result;
         }
     }
