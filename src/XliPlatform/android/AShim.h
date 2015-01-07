@@ -58,6 +58,8 @@ namespace Xli
             static jmethodID sendHttpAsyncB;
             static jmethodID getHeaderMap;
             static jmethodID getUnoSurface;
+            static jmethodID getUnoSurfaceWidth;
+            static jmethodID getUnoSurfaceHeight;
             
         public:
             static int kbVisible;
@@ -96,6 +98,8 @@ namespace Xli
             static bool TryReleaseObject(JObjRef objKey);
             static jobject GetHeaderMap();
             static jobject GetUnoSurface();
+            static int GetUnoSurfaceWidth();
+            static int GetUnoSurfaceHeight();
         };
     };
 };

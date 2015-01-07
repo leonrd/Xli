@@ -589,8 +589,8 @@ namespace Xli
     {
         //int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
         //int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
-    	int w = (int)AShim::GetUnoSurfaceWidth();
-    	int h = (int)AShim::GetUnoSurfaceHeight();
+    	int w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
+    	int h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
         return Vector2i(w, h);
     }
 
@@ -625,8 +625,8 @@ namespace Xli
         if (GlobalInit && !GlobalAndroidApp->destroyRequested)
         {
             // Detect window resize / screen rotation
-        	int w = (int)AShim::GetUnoSurfaceWidth();
-        	int h = (int)AShim::GetUnoSurfaceHeight();
+        	int w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
+        	int h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
             //int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
             //int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
 

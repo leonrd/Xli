@@ -54,7 +54,9 @@ namespace Xli
         jmethodID AShim::asyncInputStreamToString;
         jmethodID AShim::asyncInputStreamToByteArray;
         jmethodID AShim::getHeaderMap;
-        jmethodID AShim::getUnoSurface;        
+        jmethodID AShim::getUnoSurface;
+        jmethodID AShim::getUnoSurfaceWidth;
+        jmethodID AShim::getUnoSurfaceHeight;
         jmethodID AShim::sendHttpAsyncA;
         jmethodID AShim::sendHttpAsyncB;
 
@@ -82,6 +84,8 @@ namespace Xli
             asyncInputStreamToByteArray = env->GetStaticMethodID(shimClass, "AsyncInputStreamToByteArray", "(IJ)I");
             getHeaderMap = env->GetStaticMethodID(shimClass, "GetHeaderMap","()Ljava/lang/Object;");
             getUnoSurface = env->GetStaticMethodID(shimClass, "GetUnoSurface","()Landroid/view/Surface;");
+            getUnoSurfaceWidth = env->GetStaticMethodID(shimClass, "GetUnoSurfaceWidth","()I");
+            getUnoSurfaceHeight = env->GetStaticMethodID(shimClass, "GetUnoSurfaceHeight","()I");
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
 
@@ -105,7 +109,9 @@ namespace Xli
             if (!asyncInputStreamToString) XLI_THROW("Cannot cache mid for asyncInputStreamToString.");
             if (!asyncInputStreamToByteArray) XLI_THROW("Cannot cache mid for asyncInputStreamToByteArray.");
             if (!getHeaderMap) XLI_THROW("Cannot cache mid for getHeaderMap.");
-            if (!getUnoSurface) XLI_THROW("Cannot cache mid for getUnoSurface.");            
+            if (!getUnoSurface) XLI_THROW("Cannot cache mid for getUnoSurface.");
+            if (!getUnoSurfaceWidth) XLI_THROW("Cannot cache mid for getUnoSurfaceWidth.");
+            if (!getUnoSurfaceHeight) XLI_THROW("Cannot cache mid for getUnoSurfaceHeight.");
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
             LOGD("Mids Cached");
@@ -490,6 +496,20 @@ namespace Xli
         {
             AJniHelper jni;
             jobject result = jni->CallStaticObjectMethod(jni.GetShim(), getUnoSurface);
+            return result;
+        }
+
+        int AShim::GetUnoSurfaceWidth()
+        {
+            AJniHelper jni;
+            int result = (int)jni->CallStaticObjectMethod(jni.GetShim(), getUnoSurfaceWidth);
+            return result;
+        }
+
+        int AShim::GetUnoSurfaceHeight()
+        {
+            AJniHelper jni;
+            int result = (int)jni->CallStaticObjectMethod(jni.GetShim(), getUnoSurfaceHeight);
             return result;
         }
     }
