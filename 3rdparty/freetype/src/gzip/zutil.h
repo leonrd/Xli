@@ -182,7 +182,7 @@ typedef unsigned long  ulg;
 #endif
 
 /* Diagnostic functions */
-#ifdef DEBUG
+/*#ifdef DEBUG
 #  include <stdio.h>
    extern int z_verbose;
    extern void z_error    OF((char *m));
@@ -192,14 +192,14 @@ typedef unsigned long  ulg;
 #  define Tracevv(x) {if (z_verbose>1) fprintf x ;}
 #  define Tracec(c,x) {if (z_verbose>0 && (c)) fprintf x ;}
 #  define Tracecv(c,x) {if (z_verbose>1 && (c)) fprintf x ;}
-#else
+#else*/
 #  define Assert(cond,msg)
 #  define Trace(x)
 #  define Tracev(x)
 #  define Tracevv(x)
 #  define Tracec(c,x)
 #  define Tracecv(c,x)
-#endif
+//#endif
 
 
 typedef uLong (*check_func) OF((uLong check, const Bytef *buf,
