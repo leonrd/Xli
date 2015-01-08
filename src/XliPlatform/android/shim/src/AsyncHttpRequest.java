@@ -35,7 +35,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 	long requestPointer;
@@ -43,6 +42,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 	
 	@Override
 	protected Boolean doInBackground(Object... params) {
+
 		String url = (String)params[0];
 		String method = (String)params[1];
 		@SuppressWarnings("unchecked")
@@ -54,6 +54,8 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 		String[] responseHeaders;
 		boolean hasUploadContent = (body != null);
 		HttpURLConnection connection = null;
+
+        System.setProperty("http.keepAlive", "false");
 		
 		if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
 		try {
@@ -70,18 +72,22 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 			XliJ.XliJ_JavaThrowError(-1, "JavaError (NewHttpConnection): Could not make connection. Check Android permissions");
 			return false;
 		}
+
 		//set headers
 		Iterator<Map.Entry<String, String>> it = headers.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<String, String>pair = (Map.Entry<String, String>)it.next();
 			connection.addRequestProperty(pair.getKey(), pair.getValue());
 		}
+
 		if (this.isCancelled()) { XliJ.XliJ_HttpAbortedCallback(requestPointer); return false; }
+
 		//set content payload
 		if (hasUploadContent)
 		{
 			if (body!=null)
-			{				
+			{
+
 				int length = body.capacity();
 				int progressThreshold = Math.max((length / 100), 2048);
 				int steps = 1;
@@ -89,8 +95,10 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 				int bufferSize = 2048;
 				body.clear();
 				byte[] block = new byte[bufferSize];
+
 				try {
 					connection.setFixedLengthStreamingMode(length);
+                    connection.connect();
 					BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
 
 					while (runningTotal<length) {
@@ -105,14 +113,23 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 						}        							
 						runningTotal+=bufferSize;
 					}
+
 					publishProgress(runningTotal, length);
 					out.flush();
+                    out.close();
 				} catch(Exception e) {
 					XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to upload data: "+e.getLocalizedMessage());
 				}
+
 				body=null;
 			}
-		}
+		} else {
+            try {
+                connection.connect();
+            } catch(Exception e) {
+                XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to upload data: "+e.getLocalizedMessage());
+            }
+        }
 
 		// headers
 		responseHeaders = HeadersToStringArray(connection);     		
@@ -139,8 +156,10 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 		BufferedInputStream stream_b;
 		
 		try {
+
 			stream_b = new BufferedInputStream(connection.getInputStream());
 		} catch (IOException e) {
+
 			try {
 				stream_b = new BufferedInputStream(connection.getErrorStream());
 			} catch (Exception e2) {
@@ -148,6 +167,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 				return false;
 			}			
 		}
+
 		ResponseBody = stream_b;
 		return true;
 	}
@@ -165,6 +185,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean hasResult)
 	{
+
 		if (hasResult) {
 			XliJ.XliJ_HttpCallback(XliJ.HoldObject(ResponseBody), ResponseHeaders, ResponseCode, ResponseMessage, ResponseFPointer);
 		}
@@ -173,6 +194,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
     //[TODO] Could optimize by changing chunk mode if length known
 	public static HttpURLConnection NewHttpConnection(String url, String method, boolean hasPayload, int timeout, long requestPointer, boolean verifyHost)
     {
+
         URL j_url = null;
         try {
             j_url = new URL(url);
@@ -184,8 +206,8 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 
         try {
         	if (j_url.getProtocol().toLowerCase(Locale.ENGLISH).equals("https") && !verifyHost) {		
-    			Log.d("XliApp","Non-verified Connection");
-    			HttpsURLConnection uc = (HttpsURLConnection)j_url.openConnection();            		
+    			
+    			HttpsURLConnection uc = (HttpsURLConnection)j_url.openConnection();         		
     	       	// Install the all-trusting trust manager
     	    	try {
     	    		SSLContext sc = SSLContext.getInstance("TLS");
@@ -195,19 +217,20 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
     	    	} catch (Exception e) {
     	    		e.printStackTrace();
     	    	}
-    	    	urlConnection = uc;          
+    	    	urlConnection = uc;
         	} else {
-        		Log.d("XliApp","Default Connection");
+        		
         		urlConnection = (HttpURLConnection)j_url.openConnection();
         	}
-        	  	
-            urlConnection.setConnectTimeout(timeout);
+            urlConnection.setUseCaches(false);
             urlConnection.setDoOutput(hasPayload);
             urlConnection.setRequestMethod(method);
+            urlConnection.setRequestProperty("connection", "close");
         } catch (IOException e) {
         	XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (newHttpConnection): "+e.getLocalizedMessage());
             return null;
         }
+
         return urlConnection;
     }
 	
@@ -233,7 +256,7 @@ public class AsyncHttpRequest extends AsyncTask<Object, Integer, Boolean> {
 					headers.add(key);
 					headers.add(sb.toString());
 				}
-				String[] result = headers.toArray(new String[headers.size()]);	
+				String[] result = headers.toArray(new String[headers.size()]);
 				return result;
 			} catch (Exception e) {
 				XliJ.XliJ_JavaThrowError(-1,"Error in HeadersToStringArray: "+e.getLocalizedMessage());
