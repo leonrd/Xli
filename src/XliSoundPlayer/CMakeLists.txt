@@ -15,7 +15,7 @@ elseif (XLI_PLATFORM_ANDROID)
 
 else()
 
-	return()
+	set(SRC ${SRC} dummy/DummySoundPlayer.cpp)
 
 endif()
 
