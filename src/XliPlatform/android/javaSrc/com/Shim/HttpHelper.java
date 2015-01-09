@@ -36,43 +36,53 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import android.os.AsyncTask;
-
+import android.os.Build;
 
 public class HttpHelper {
 	//[TODO] this task array hack is terrible
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public static AsyncTask SendHttpAsync(final String url, final String method,
+	public static int SendHttpAsync(final String url, final String method,
     								 	final HashMap<String,String> headers, final ByteBuffer body,
     								 	final int timeout, final long requestPointer, final boolean verifyHost) {
     	try
     	{
-    		final AsyncTask task = new AsyncHttpRequest();
+            final int taskKey = XliJ.ReserveObject();
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
- 				((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, body, (Long)requestPointer, (Boolean)verifyHost);
+                AsyncTask task = new AsyncHttpRequest();
+                XliJ.PopulateReservedObject(taskKey, task);
+ 				//((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, body, (Long)requestPointer, (Boolean)verifyHost);
+                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.HONEYCOMB) {
+                    ((AsyncTask<Object, Void, Boolean>)(task)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, method, headers, (Integer)timeout, body, (Long)requestPointer, (Boolean)verifyHost);
+                }
+                else {
+                    ((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, body, (Long)requestPointer, (Boolean)verifyHost);
+                }
              }});
-    		return task;
+    		return taskKey;
     	} catch (Exception e) {
     		XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to build Async Http Request: "+e.getLocalizedMessage());
-    		return null;
+    		return 0;
     	}
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public static AsyncTask SendHttpStringAsync(final String url, final String method,
+	public static int SendHttpStringAsync(final String url, final String method,
     								 			final HashMap<String,String> headers, final String body,
     								 			final int timeout, final long requestPointer, final boolean verifyHost) {
     	try
     	{
-    		final AsyncTask task = new AsyncHttpRequest();
+            final int taskKey = XliJ.ReserveObject();
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
-         		ByteBuffer data = null;         		
+         		ByteBuffer data = null;
+                AsyncTask task = new AsyncHttpRequest();
+                XliJ.PopulateReservedObject(taskKey, task);
          		if (body!=null) data = ByteBuffer.wrap(body.getBytes());
  				((AsyncTask<Object, Void, Boolean>)(task)).execute(url, method, headers, (Integer)timeout, data, (Long)requestPointer, (Boolean)verifyHost);         	
              }});
-    		return task;
+    		return taskKey;
     	} catch (Exception e) {
     		XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "Unable to build Async Http Request: "+e.getLocalizedMessage());
-    		return null;
+    		return 0;
     	}
     }
 	
@@ -96,19 +106,19 @@ public class HttpHelper {
 		buffer.flush();
 		return buffer.toByteArray();
     }
-    
+
     public static void InitDefaultCookieManager()
     {
         CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
     }
-    
+
     // always verify the host - dont check for certificate
     final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
     	public boolean verify(String hostname, SSLSession session) {
     		return true;
     	}
-    };  
+    };
     // Create a trust manager that does not validate certificate chains
     public static TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 		public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[] {}; }

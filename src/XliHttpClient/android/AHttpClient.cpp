@@ -195,7 +195,6 @@ namespace Xli
             HttpEventHandler* eh = client->GetEventHandler();
             if (eh!=0) eh->OnRequestStateChanged(this);
         } else if (!this->javaContentHandle) {
-
             XLI_THROW("HttpRequest->PullContentArray(): In correct state to pull content array but have null contentHandle");
         } else {
             XLI_THROW("HttpRequest->PullContentArray(): Not in valid state for pulling the content array");

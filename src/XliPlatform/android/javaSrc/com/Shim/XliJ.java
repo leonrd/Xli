@@ -63,7 +63,7 @@ public class XliJ extends android.app.NativeActivity {
     public static native void XliJ_HttpAbortedCallback(long requestPointer);
     public static native void XliJ_JavaThrowError(int code, String throwMessage);
     public static native void XliJ_UnoSurfaceReady(Surface unoSurface);
-    
+
     //--------------------------------------------
     // System
     public static void RootSurfaceChanged(Surface unoSurface)
@@ -80,7 +80,7 @@ public class XliJ extends android.app.NativeActivity {
     public static void ShowStatusBar() {
     	SystemHelper.showStatusBar(nActivity);
     }
-	public static DisplayMetrics GetDisplayMetrics() 
+	public static DisplayMetrics GetDisplayMetrics()
 	{
 		return SystemHelper.GetDisplayMetrics(nActivity);
     }
@@ -104,10 +104,10 @@ public class XliJ extends android.app.NativeActivity {
     {
     	VibratorHelper.VibrateForMilliseconds(milliseconds);    	
     }
-    
-    
+
+
     //--------------------------------------------
-    // Keyboard   
+    // Keyboard
     public static void RaiseKeyboard() {
         KeyboardHelper.ShowKeyboard();
     }
@@ -127,7 +127,7 @@ public class XliJ extends android.app.NativeActivity {
     }
 
     //--------------------------------------------
-    // Network    
+    // Network
     public static boolean ConnectedToNetwork()
     {
         ConnectivityManager connMgr = (ConnectivityManager)nActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -142,7 +142,7 @@ public class XliJ extends android.app.NativeActivity {
     {
     	return (Object)new HashMap<String,String>();
     }
-    
+
     public static HashMap<String,String> StringToHeadersMap(String headers)
     {
     	//{TODO} Add validation/sanity-checks for headers
@@ -163,22 +163,22 @@ public class XliJ extends android.app.NativeActivity {
     	}
     	return h;
     }
-    
+
     public static int SendHttpAsync(String url, String method, String headers, ByteBuffer body,
                                           int timeout, long requestPointer, boolean verifyHost) {
-    	return HoldObject(HttpHelper.SendHttpAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost));
+    	return HttpHelper.SendHttpAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost);
     }
 	
 	public static int SendHttpStringAsync(String url, String method, String headers, String body,
     								 			int timeout, long requestPointer, boolean verifyHost) {				
-    	return HoldObject(HttpHelper.SendHttpStringAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost));    	
+    	return HttpHelper.SendHttpStringAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost);
     }
-    
+
 	public static byte[] ReadAllBytesFromHttpInputStream(InputStream stream, long requestPointer) throws IOException
     {    	
 		return HttpHelper.ReadAllBytesFromHttpInputStream(stream, requestPointer);
     }
-    
+
 	public static void InitDefaultCookieManager()
     {
         HttpHelper.InitDefaultCookieManager();
@@ -216,7 +216,7 @@ public class XliJ extends android.app.NativeActivity {
     	if (atask==null) return;
     	atask.cancel(true);
     }
-    
+
     //--------------------------------------------
     // Object Store
     public static Semaphore _objSem = new Semaphore(1);
@@ -289,7 +289,7 @@ public class XliJ extends android.app.NativeActivity {
 	    		_objSem.release();
 	    		XliJ_JavaThrowError(-1, "Tried to access invalid object from java object store");
 	    		return null;
-	    	}  
+	    	}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
@@ -312,9 +312,3 @@ public class XliJ extends android.app.NativeActivity {
 		}
     }
 }
-
-
-
-
-
-

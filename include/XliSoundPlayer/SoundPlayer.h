@@ -20,6 +20,7 @@
 #define __XLI_AUDIO_SIMPLE_AUDIO_PLAYER_H__
 
 #include <Xli/Object.h>
+#include <Xli/String.h>
 
 namespace Xli
 {
