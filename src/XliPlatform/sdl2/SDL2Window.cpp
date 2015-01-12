@@ -496,11 +496,19 @@ namespace Xli
         void SDL2Window::BeginTextInput(TextInputHint hint)
         {
             SDL_StartTextInput();
+            if (GlobalWindow && GlobalWindow->GetEventHandler())
+            {
+                GlobalWindow->GetEventHandler()->OnKeyboardResized(GlobalWindow);
+            }
         }
 
         void SDL2Window::EndTextInput() 
         {
             SDL_StopTextInput();
+            if (GlobalWindow && GlobalWindow->GetEventHandler())
+            {
+                GlobalWindow->GetEventHandler()->OnKeyboardResized(GlobalWindow);
+            }
         }
 
         bool SDL2Window::IsTextInputActive() 

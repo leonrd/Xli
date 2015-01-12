@@ -99,6 +99,7 @@ public class KeyboardHelper {
                             hiddenLayout.getLocationOnScreen(location);
                             int hiddenHeight = (int)(location[1] + hiddenLayout.getMeasuredHeight());
                             keyboardSize = rootViewHeight - hiddenHeight;
+                            XliJ.XliJ_OnKeyboardResized();
                         }
                     };
                 	hiddenLayout.getViewTreeObserver().addOnGlobalLayoutListener(layoutListener);

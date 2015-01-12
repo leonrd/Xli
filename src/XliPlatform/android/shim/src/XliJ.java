@@ -58,6 +58,7 @@ public class XliJ extends android.app.NativeActivity {
     public static native void XliJ_HttpErrorCallback(long requestPointer, int errorCode, String errorMessage);
     public static native void XliJ_HttpAbortedCallback(long requestPointer);
     public static native void XliJ_JavaThrowError(int code, String throwMessage);
+    public static native void XliJ_OnKeyboardResized();
 
     //--------------------------------------------
     // System

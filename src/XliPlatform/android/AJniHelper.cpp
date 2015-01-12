@@ -52,6 +52,13 @@ namespace Xli
             }
         }
 
+        void CTKeyboardResize::Execute()
+        {
+            if (GlobalWindow) {
+                GlobalEventHandler->OnKeyboardResized(GlobalWindow);
+            }
+        }
+
         extern "C"
         {
             void JNICALL XliJ_OnKeyUp (JNIEnv *env , jobject obj, jint keyCode) 
@@ -77,6 +84,11 @@ namespace Xli
                 String finalMessage = String("JavaThrown:")+String(cerrorMessage); 
                 CTQueue::EnqueueCrossThreadEvent(new CTError(finalMessage, errorCode));
                 env->ReleaseStringUTFChars(errorMessage, cerrorMessage);
+            }
+
+            void JNICALL XliJ_OnKeyboardResized (JNIEnv *env , jobject obj) 
+            {
+                CTQueue::EnqueueCrossThreadEvent(new CTKeyboardResize());
             }
         }
 
@@ -118,9 +130,10 @@ namespace Xli
                 {(char* const)"XliJ_OnKeyDown", (char* const)"(I)V", (void *)&XliJ_OnKeyDown},
                 {(char* const)"XliJ_OnTextInput", (char* const)"(Ljava/lang/String;)V", (void *)&XliJ_OnTextInput},
                 {(char* const)"XliJ_JavaThrowError", (char* const)"(ILjava/lang/String;)V", (void *)&XliJ_JavaThrowError},
-            };
+                {(char* const)"XliJ_OnKeyboardResized", (char* const)"()V", (void *)&XliJ_OnKeyboardResized},
+            };            
             // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(*shim_class, native_funcs, 4);
+            jint attached = l_env->RegisterNatives(*shim_class, native_funcs, 5);
             if (attached < 0) {
                 LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
                 XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");

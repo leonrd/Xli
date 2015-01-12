@@ -38,6 +38,11 @@ namespace Xli
     {
         return false;
     }
+
+    bool WindowEventHandler::OnKeyboardResized(Window* wnd)
+    {
+        return false;
+    }
     
     bool WindowEventHandler::OnMouseDown(Window* wnd, Vector2i pos, MouseButton button)
     {

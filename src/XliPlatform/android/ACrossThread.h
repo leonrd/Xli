@@ -53,6 +53,13 @@ namespace Xli
             virtual void Execute();
         };
 
+        class CTKeyboardResize : public WindowAction
+        {
+        public:
+            CTKeyboardResize() {}
+            virtual void Execute();
+        };
+
         class CTQueue
         {
         public:
