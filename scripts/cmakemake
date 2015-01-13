@@ -18,7 +18,7 @@ while [ $# -gt 0 ]; do
         ;;
     esac
 
-    case $OPT in 
+    case $OPT in
     -h|-\?|--help)
         cat <<E0
 Usage: cmakemake [<build-options>] <project-dir>
@@ -136,7 +136,7 @@ if ! which cmake > /dev/null 2>&1; then
     PATH=$PATH:/opt/local/bin
 
     if ! which cmake > /dev/null 2>&1; then
-        echo "ERROR: Unable to find the \`cmake\` command. Make sure cmake is installed and added to \$PATH." >&2
+        echo "ERROR: Unable to find the \`cmake\` command. Make sure CMake is installed and added to \$PATH." >&2
         exit 1
     fi
 fi
@@ -149,7 +149,7 @@ if [ -z "$JOB_COUNT" ]; then
     elif [ -n "$NUMBER_OF_PROCESSORS" ]; then
         JOB_COUNT=$NUMBER_OF_PROCESSORS
     else
-        JOB_COUNT=1 
+        JOB_COUNT=1
     fi
 fi
 
@@ -200,6 +200,11 @@ if [ -n "$PLATFORM" ]; then
         done
         ;;
     android)
+        if ! which ndk-build > /dev/null 2>&1; then
+            echo "ERROR: Unable to find the \`ndk-build\` command. Make sure the Android NDK is installed and added to \$PATH." >&2
+            exit 1
+        fi
+
         if [ -z "$ARCHS" ]; then
             ARCHS="armeabi-v7a" #"armeabi-v7a mips x86"
         fi
@@ -251,7 +256,7 @@ if [ -n "$PLATFORM" ]; then
         exit 1
         ;;
     esac
-else 
+else
     mkdir -p "$BUILD_DIR"
     cd "$BUILD_DIR"
 
@@ -262,7 +267,7 @@ else
         set -- -G"MinGW Makefiles"
     #elif which ninja 2>&1 > /dev/null; then
         #set -- -G"Ninja Makefiles"
-    fi 
+    fi
 
     cmake $@ $CMAKE_ARGS ../..
 
