@@ -21,6 +21,7 @@
 #include <Xli/CoreLib.h>
 #include <cstdlib>
 
+# include <XliPlatform/Application.h>
 #if defined(XLI_PLATFORM_ANDROID)
 # include "../../3rdparty/android_native_app_glue/android_native_app_glue.h"
 # include <XliPlatform/PlatformSpecific/Android.h>
@@ -52,12 +53,7 @@ extern "C" int main(int argc, char** argv)
         Xli::CoreLib::OnUnhandledException(e, "main");
     }        
 
-    Xli::Array<Xli::String> args(argc);
-    for (int i = 0; i < argc; i++) 
-        args[i] = argv[i];
-
-    Xli::Application::SharedApp()->Start();
-    Xli::Application::SharedApp()->Run();
+    Xli::Application::SharedApp()->Run(argc, argv);
 
     return result;
 }

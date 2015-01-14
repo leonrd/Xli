@@ -20,8 +20,7 @@
     // if (launchOptions) {TODO} parse launch options
     //     return NO;
 
-    // Xli::Application::SharedApp()->Start(); // remove in favour of main
-    main(0, (char**)0);
+    Xli::Application::SharedApp()->Start(); // remove in favour of main
     
     return YES;
 }
