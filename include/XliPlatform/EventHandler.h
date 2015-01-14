@@ -232,6 +232,7 @@ namespace Xli
         virtual bool OnKeyDown(Window* wnd, Key key);
         virtual bool OnKeyUp(Window* wnd, Key key);
         virtual bool OnTextInput(Window* wnd, const String& text);
+        virtual bool OnKeyboardResized(Window* wnd);
         
         virtual bool OnMouseDown(Window* wnd, Vector2i pos, MouseButton button);
         virtual bool OnMouseUp(Window* wnd, Vector2i pos, MouseButton button);
