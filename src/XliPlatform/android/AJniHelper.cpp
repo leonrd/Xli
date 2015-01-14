@@ -19,7 +19,7 @@
 
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/Window.h>
-#include <XliPlatform/EventHandler.h>
+#include <XliPlatform/InputEventHandler.h>
 #include <XliHttpClient.h>
 #include <pthread.h>
 #include <stdarg.h>
@@ -28,7 +28,7 @@
 
 #define DEBUG_JNI
 
-extern Xli::WindowEventHandler* GlobalEventHandler;
+extern Xli::InputEventHandler* GlobalEventHandler;
 extern Xli::Window* GlobalWindow;
 extern int GlobalInit;
 

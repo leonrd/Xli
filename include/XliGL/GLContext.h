@@ -60,6 +60,7 @@ namespace Xli
 
         virtual void MakeCurrent(Window* window) = 0;
         virtual bool IsCurrent() = 0;
+        virtual void Destroy() = 0;
 
         virtual void SwapBuffers() = 0;
 

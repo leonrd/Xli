@@ -129,12 +129,12 @@ namespace Xli
             return WindowImplementationWin32;
         }
 
-        void Win32Window::SetEventHandler(WindowEventHandler* handler)
+        void Win32Window::SetEventHandler(InputEventHandler* handler)
         {
             eventHandler = handler;
         }
 
-        WindowEventHandler* Win32Window::GetEventHandler()
+        InputEventHandler* Win32Window::GetEventHandler()
         {
             return eventHandler;
         }

@@ -16,8 +16,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_PLATFORM_EVENTHANDLER_H__
-#define __XLI_PLATFORM_EVENTHANDLER_H__
+#ifndef __XLI_PLATFORM_INPUTEVENTHANDLER_H__
+#define __XLI_PLATFORM_INPUTEVENTHANDLER_H__
 
 #include <Xli/Object.h>
 #include <Xli/Vector2.h>
@@ -226,7 +226,7 @@ namespace Xli
     /**
         \ingroup XliPlatform
     */
-    class WindowEventHandler: public Object
+    class InputEventHandler: public Object
     {
     public:
         virtual bool OnKeyDown(Window* wnd, Key key);
@@ -245,16 +245,6 @@ namespace Xli
         
         virtual void OnSizeChanged(Window* wnd);
         virtual void OnNativeHandleChanged(Window* wnd);
-
-        virtual bool OnClosing(Window* wnd);
-        virtual void OnClosed(Window* wnd);
-
-        virtual void OnAppLowMemory(Window* wnd);
-        virtual void OnAppTerminating(Window* wnd);
-        virtual void OnAppWillEnterForeground(Window* wnd);
-        virtual void OnAppDidEnterForeground(Window* wnd);
-        virtual void OnAppWillEnterBackground(Window* wnd);
-        virtual void OnAppDidEnterBackground(Window* wnd);
     };
 }
 

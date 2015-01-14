@@ -41,69 +41,6 @@ namespace Xli
         {
             return wnd != 0 && wnd->GetImplementation() == WindowImplementationSDL2 ? ((PlatformSpecific::SDL2Window*)wnd)->window : NULL;
         }
-
-#ifdef XLI_PLATFORM_IOS
-
-        static int HandleAppEvents(void *userdata, SDL_Event *event)
-        {
-            switch (event->type)
-            {
-            case SDL_APP_TERMINATING:
-                if (GlobalWindow && GlobalWindow->GetEventHandler())
-                {
-                    GlobalWindow->GetEventHandler()->OnAppTerminating(GlobalWindow);
-                    
-                    GlobalWindow->closed = true;
-                    GlobalWindow->GetEventHandler()->OnClosed(GlobalWindow);
-                }
-                
-                return 0;
-                
-            case SDL_APP_LOWMEMORY:
-                if (GlobalWindow && GlobalWindow->GetEventHandler())
-                {
-                    GlobalWindow->GetEventHandler()->OnAppLowMemory(GlobalWindow);
-                }
-                
-                return 0;
-                
-            case SDL_APP_WILLENTERBACKGROUND:
-                if (GlobalWindow && GlobalWindow->GetEventHandler())
-                {
-                    GlobalWindow->GetEventHandler()->OnAppWillEnterBackground(GlobalWindow);
-                }
-                
-                return 0;
-                
-            case SDL_APP_DIDENTERBACKGROUND:
-                if (GlobalWindow && GlobalWindow->GetEventHandler())
-                {
-                    GlobalWindow->GetEventHandler()->OnAppDidEnterBackground(GlobalWindow);
-                }
-                
-                return 0;
-                
-            case SDL_APP_WILLENTERFOREGROUND:
-                if (GlobalWindow && GlobalWindow->GetEventHandler())
-                {
-                    GlobalWindow->GetEventHandler()->OnAppWillEnterForeground(GlobalWindow);
-                }
-                
-                return 0;
-                
-            case SDL_APP_DIDENTERFOREGROUND:
-                if (GlobalWindow && GlobalWindow->GetEventHandler())
-                {
-                    GlobalWindow->GetEventHandler()->OnAppDidEnterForeground(GlobalWindow);
-                }
-                
-                return 0;
-            }
-            
-            return 1;
-        }
-
-#endif
         
         SDL2Window::SDL2Window(int width, int height, const String& title, int flags)
         {
@@ -143,41 +80,17 @@ namespace Xli
 
 #endif
 
-#ifdef XLI_PLATFORM_IOS
-            
-            if (flags & WindowFlagsDisablePowerSaver && !SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "1"))
-                Error->WriteLine("SDL WARNING: Failed to disable idle timer");
-
-            if (fullscreen)
-                sdlFlags |= SDL_WINDOW_BORDERLESS;
-            
-            sdlFlags |= SDL_WINDOW_RESIZABLE;
-            
-            SDL_SetEventFilter(HandleAppEvents, NULL);
-            
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-#else
-
             sdlFlags |= SDL_WINDOW_OPENGL;
-
-#endif
             
             window = SDL_CreateWindow(title.Ptr(), x, y, width, height, sdlFlags);
 
             SDL_SetWindowData(window, "SDL2Window", this);
-            
-#ifndef XLI_PLATFORM_IOS
             
             if (fullscreen)
             {
                 fullscreen = false;
                 SetFullscreen(true);
             }
-
-#else 
-            this->SDL2WindowInit();
-#endif           
         }
 
         SDL2Window::SDL2Window(const void* nativeHandle)
@@ -202,23 +115,21 @@ namespace Xli
             SDL_DestroyWindow(window);
         }
 
-#ifndef XLI_PLATFORM_IOS
         void SDL2Window::SDL2WindowInit() 
         {
         }
-#endif
 
         WindowImplementation SDL2Window::GetImplementation()
         {
             return WindowImplementationSDL2;
         }
 
-        void SDL2Window::SetEventHandler(WindowEventHandler* handler)
+        void SDL2Window::SetEventHandler(InputEventHandler* handler)
         {
             eventHandler = handler;
         }
 
-        WindowEventHandler* SDL2Window::GetEventHandler()
+        InputEventHandler* SDL2Window::GetEventHandler()
         {
             return eventHandler;
         }
@@ -309,12 +220,6 @@ namespace Xli
             {
                 this->fullscreen = fullscreen;
 
-#ifdef XLI_PLATFORM_IOS
-                
-                SDL_SetWindowFullscreen(window, fullscreen ? SDL_TRUE : SDL_FALSE);
-                
-#else
-                
                 if (fullscreen)
                 {
                     SDL_GetWindowPosition(window, &x, &y);
@@ -336,8 +241,6 @@ namespace Xli
                     SDL_SetWindowPosition(window, x, y);
                     SDL_SetWindowSize(window, w, h);
                 }
-                
-#endif
             }
         }
 
@@ -368,7 +271,6 @@ namespace Xli
 
         bool SDL2Window::GetKeyState(Key key)
         {
-#ifndef XLI_PLATFORM_IOS
 
             const Uint8* keys = SDL_GetKeyboardState(0);
             
@@ -456,9 +358,6 @@ namespace Xli
                 case KeyMenu:
                 case KeyUnknown: break;
             }
-
-#endif
-
             return false;
         }
 
@@ -486,11 +385,6 @@ namespace Xli
 
         void SDL2Window::SetSystemCursor(SystemCursor cursor)
         {
-#ifndef XLI_PLATFORM_IOS
-
-
-
-#endif
         }
 
         void SDL2Window::BeginTextInput(TextInputHint hint)
@@ -526,8 +420,6 @@ namespace Xli
             return SDL_IsScreenKeyboardShown(window);
         }
 
-#ifndef XLI_PLATFORM_IOS
-
         Vector2i SDL2Window::GetStatusBarSize()
         {
             return Vector2i(0,0);
@@ -556,8 +448,6 @@ namespace Xli
         { 
             return Vector2i(0,0);
         }
-
-#endif
     }
 
     void InitWindow()
@@ -709,35 +599,6 @@ namespace Xli
                 case SDL_FINGERDOWN:
                 case SDL_FINGERMOTION:
                 case SDL_FINGERUP:
-#ifdef XLI_PLATFORM_IOS
-                    if (GlobalWindow != 0 && GlobalWindow->GetEventHandler() != 0)
-                    {
-                        int w, h;
-                        SDL_GetWindowSize(GlobalWindow->window, &w, &h);
-                        
-                        float x = e.tfinger.x * w;
-                        float y = e.tfinger.y * h;
-                        int id = (int)e.tfinger.fingerId;
-                        
-                        //Error->WriteLine(String::HexFromInt((int)e.type) + " " + (String)x + " " + y + " " + (String)(int)e.tfinger.fingerId);
-                        
-                        switch (e.type)
-                        {
-                            case SDL_FINGERDOWN:
-                                GlobalWindow->GetEventHandler()->OnTouchDown(GlobalWindow, Vector2(x, y), id);
-                                break;
-                                
-                            case SDL_FINGERMOTION:
-                                GlobalWindow->GetEventHandler()->OnTouchMove(GlobalWindow, Vector2(x, y), id);
-                                break;
-                                
-                            case SDL_FINGERUP:
-                                GlobalWindow->GetEventHandler()->OnTouchUp(GlobalWindow, Vector2(x, y), id);
-                                break;
-                        }
-                    }
-#endif                 
-   
                     continue;
                     
                 case SDL_MULTIGESTURE:
@@ -846,8 +707,6 @@ namespace Xli
 
                     break;
                     
-#ifndef XLI_PLATFORM_IOS
-
                 case SDL_MOUSEBUTTONDOWN:
                     wnd->buttons |= SDL_BUTTON(e.button.button);
                     
@@ -875,7 +734,6 @@ namespace Xli
                         wnd->GetEventHandler()->OnMouseWheel(wnd, Vector2i(e.wheel.x, e.wheel.y));
 
                     break;
-#endif
             }
         }
     }

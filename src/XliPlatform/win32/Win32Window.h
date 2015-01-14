@@ -20,7 +20,7 @@
 #define __XLI_PLATFORM_SPECIFIC_WIN32_WINDOW_H__
 
 #include <XliPlatform/PlatformSpecific/Win32.h>
-#include <XliPlatform/EventHandler.h>
+#include <XliPlatform/InputEventHandler.h>
 #include <XliPlatform/Window.h>
 #include <Xli/Shared.h>
 
@@ -37,7 +37,7 @@ namespace Xli
             HWND hWnd;
             bool closed, ownsHwnd;
 
-            Shared<WindowEventHandler> eventHandler;
+            Shared<InputEventHandler> eventHandler;
 
             DWORD dwStyle;
             RECT rect;
@@ -51,8 +51,8 @@ namespace Xli
 
             virtual WindowImplementation GetImplementation();
 
-            virtual void SetEventHandler(WindowEventHandler* handler);
-            virtual WindowEventHandler* GetEventHandler();
+            virtual void SetEventHandler(InputEventHandler* handler);
+            virtual InputEventHandler* GetEventHandler();
 
             virtual void Close();
 

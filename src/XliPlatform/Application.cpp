@@ -23,60 +23,11 @@
 #include <Xli/Managed.h>
 #include <Xli/Thread.h>
 #include <Xli/Time.h>
+#include <cassert>
 
 namespace Xli
 {
-    void Application::Run(Application* app, int flags)
-    {
-        Managed<Window> wnd = Window::Create(app->GetInitSize(), app->GetInitTitle(), flags);
-
-        app->OnInit(wnd);
-        wnd->SetEventHandler(app);
-        Window::ProcessMessages();
-
-        app->OnLoad(wnd);
-
-        while (!wnd->IsClosed())
-        {
-            double startTime = GetSeconds();
-
-            Window::ProcessMessages();
-            app->OnUpdate(wnd);
-
-            if (wnd->IsVisible())
-                app->OnDraw(wnd);
-
-            if (app->_maxFps > 0)
-            {
-                double targetTime = 1.0 / (double)app->_maxFps;
-                double renderTime = GetSeconds() - startTime;
-
-                int msTimeout = (int)((targetTime - renderTime) * 1000.0 + 0.5);
-
-                if (msTimeout > 0)
-                    Sleep(msTimeout);
-            }
-        }
-    }
-
-    Application::Application()
-    {
-        PlatformLib::Init();
-
-        DisplaySettings settings;
-        if (Display::GetCount() > 0 &&
-            Display::GetCurrentSettings(0, settings) &&
-            settings.RefreshRate > 0)
-            _maxFps = settings.RefreshRate;
-        else
-            _maxFps = 60;
-    }
-
-    void Application::SetMaxFps(int value)
-    {
-        _maxFps = value;
-    }
-
+    
     String Application::GetInitTitle()
     {
         return "Xli Application";
@@ -91,30 +42,142 @@ namespace Xli
 #endif
     }
 
-    void Application::OnInit(Window* wnd)
+    // Lifecycle    
+    void Application::Start()
     {
-    }
-
-    void Application::OnLoad(Window* wnd)
-    {
-    }
-
-    void Application::OnUpdate(Window* wnd)
-    {
-    }
-
-    void Application::OnDraw(Window* wnd)
-    {
-    }
-
-    void Application::OnSizeChanged(Window* wnd)
-    {
-#if defined(XLI_PLATFORM_WIN32) || defined(XLI_PLATFORM_OSX)
-        if (wnd->GetMouseButtonState(MouseButtonLeft))
+        switch (state_)
         {
-            OnUpdate(wnd);
-            OnDraw(wnd);
+        case Active:
+        case Visible:
+        case Background:
+            assert("Invalid state transition");
+
+            Terminate();
+
+        case Terminating:
+            state_ = Starting;
+            EmitOnStart();
+
+        case Starting:
+            // On it!
+            break;
         }
-#endif
+    }
+
+    void Application::BecomeVisible()
+    {
+        switch (state_)
+        {
+        case Terminating:
+            assert("Invalid state transition");
+
+            Start();
+
+        case Starting:
+            EmitOnDidStart();
+
+        case Background:
+            state_ = Visible;
+            EmitOnEnterVisible();
+            break;
+
+        case Active:
+            ResignActive();
+
+        case Visible:
+            // On it!
+            break;
+        }
+    }
+
+    void Application::BecomeActive()
+    {
+        switch (state_)
+        {
+        case Terminating:
+            assert(!"Invalid state transition");
+
+            Start();
+
+        case Background:
+        case Starting:
+            BecomeVisible();
+
+        case Visible:
+            EmitOnEnterActive();
+            state_ = Active;
+
+        case Active:
+            break;
+        }
+    }
+
+    void Application::ResignActive()
+    {
+        switch (state_)
+        {
+        case Terminating:
+            assert(!"Invalid state transition");
+
+            Start();
+
+        case Starting:
+        case Background:
+            assert(!"Invalid state transition");
+
+            BecomeVisible();
+            break;
+
+        case Active:
+        case Visible:
+            state_ = Visible;
+            EmitOnExitActive();
+            break;
+        }
+    }
+
+    void Application::EnterBackground()
+    {
+        switch (state_)
+        {
+        case Active:
+            ResignActive();
+
+        case Visible:
+        case Starting:
+            state_ = Background;
+            EmitOnEnterBackground();
+            break;
+
+        case Terminating:
+            assert(!"Invalid state transition");
+
+            Start();
+            return EnterBackground();
+
+        case Background:
+            // On it!
+            break;
+        }
+    }
+
+    void Application::Terminate()
+    {
+        switch (state_)
+        {
+        case Active:
+            ResignActive();
+
+        case Visible:
+        case Starting:
+            EnterBackground();
+
+        case Background:
+            EmitOnTerminate();
+
+        case Terminating:
+            // On it!
+            break;
+        }
     }
 }

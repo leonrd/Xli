@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 #include <XliPlatform/PlatformSpecific/Android.h>
-#include <XliPlatform/EventHandler.h>
+#include <XliPlatform/InputEventHandler.h>
 #include <XliPlatform/Window.h>
 #include <Xli/Console.h>
 #include "ACrossThread.h"
@@ -35,7 +35,7 @@
 #include "AShim.h"
 
 
-Xli::WindowEventHandler* GlobalEventHandler = 0;
+Xli::InputEventHandler* GlobalEventHandler = 0;
 Xli::Window* GlobalWindow = 0;
 volatile int GlobalInit = 0;
 
@@ -75,7 +75,7 @@ namespace Xli
                 return WindowImplementationAndroid;
             }
 
-            virtual void SetEventHandler(WindowEventHandler* handler)
+            virtual void SetEventHandler(InputEventHandler* handler)
             {
                 if (handler != 0)
                     handler->AddRef();
@@ -86,7 +86,7 @@ namespace Xli
                 GlobalEventHandler = handler;
             }
 
-            virtual WindowEventHandler* GetEventHandler()
+            virtual InputEventHandler* GetEventHandler()
             {
                 return GlobalEventHandler;
             }

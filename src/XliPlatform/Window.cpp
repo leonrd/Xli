@@ -17,107 +17,92 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <XliPlatform/EventHandler.h>
+
+#include <XliPlatform/InputEventHandler.h> 
 #include <XliPlatform/Window.h>
 #include <Xli/Thread.h>
 #include <Xli/StringBuilder.h>
 #include <cstring>
+#include <cassert>
 
 namespace Xli
 {
-    bool WindowEventHandler::OnKeyDown(Window* wnd, Key key)
+    void Window::Initialize()
     {
-        return false;
+        switch (state_)
+        {
+        case Visible:
+            assert(!"Invalid state transition");
+            Hide();
+
+        case Hidden:
+            assert(!"Invalid state transition");
+            Destroy();
+
+        case Destroying:
+            state_ = Initializing;
+            OnInitialize();
+
+        case Initializing:
+            // On it!
+            break;
+        }
     }
 
-    bool WindowEventHandler::OnKeyUp(Window* wnd, Key key)
+    void Window::Show()
     {
-        return false;
+        switch (state_)
+        {
+        case Destroying:
+            assert("Invalid state transition");
+            Initialize();
+
+        case Initializing:
+        case Hidden:
+            OnShow();
+
+        case Visible:
+            // On it!
+            break;
+        }
     }
 
-    bool WindowEventHandler::OnTextInput(Window* wnd, const String& text)
+    void Window::Hide()
     {
-        return false;
+        switch (state_)
+        {
+        case Destroying:
+            assert("Invalid state transition");
+            Initialize();
+            return Hide();
+
+        case Visible:
+            OnHide();
+
+        case Initializing:
+            state_ = Hidden;
+
+        case Hidden:
+            // On it!
+            break;
+        }
     }
 
-    bool WindowEventHandler::OnKeyboardResized(Window* wnd)
+    void Window::Destroy()
     {
-        return false;
-    }
-    
-    bool WindowEventHandler::OnMouseDown(Window* wnd, Vector2i pos, MouseButton button)
-    {
-        return false;
-    }
+        switch (state_)
+        {
+        case Visible:
+            Hide();
 
-    bool WindowEventHandler::OnMouseUp(Window* wnd, Vector2i pos, MouseButton button)
-    {
-        return false;
-    }
+        case Initializing:
+        case Hidden:
+            state_ = Destroying;
+            OnDestroy();
 
-    bool WindowEventHandler::OnMouseMove(Window* wnd, Vector2i pos)
-    {
-        return false;
-    }
-
-    bool WindowEventHandler::OnMouseWheel(Window* wnd, Vector2i delta)
-    {
-        return false;
-    }
-    
-    bool WindowEventHandler::OnTouchDown(Window* wnd, Vector2 pos, int id)
-    {
-        return false;
-    }
-
-    bool WindowEventHandler::OnTouchMove(Window* wnd, Vector2 pos, int id)
-    {
-        return false;
-    }
-
-    bool WindowEventHandler::OnTouchUp(Window* wnd, Vector2 pos, int id)
-    {
-        return false;
-    }
-    
-    void WindowEventHandler::OnNativeHandleChanged(Window* wnd)
-    {
-    }
-
-    void WindowEventHandler::OnSizeChanged(Window* wnd)
-    {
-    }
-
-    bool WindowEventHandler::OnClosing(Window* wnd)
-    {
-        return false;
-    }
-
-    void WindowEventHandler::OnClosed(Window* wnd)
-    {
-    }
-
-    void WindowEventHandler::OnAppLowMemory(Window* wnd)
-    {
-    }
-
-    void WindowEventHandler::OnAppTerminating(Window* wnd)
-    {
-    }
-
-    void WindowEventHandler::OnAppWillEnterForeground(Window* wnd)
-    {
-    }
-
-    void WindowEventHandler::OnAppDidEnterForeground(Window* wnd)
-    {
-    }
-
-    void WindowEventHandler::OnAppWillEnterBackground(Window* wnd)
-    {
-    }
-
-    void WindowEventHandler::OnAppDidEnterBackground(Window* wnd)
-    {
+        case Destroying:
+            // On it!
+            break;
+        }
     }
 }

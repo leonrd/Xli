@@ -16,19 +16,52 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_FEATURES_VIBRATOR_H__
-#define __XLI_FEATURES_VIBRATOR_H__
+#ifndef __XLI_GL_IGL_CONTEXT_H__
+#define __XLI_GL_IGL_CONTEXT_H__
+
+#include <Xli/Object.h>
+#include <Xli/Vector4.h>
+#include <XliPlatform/PlatformSpecific/iOS.h>
+#include <Xli/Shared.h>
+#include <XliGL/GLContext.h>
+#include <XliGL.h>
+
+#include <UIKit/UIKit.h>
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#include <QuartzCore/QuartzCore.h>
+
 
 namespace Xli
-{   
-    class Vibrator
-    { 
-    public:
-        static bool CanVibrate();
-        static bool CanTimedVibrate();
-        static void Vibrate();
-        static void VibrateForMilliseconds(int milliseconds);
-    };
+{
+    namespace PlatformSpecific
+    {
+        class iGLContext : public Xli::GLContext
+        {
+        public:
+            iGLContext();
+            virtual ~iGLContext();
+
+            void Initialize(CAEAGLLayer* layer);
+
+            virtual GLContext* CreateSharedContext();
+
+            virtual void GetAttributes(GLContextAttributes& result);
+            virtual Vector2i GetDrawableSize();
+
+            virtual void MakeCurrent(Window* window);
+            virtual bool IsCurrent();
+            virtual void Destroy();
+            
+            virtual void SwapBuffers();
+
+            virtual void SetSwapInterval(int value);
+            virtual int GetSwapInterval();
+        private:
+            CAEAGLLayer* layer_;
+            EAGLContext* context_;
+        };
+    }
 }
 
 #endif

@@ -57,7 +57,3 @@ endif()
 if (NOT XLI_NO_SOUND_PLAYER)
     add_subdirectory(src/XliSoundPlayer)
 endif()
-
-if (NOT XLI_NO_FEATURES)
-    add_subdirectory(src/XliFeatures)
-endif()

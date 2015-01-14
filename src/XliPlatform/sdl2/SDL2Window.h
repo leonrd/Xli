@@ -19,7 +19,7 @@
 #ifndef __XLI_PLATFORM_SPECIFIC_SDL2_WINDOW_H__
 #define __XLI_PLATFORM_SPECIFIC_SDL2_WINDOW_H__
 
-#include <XliPlatform/EventHandler.h>
+#include <XliPlatform/InputEventHandler.h>
 #include <XliPlatform/Window.h>
 #include <Xli/Shared.h>
 #include <SDL.h>
@@ -34,7 +34,7 @@ namespace Xli
         class SDL2Window: public Window
         {
         public:            
-            Shared<WindowEventHandler> eventHandler;
+            Shared<InputEventHandler> eventHandler;
             SDL_Window* window;
             bool closed, fullscreen;
             int x, y, w, h, buttons;
@@ -48,8 +48,8 @@ namespace Xli
 
             virtual WindowImplementation GetImplementation();
 
-            virtual void SetEventHandler(WindowEventHandler* handler);
-            virtual WindowEventHandler* GetEventHandler();
+            virtual void SetEventHandler(InputEventHandler* handler);
+            virtual InputEventHandler* GetEventHandler();
 
             virtual bool IsClosed();
             virtual bool IsVisible();

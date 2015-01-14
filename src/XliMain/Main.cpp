@@ -26,10 +26,7 @@
 # include <XliPlatform/PlatformSpecific/Android.h>
 #elif defined(XLI_PLATFORM_IOS)
 # include <XliPlatform/PlatformSpecific/iOS.h>
-# include <SDL_main.h>
 #endif
-
-extern int Main(const Xli::Array<Xli::String>& args);
 
 extern "C" int main(int argc, char** argv)
 {
@@ -44,12 +41,6 @@ extern "C" int main(int argc, char** argv)
 #elif defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
-
-        Xli::Array<Xli::String> args(argc);
-        for (int i = 0; i < argc; i++) 
-            args[i] = argv[i];
-
-        result = Main(args);
     }
     catch (const Xli::Exception& e)
     {
@@ -59,7 +50,14 @@ extern "C" int main(int argc, char** argv)
     {
         Xli::Exception e("An unsupported C++ exception was thrown");
         Xli::CoreLib::OnUnhandledException(e, "main");
-    }
+    }        
+
+    Xli::Array<Xli::String> args(argc);
+    for (int i = 0; i < argc; i++) 
+        args[i] = argv[i];
+
+    Xli::Application::SharedApp()->Start();
+    Xli::Application::SharedApp()->Run();
 
     return result;
 }

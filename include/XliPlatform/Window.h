@@ -21,171 +21,129 @@
 
 #include <Xli/Object.h>
 #include <Xli/Vector2.h>
-#include <XliPlatform/EventHandler.h>
+#include <XliPlatform/InputEventHandler.h>
 
 namespace Xli
 {
-    /**
-        \ingroup XliPlatform
 
-        Represents a window in the native window system.
-    */
-    class Window: public Object
+    class Window : public Object
     {
-    public:
+    public:        
+        enum State
+        {
+            Destroying,
+            Initializing,
+            Visible,
+            Hidden,
+        };
+
+        Window()
+        {
+            state_ = Destroying;
+        }
+        
         virtual ~Window() {}
 
-        /**
-            Returns the window implementation type
-        */
-        virtual WindowImplementation GetImplementation() = 0;
+        State CurrentState() const { return state_; }
+
+        void Initialize();
+        void Show();
+        void Hide();
+        void Destroy();
+
+        void OnDraw() {}
 
         /**
-            Sets the handler that should recieve events from the window
+            Returns the window implementation type (enum)
+        */        
+        WindowImplementation GetImplementation();
+
+        //{TODO}
+        /**
+           Closes the window
         */
-        virtual void SetEventHandler(WindowEventHandler* handler) = 0;
+        void Close();
 
         /**
-            Returns the current event handler for the window
+           Returns wether or not the window has been closed by the user or operating system.
         */
-        virtual WindowEventHandler* GetEventHandler() = 0;
-
-        /**
-            Closes the window
-        */
-        virtual void Close() = 0;
-
-        /**
-            Returns wether or not the window has been closed by the user or operating system.
-        */
-        virtual bool IsClosed() = 0;
-
-        /**
-            Returns wether or not the window is currently visible (i.e. not minimized or hidden).
-        */
-        virtual bool IsVisible() = 0;
-
+        bool IsClosed();
+        
         /**
             Sets the fullscreen mode of the window. 
             The window will go fullscreen on the display which contains the windows centre coordinate and stretched to that displays resolution.
         */
-        virtual void SetFullscreen(bool fullscreen) = 0;
+        void SetFullscreen(bool fullscreen);
 
         /**
             Returns if this is a fullscreen window
         */
-        virtual bool IsFullscreen() = 0;
+        bool IsFullscreen();
 
         /**
             Minimizes the window
         */
-        virtual void Minimize() = 0;
+        void Minimize();
 
         /**
             Maximizes the window
         */
-        virtual void Maximize() = 0;
+        void Maximize();
 
         /**
             Restores the window from maximized/minimized state to normal position
         */
-        virtual void Restore() = 0;
+        void Restore();
 
         /**
             Returns if this window is minimized
         */
-        virtual bool IsMinimized() = 0;
+        bool IsMinimized();
 
         /**
             Returns if this window is maximized
         */
-        virtual bool IsMaximized() = 0;
+        bool IsMaximized();
 
         /**
             Sets the windows title
         */
-        virtual void SetTitle(const String& title) = 0;
+        void SetTitle(const String& title);
 
         /**
             Returns the windows title
         */
-        virtual String GetTitle() = 0;
+        String GetTitle();
 
         /**
             Sets the position of the window
         */
-        virtual void SetPosition(Vector2i pos) = 0;
+        void SetPosition(Vector2i pos);
 
         /**
             Returns the position of the window
         */
-        virtual Vector2i GetPosition() = 0;
+        Vector2i GetPosition();
 
         /**
             Sets the size of the client area of the window
         */
-        virtual void SetClientSize(Vector2i size) = 0;
+        void SetClientSize(Vector2i size);
 
         /**
             Returns the size of the client area of the window
         */
-        virtual Vector2i GetClientSize() = 0;
+        Vector2i GetClientSize();
 
         /**
             Returns the index for the display containing this windows center coordinate
         */
-        virtual int GetDisplayIndex() = 0;
+        int GetDisplayIndex();
 
         /**
             Returns the native windows handle
         */
-        virtual void* GetNativeHandle() = 0;
-
-        /**
-            Returns true if the specified Key is currently pressed
-        */
-        virtual bool GetKeyState(Key key) = 0;
-
-        /**
-            Returns true if the specified MouseButton is currently pressed
-        */
-        virtual bool GetMouseButtonState(MouseButton button) = 0;
-
-        /**
-            Sets the current mouse position relative to the client area of the window
-        */
-        virtual void SetMousePosition(Vector2i position) = 0;
-
-        /**
-            Returns the current mouse position relative to the client area of the window
-        */
-        virtual Vector2i GetMousePosition() = 0;
-
-        /**
-            Sets the system cursor to be used in the window
-        */
-        virtual void SetSystemCursor(SystemCursor cursor) = 0;
-
-        /**
-            Returns the current system cursor used in the window
-        */
-        virtual SystemCursor GetSystemCursor() = 0;
-
-        virtual void BeginTextInput(TextInputHint hint) { }
-        virtual void EndTextInput() { }
-        virtual bool IsTextInputActive() { return false; }
-
-        virtual bool HasOnscreenKeyboardSupport() { return false; }
-        virtual bool IsOnscreenKeyboardVisible() { return false; }
-
-        virtual void SetOnscreenKeyboardPosition(Vector2i position) { }
-        virtual Vector2i GetOnscreenKeyboardPosition() { return Vector2i(0, 0); }
-        virtual Vector2i GetOnscreenKeyboardSize() { return Vector2i(0, 0); }
-
-        virtual bool IsStatusBarVisible() { return false; }
-        virtual Vector2i GetStatusBarPosition() { return Vector2i(0, 0); }
-        virtual Vector2i GetStatusBarSize() { return Vector2i(0, 0); }
-
+        void* GetNativeHandle();
         /**
             Sets the window that should be used as main window
         */
@@ -202,29 +160,19 @@ namespace Xli
         */
         static Vector2i GetScreenSize();
 
-        /**
-            Creates a window
-        */
-        static Window* Create(int width, int height, const Xli::String& title, int flags = 0);
+    protected:
+        void OnInitialize() {}
+        void OnShow() {}
+        void OnHide() {}
+        void OnDestroy() {}
 
-        /**
-            Creates a window
-        */
-        static Window* Create(const Vector2i& size, const Xli::String& title, int flags = 0)
-        { 
-            return Create(size.X, size.Y, title, flags);
-        }
+    private:        
+        Window(Window const &);
+        void operator=(Window const &);
 
-        /**
-            Adopts a native window
-        */
-        static Window* CreateFrom(void* nativeWindowHandle);
-
-        /**
-            Process messages for the application to keep user interface responsive.
-        */
-        static void ProcessMessages();
+        State state_;
     };
+
 }
 
 #endif

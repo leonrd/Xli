@@ -77,7 +77,7 @@ namespace Xli
         return false;
     }
 
-#if !defined(XLI_PLATFORM_OSX) && !defined(XLI_PLATFORM_IOS)
+#if !defined(XLI_PLATFORM_OSX)
     float Display::GetDensity(int displayIndex)
     {
         // TODO

@@ -12,8 +12,7 @@ if (XLI_PLATFORM_ANDROID)
 
 elseif (XLI_PLATFORM_IOS)
 
-    include_directories(../../3rdparty/SDL2/include)
-    set(SRC ${SRC} sdl2/SDL2GLContext.cpp)
+    set(SRC ${SRC})
 
 elseif (XLI_PLATFORM_OSX)
 

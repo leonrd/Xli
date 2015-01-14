@@ -20,35 +20,73 @@
 #define __XLI_APPLICATION_H__
 
 #include <XliPlatform/Window.h>
-#include <XliPlatform/EventHandler.h>
+#include <XliPlatform/InputEventHandler.h>
 
 namespace Xli
 {
-    /**
-        \ingroup XliPlatform
-    */
-    class Application: public WindowEventHandler
+    class Application: public InputEventHandler
     {
-        int _maxFps;
-
-    protected:
-        void SetMaxFps(int value);
-
     public:
-        static void Run(Application* app, int flags = WindowFlagsResizeable);
+        static Application *SharedApp();
 
-        Application();
+        enum State
+        {
+            Terminating,
+            Starting,
+            Visible,
+            Active,
+            Background,
+        };
+
+        virtual int Run(int argc, char **argv);
+
+        char const *GetTitle() const;
+        State CurrentState() const { return state_; }
+
+        void Start();
+        void BecomeVisible();
+        void BecomeActive();
+        void ResignActive();
+        void EnterBackground();
+        void Terminate();
+
+        virtual Window* RootWindow();
+
+        virtual unsigned FrameRate() const;
+        virtual void SetFrameRate(unsigned frameRate);
+        virtual void OnUpdateFrame();
+
+        virtual void OnLowMemory();
 
         virtual String GetInitTitle();
         virtual Vector2i GetInitSize();
+    protected:
+        virtual void OnStart() {}
+        virtual void OnDidStart() {}
+        virtual void OnEnterVisible() {}
+        virtual void OnEnterActive() {}
+        virtual void OnExitActive() {}
+        virtual void OnEnterBackground() {}
+        virtual void OnTerminate() {}
 
-        virtual void OnInit(Window* wnd);
-        virtual void OnLoad(Window* wnd);
+        Application() : state_(Terminating) {}
+        virtual ~Application() {}
 
-        virtual void OnUpdate(Window* wnd);
-        virtual void OnDraw(Window* wnd);
+    private:
+        virtual void _FreeResources();
+        Application(Application const &);
+        void operator=(Application const &);
 
-        virtual void OnSizeChanged(Window* wnd);
+        void EmitOnStart();
+        void EmitOnDidStart();
+        void EmitOnEnterVisible();
+        void EmitOnEnterActive();
+        void EmitOnExitActive();
+        void EmitOnEnterBackground();
+        void EmitOnTerminate();
+        void EmitOnLowMemory();
+
+        State state_;
     };
 }
 

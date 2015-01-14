@@ -39,10 +39,10 @@ namespace Xli
                 SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, attribs.ColorBits.A);
                 SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, attribs.DepthBits);
                 SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, attribs.StencilBits);
-#ifndef XLI_PLATFORM_IOS
+
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, attribs.Samples > 1 ? 1 : 0);
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, attribs.Samples);
-#endif
+
                 SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE, attribs.AccumBits.R);
                 SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE, attribs.AccumBits.G);
                 SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, attribs.AccumBits.B);

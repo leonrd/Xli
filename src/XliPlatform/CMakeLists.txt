@@ -100,7 +100,7 @@ if (XLI_PLATFORM_ANDROID)
 
     set(SRC ${SRC}
         android/AFileSystem.cpp
-        android/ACrossThread.cpp    
+        android/ACrossThread.cpp
         android/AJniHelper.cpp
         android/AMessageBox.cpp
         android/AShim.cpp
@@ -133,28 +133,12 @@ elseif (XLI_PLATFORM_LINUX)
 
 elseif (XLI_PLATFORM_IOS)
 
-    include_directories(${SDL2_DIR}/include)
-
-    set(SRC ${SRC} ${SDL2_SRC} ${SDL2_STATIC_SRC}
+    set(SRC ${SRC}
         ios/iInit.mm
-        ${SDL2_DIR}/src/haptic/dummy/SDL_syshaptic.c
-        ${SDL2_DIR}/src/joystick/iphoneos/SDL_sysjoystick.m
-        ${SDL2_DIR}/src/power/uikit/SDL_syspower.m
-        ${SDL2_DIR}/src/render/opengles/SDL_render_gles.c
-        ${SDL2_DIR}/src/render/opengles2/SDL_render_gles2.c
-        ${SDL2_DIR}/src/render/opengles2/SDL_shaders_gles2.c
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitappdelegate.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitevents.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitmessagebox.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitmodes.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitopengles.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitopenglview.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitvideo.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitview.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitviewcontroller.m
-        ${SDL2_DIR}/src/video/uikit/SDL_uikitwindow.m
-        sdl2/SDL2Display_iOS.mm
-        sdl2/SDL2Window_iOS.mm)
+        ios/iGLContext.mm
+        ios/iDisplay.mm
+        ios/iWindow.mm
+        ios/iApplication.mm)
 
 elseif (XLI_PLATFORM_OSX)
 
