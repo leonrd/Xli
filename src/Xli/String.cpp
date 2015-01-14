@@ -25,6 +25,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <climits>
 
 #ifndef XLI_COMPILER_MSVC
 # define sprintf_s snprintf
@@ -441,9 +442,13 @@ namespace Xli
     {
         char *endptr;
         errno = 0;
-        int res = strtol(_data, &endptr, 0);
+        long res = strtol(_data, &endptr, 0);
         ValidateParsingResult("int", endptr);
-        return res;
+        if (res > INT_MAX || INT_MIN > res)
+        {
+           XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for int");
+        }
+        return (int)res;
     }
 
     unsigned long long String::ToULong() const
