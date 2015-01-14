@@ -1,8 +1,6 @@
 set(SRC Main.cpp)
 
-if (XLI_PLATFORM_IOS)
-   set(SRC ${SRC} ./ios/AppDelegate.mm)
-elseif (XLI_PLATFORM_ANDROID)
+if (XLI_PLATFORM_ANDROID)
 	set(SRC ${SRC} ../../3rdparty/android_native_app_glue/android_native_app_glue.c)
 endif()
 

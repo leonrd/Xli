@@ -138,7 +138,10 @@ elseif (XLI_PLATFORM_IOS)
         ios/iGLContext.mm
         ios/iDisplay.mm
         ios/iWindow.mm
-        ios/iApplication.mm)
+        ios/iApplication.mm
+        ./ios/AppDelegate.mm)
+
+
 
 elseif (XLI_PLATFORM_OSX)
 

@@ -24,7 +24,7 @@
 #include <XliPlatform/Window.h>
 #include <XliPlatform/InputEventHandler.h>
 
-#include "../../XliMain/ios/AppDelegate.h"
+#include "AppDelegate.h"
 #include "iWindow.h"
 
 #include <UIKit/UIKit.h>
