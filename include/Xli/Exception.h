@@ -74,6 +74,8 @@ namespace Xli
     /** @} */
 
     /** \ingroup XliExceptions */
+    XLI_DECLARE_EXCEPTION(OverflowException, "Overflow exception");
+    /** \ingroup XliExceptions */
     XLI_DECLARE_EXCEPTION(IndexOutOfBoundsException, "Index out of bounds");
     /** \ingroup XliExceptions */
     XLI_DECLARE_EXCEPTION(NullPointerException, "Null pointer access attempt");
@@ -115,6 +117,7 @@ namespace Xli
 #define XLI_THROW_INVALID_FORMAT(msg)       XLI_THROW_EX(::Xli::FormatException, msg)
 #define XLI_THROW_INVALID_ARGUMENT(msg)     XLI_THROW_EX(::Xli::ArgumentException, msg)
 #define XLI_THROW_NOT_SUPPORTED(msg)        XLI_THROW_EX(::Xli::NotSupportedException, msg)
+#define XLI_THROW_OVERFLOW_EXCEPTION(msg)   XLI_THROW_EX(::Xli::OverflowException, msg)
 
 #define XLI_THROW_STREAM_CLOSED             XLI_THROW_E(::Xli::StreamClosedException)
 #define XLI_THROW_STREAM_CANT_READ          XLI_THROW_E(::Xli::StreamCantReadException)

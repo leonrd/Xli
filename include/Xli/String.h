@@ -47,6 +47,7 @@ namespace Xli
         void Init(float f);
         void Init(double d);
         void Deinit();
+        void ValidateParsingResult(Xli::String typeName, char* endptr) const;
 
     public:
         String();
@@ -103,6 +104,8 @@ namespace Xli
 
         int HexToInt() const;
         int ToInt() const;
+        unsigned long long ToULong() const;
+        long long ToLong() const;
         float ToFloat() const;
         double ToDouble() const;
         bool ToBool() const;

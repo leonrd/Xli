@@ -20,6 +20,7 @@
 #include <Xli/String.h>
 #include <Xli/Array.h>
 #include <Xli/Exception.h>
+#include <errno.h>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
@@ -82,6 +83,19 @@ namespace Xli
     {
         if (_data != _buf)
             free(_data);
+    }
+
+    void String::ValidateParsingResult(Xli::String typeName, char* endptr) const
+    {
+        if (errno == ERANGE)
+        {
+            XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for " + typeName);
+        } 
+
+        if (*endptr != '\0')
+        {
+            XLI_THROW_INVALID_FORMAT("Unable to convert string to " + typeName);
+        }
     }
 
     String::String()
@@ -425,27 +439,58 @@ namespace Xli
 
     int String::ToInt() const
     {
-        int i;
-        if (sscanf_s(_data, "%d", &i) == 1) return i;
-        XLI_THROW_INVALID_FORMAT("Unable to convert string to int");
+        char *endptr;
+        errno = 0;
+        int res = strtol(_data, &endptr, 0);
+        ValidateParsingResult("int", endptr);
+        return res;
+    }
+
+    unsigned long long String::ToULong() const
+    {
+        char *endptr;
+        errno = 0;
+        unsigned long long res = strtoull(_data, &endptr, 0);
+        ValidateParsingResult("ulong", endptr);
+        if (strchr(_data, '-'))
+        {
+           XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for ulong");
+        }
+        return res;
+    }
+
+    long long String::ToLong() const
+    {
+        char *endptr;
+        errno = 0;
+        long long res = strtoll(_data, &endptr, 0);
+        ValidateParsingResult("long", endptr);
+        return res;
     }
 
     float String::ToFloat() const
     {
-        float i;
-        if (sscanf_s(_data, "%f", &i) == 1) return i;
-        if (sscanf_s(_data, "%e", &i) == 1) return i;
-        if (sscanf_s(_data, "%E", &i) == 1) return i;
-        XLI_THROW_INVALID_FORMAT("Unable to convert string to float");
+        float minFloatValue = -3.402823e38;
+        float maxFloatValue = 3.402823e38;
+        char *endptr;
+        errno = 0;
+        double res = strtod(_data, &endptr);
+        ValidateParsingResult("float", endptr);
+        if (res > maxFloatValue || res < minFloatValue)
+        {
+           XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for float");
+        }
+
+        return (float)res;
     }
 
     double String::ToDouble() const
     {
-        double i;
-        if (sscanf_s(_data, "%lf", &i) == 1) return i;
-        if (sscanf_s(_data, "%le", &i) == 1) return i;
-        if (sscanf_s(_data, "%lE", &i) == 1) return i;
-        XLI_THROW_INVALID_FORMAT("Unable to convert string to double");
+        char *endptr;
+        errno = 0;
+        double res = strtod(_data, &endptr);
+        ValidateParsingResult("double", endptr);
+        return res;
     }
 
     bool String::ToBool() const
