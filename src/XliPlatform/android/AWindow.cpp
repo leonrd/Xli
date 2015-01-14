@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include <XliPlatform/PlatformSpecific/Android.h>
+#include <XliPlatform/EventHandler.h>
 #include <XliPlatform/Window.h>
 #include <Xli/Console.h>
 #include "ACrossThread.h"
@@ -170,10 +171,14 @@ namespace Xli
 
             virtual void* GetNativeHandle()
             {
-                //return GlobalAndroidApp->window;
-                jobject unoSurface = AShim::GetUnoSurface();
-                AJniHelper jni;
-                return (void*)ANativeWindow_fromSurface(jni.GetEnv(), unoSurface);
+                if (Xli::PlatformSpecific::AShim::SupportsNativeUI())
+                {
+                    jobject unoSurface = AShim::GetUnoSurface();
+                    AJniHelper jni;
+                    return (void*)ANativeWindow_fromSurface(jni.GetEnv(), unoSurface);                    
+                } else {
+                    return GlobalAndroidApp->window;
+                }
             }
 
             virtual void SetTitle(const String& title)
@@ -467,10 +472,14 @@ namespace Xli
             switch (cmd)
             {
             case APP_CMD_INIT_WINDOW:
-                // GlobalInit = 1;
-                // if (GlobalEventHandler)
-                //     GlobalEventHandler->OnNativeHandleChanged(GlobalWindow);
-
+                if (!Xli::PlatformSpecific::AShim::SupportsNativeUI())
+                {
+                    GlobalInit = 1;
+                    if (GlobalEventHandler)
+                    {
+                        GlobalEventHandler->OnNativeHandleChanged(GlobalWindow);
+                    }
+                }
                 break;
 
             case APP_CMD_TERM_WINDOW:
@@ -587,10 +596,16 @@ namespace Xli
 
     Vector2i Window::GetScreenSize()
     {
-        //int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
-        //int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
-    	int w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
-    	int h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
+        int w = 0;
+        int h = 0;
+        if (Xli::PlatformSpecific::AShim::SupportsNativeUI())
+        {
+            w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
+            h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
+        } else {
+            w = ANativeWindow_getWidth(GlobalAndroidApp->window);
+            h = ANativeWindow_getHeight(GlobalAndroidApp->window);
+        }
         return Vector2i(w, h);
     }
 
@@ -619,16 +634,26 @@ namespace Xli
         struct android_poll_source* source;
 
         while ((ident = ALooper_pollAll(0, NULL, &events, (void**)&source)) >= 0)
+        {
             if (source != NULL)
+            {
                 source->process(GlobalAndroidApp, source);
+            }
+        }
 
         if (GlobalInit && !GlobalAndroidApp->destroyRequested)
         {
             // Detect window resize / screen rotation
-        	int w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
-        	int h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
-            //int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
-            //int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
+            int w = 0;
+            int h = 0;
+            if (Xli::PlatformSpecific::AShim::SupportsNativeUI())
+            {
+                w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
+                h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();            
+            } else {
+                w = ANativeWindow_getWidth(GlobalAndroidApp->window);
+                h = ANativeWindow_getHeight(GlobalAndroidApp->window);            
+            }
 
             if (w != GlobalWidth || h != GlobalHeight)
             {

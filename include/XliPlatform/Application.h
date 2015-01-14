@@ -20,6 +20,7 @@
 #define __XLI_APPLICATION_H__
 
 #include <XliPlatform/Window.h>
+#include <XliPlatform/EventHandler.h>
 
 namespace Xli
 {

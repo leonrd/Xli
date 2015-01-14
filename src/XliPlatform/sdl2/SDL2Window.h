@@ -19,6 +19,7 @@
 #ifndef __XLI_PLATFORM_SPECIFIC_SDL2_WINDOW_H__
 #define __XLI_PLATFORM_SPECIFIC_SDL2_WINDOW_H__
 
+#include <XliPlatform/EventHandler.h>
 #include <XliPlatform/Window.h>
 #include <Xli/Shared.h>
 #include <SDL.h>

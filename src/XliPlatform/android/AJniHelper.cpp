@@ -19,6 +19,7 @@
 
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/Window.h>
+#include <XliPlatform/EventHandler.h>
 #include <XliHttpClient.h>
 #include <pthread.h>
 #include <stdarg.h>

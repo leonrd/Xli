@@ -46,8 +46,12 @@ public class XliJ extends android.app.NativeActivity {
 	//--------------------------------------------
 	// Cached Activity
 	public static NativeActivity nActivity;
-	public static Surface nRootSurface;    
+	public static Surface nRootSurface;
+	public static int nRootSurfaceWidth = 400;
+	public static int nRootSurfaceHeight = 800;
+    public static boolean nSupportsNativeUI = false;
     public static void CacheActivity(final NativeActivity activity) { nActivity = activity; }
+    public static void SetSupportsNativeUI(final boolean supported) { nSupportsNativeUI = supported; }
 	
 	//--------------------------------------------
 	// Callbacks to C++ code
@@ -68,11 +72,40 @@ public class XliJ extends android.app.NativeActivity {
     // System
     public static void RootSurfaceChanged(Surface unoSurface)
     {
-        nRootSurface = unoSurface;
-        XliJ_UnoSurfaceReady(unoSurface);
+        if (nSupportsNativeUI) {
+            nRootSurface = unoSurface;
+            XliJ_UnoSurfaceReady(unoSurface);
+        }
     }
+	public static void RootSurfaceChangedDimensions(int width, int height) {
+        if (nSupportsNativeUI) {
+            nRootSurfaceHeight = height;
+            nRootSurfaceWidth = width;
+        }
+	}
     public static Surface GetUnoSurface() {
+        if (nSupportsNativeUI) {
         return nRootSurface;
+        } else {
+            return null;
+        }
+    }
+    public static int GetUnoSurfaceWidth() {
+        if (nSupportsNativeUI) {
+            return nRootSurfaceWidth;
+        } else {
+            return -1;
+        }
+    }
+    public static int GetUnoSurfaceHeight() {
+        if (nSupportsNativeUI) {
+            return nRootSurfaceHeight;
+        } else {
+            return -1;
+        }
+    }
+    public static boolean SupportsNativeUI() {
+        return nSupportsNativeUI;
     }
     public static void HideStatusBar() {
     	SystemHelper.hideStatusBar(nActivity);
@@ -91,7 +124,7 @@ public class XliJ extends android.app.NativeActivity {
     public static AssetManager GetAssetManager()
     {
         return nActivity.getAssets();
-    }   
+    }
 
     //--------------------------------------------
     // Vibration
@@ -109,14 +142,22 @@ public class XliJ extends android.app.NativeActivity {
     //--------------------------------------------
     // Keyboard
     public static void RaiseKeyboard() {
-        KeyboardHelper.ShowKeyboard();
+        if (!nSupportsNativeUI) {
+            KeyboardHelper.ShowKeyboard();
+        }
     }
     public static int GetKeyboardSize()
     {
-        return KeyboardHelper.GetKeyboardSize();
+        if (!nSupportsNativeUI) {
+            return 0;
+        } else {
+            return KeyboardHelper.GetKeyboardSize();
+        }
     }
     public static void HideKeyboard() {
-        KeyboardHelper.HideKeyboard();
+        if (!nSupportsNativeUI) {
+            KeyboardHelper.HideKeyboard();
+        }
     }
 
     //--------------------------------------------
@@ -171,7 +212,7 @@ public class XliJ extends android.app.NativeActivity {
 	
 	public static int SendHttpStringAsync(String url, String method, String headers, String body,
     								 			int timeout, long requestPointer, boolean verifyHost) {				
-    	return HttpHelper.SendHttpStringAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost);
+        return HttpHelper.SendHttpStringAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost);
     }
 
 	public static byte[] ReadAllBytesFromHttpInputStream(InputStream stream, long requestPointer) throws IOException

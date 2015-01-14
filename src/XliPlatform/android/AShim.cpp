@@ -59,6 +59,7 @@ namespace Xli
         jmethodID AShim::getUnoSurfaceHeight;
         jmethodID AShim::sendHttpAsyncA;
         jmethodID AShim::sendHttpAsyncB;
+        jmethodID AShim::supportsNativeUI;
 
         void AShim::CacheMids(JNIEnv *env, jclass shimClass)
         {
@@ -88,6 +89,7 @@ namespace Xli
             getUnoSurfaceHeight = env->GetStaticMethodID(shimClass, "GetUnoSurfaceHeight","()I");
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
+            supportsNativeUI = env->GetStaticMethodID(shimClass, "SupportsNativeUI", "()Z");
 
             if (!raiseKeyboard) XLI_THROW("Cannot cache mid for raiseKeyboard.");
             if (!hideKeyboard) XLI_THROW("Cannot cache mid for hideKeyboard.");
@@ -114,6 +116,7 @@ namespace Xli
             if (!getUnoSurfaceHeight) XLI_THROW("Cannot cache mid for getUnoSurfaceHeight.");
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
+            if (!supportsNativeUI) XLI_THROW("Cannot cache mid for supportsNativeUI.");
             LOGD("Mids Cached");
         }
 
@@ -510,6 +513,13 @@ namespace Xli
         {
             AJniHelper jni;
             int result = (int)jni->CallStaticIntMethod(jni.GetShim(), getUnoSurfaceHeight);
+            return result;
+        }
+
+        bool AShim::SupportsNativeUI()
+        {
+            AJniHelper jni;
+            bool result = (bool)jni->CallStaticIntMethod(jni.GetShim(), supportsNativeUI);
             return result;
         }
     }

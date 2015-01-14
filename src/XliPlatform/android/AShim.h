@@ -60,6 +60,7 @@ namespace Xli
             static jmethodID getUnoSurface;
             static jmethodID getUnoSurfaceWidth;
             static jmethodID getUnoSurfaceHeight;
+            static jmethodID supportsNativeUI;            
             
         public:
             static int kbVisible;
@@ -100,6 +101,7 @@ namespace Xli
             static jobject GetUnoSurface();
             static int GetUnoSurfaceWidth();
             static int GetUnoSurfaceHeight();
+            static bool SupportsNativeUI();            
         };
     };
 };
