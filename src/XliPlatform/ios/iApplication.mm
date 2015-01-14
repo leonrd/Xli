@@ -25,6 +25,7 @@
 #include <Xli/Thread.h>
 #include <Xli/Time.h>
 #include "iWindow.h"
+#include "../../XliMain/ios/AppDelegate.h"
 
 namespace Xli
 {

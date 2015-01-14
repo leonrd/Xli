@@ -32,11 +32,31 @@
 #include <OpenGLES/ES2/glext.h>
 #include <QuartzCore/QuartzCore.h>
 
+@interface uObjC_GLView : UIView
+@end
+
+@implementation uObjC_GLView
++ (Class)layerClass
+{
+    return [CAEAGLLayer class];
+}
+@end
+
+
+@interface uObjC_GLViewController : UIViewController
+@end
+
+@implementation uObjC_GLViewController
+@end
+
+Xli::Window* uStatic__Window;
+Xli::GLContext* uStatic__GLContext;
+
 namespace Xli
 {
     namespace PlatformSpecific
     {
-        iWindow::iWindow(int width, int height, const String& title, int flags)
+        iWindow::iWindow()
         {
             state_ = Destroying;
             window_ = 0;

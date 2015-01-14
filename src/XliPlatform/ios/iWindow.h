@@ -32,7 +32,7 @@ namespace Xli
         class iWindow : public Window
         {
         public:        
-            iWindow(int width, int height, const String& title, int flags);
+            iWindow();
         
             virtual ~iWindow();
 
