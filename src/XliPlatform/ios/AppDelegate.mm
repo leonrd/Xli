@@ -7,23 +7,20 @@
 
 - (void)uObjC_OnDidStart:(id)sender
 {
-    Xli::Application::SharedApp()->BecomeVisible();
+    sharedApplication->BecomeVisible();
 }
 
 - (void)uObjC_OnUpdateFrame:(id)sender
 {
-    Xli::Application::SharedApp()->OnUpdateFrame();
+    sharedApplication->OnUpdateFrame();
 }
 
 // Tells the delegate that the launch process has begun but that state restoration has not yet occurred.
 - (BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    // if (launchOptions) {TODO} parse launch options
-    //     return NO;
-
     Xli::PrintLine("------------------------------------------------------------ Test2");
-    Xli::Application::SharedApp()->Start(); // remove in favour of main
-    
+    sharedApplication = Xli::Application::SharedApp();
+    sharedApplication->Start();
     return YES;
 }
 
@@ -38,37 +35,37 @@
 // Tells the delegate that the app is about to enter the foreground.
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-    Xli::Application::SharedApp()->BecomeVisible();
+    sharedApplication->BecomeVisible();
 }
 
 // Tells the delegate that the app has become active.
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-    Xli::Application::SharedApp()->BecomeActive();
+    sharedApplication->BecomeActive();
 }
 
 // Tells the delegate that the app is about to become inactive.
 - (void)applicationWillResignActive:(UIApplication *)application
 {
-    Xli::Application::SharedApp()->ResignActive();
+    sharedApplication->ResignActive();
 }
 
 // Tells the delegate that the app is now in the background.
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    Xli::Application::SharedApp()->EnterBackground();
+    sharedApplication->EnterBackground();
 }
 
 // Tells the delegate when the app is about to terminate.
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    Xli::Application::SharedApp()->Terminate();
+    sharedApplication->Terminate();
 }
 
 // Tells the delegate when the app receives a memory warning from the system.
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
-    Xli::Application::SharedApp()->OnLowMemory();
+    sharedApplication->OnLowMemory();
 }
 
 @end
