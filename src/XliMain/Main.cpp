@@ -44,6 +44,8 @@ extern "C" int main(int argc, char** argv)
 #elif defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
+
+        result = Xli::Application::SharedApp()->Run(argc, argv);
     }
     catch (const Xli::Exception& e)
     {
@@ -54,8 +56,6 @@ extern "C" int main(int argc, char** argv)
         Xli::Exception e("An unsupported C++ exception was thrown");
         Xli::CoreLib::OnUnhandledException(e, "main");
     }        
-
-    Xli::Application::SharedApp()->Run(argc, argv);
 
     return result;
 }
