@@ -63,95 +63,95 @@ namespace Xli
         /**
            Returns the window implementation type (enum)
         */        
-        virtual void SetEventHandler(WindowEventHandler* handler);
-        virtual WindowEventHandler* GetEventHandler();
+        virtual void SetEventHandler(WindowEventHandler* handler) = 0;
+        virtual WindowEventHandler* GetEventHandler() = 0;
 
         //{TODO}
         /**
            Closes the window
         */
-        virtual void Close();
+        virtual void Close() = 0;
 
         /**
            Returns wether or not the window has been closed by the user or operating system.
         */
-        virtual bool IsClosed();
+        virtual bool IsClosed() = 0;
         
         /**
             Sets the fullscreen mode of the window. 
             The window will go fullscreen on the display which contains the windows centre coordinate and stretched to that displays resolution.
         */
-        virtual void SetFullscreen(bool fullscreen);
+        virtual void SetFullscreen(bool fullscreen) = 0;
 
         /**
             Returns if this is a fullscreen window
         */
-        virtual bool IsFullscreen();
+        virtual bool IsFullscreen() = 0;
 
         /**
             Minimizes the window
         */
-        virtual void Minimize();
+        virtual void Minimize() = 0;
 
         /**
             Maximizes the window
         */
-        virtual void Maximize();
+        virtual void Maximize() = 0;
 
         /**
             Restores the window from maximized/minimized state to normal position
         */
-        virtual void Restore();
+        virtual void Restore() = 0;
 
         /**
             Returns if this window is minimized
         */
-        virtual bool IsMinimized();
+        virtual bool IsMinimized() = 0;
 
         /**
             Returns if this window is maximized
         */
-        virtual bool IsMaximized();
+        virtual bool IsMaximized() = 0;
 
         /**
             Sets the windows title
         */
-        virtual void SetTitle(const String& title);
+        virtual void SetTitle(const String& title) = 0;
 
         /**
             Returns the windows title
         */
-        virtual String GetTitle();
+        virtual String GetTitle() = 0;
 
         /**
             Sets the position of the window
         */
-        virtual void SetPosition(Vector2i pos);
+        virtual void SetPosition(Vector2i pos) = 0;
 
         /**
             Returns the position of the window
         */
-        virtual Vector2i GetPosition();
+        virtual Vector2i GetPosition() = 0;
 
         /**
             Sets the size of the client area of the window
         */
-        virtual void SetClientSize(Vector2i size);
+        virtual void SetClientSize(Vector2i size) = 0;
 
         /**
             Returns the size of the client area of the window
         */
-        virtual Vector2i GetClientSize();
+        virtual Vector2i GetClientSize() = 0;
 
         /**
             Returns the index for the display containing this windows center coordinate
         */
-        virtual int GetDisplayIndex();
+        virtual int GetDisplayIndex() = 0;
 
         /**
             Returns the native windows handle
         */
-        virtual void* GetNativeHandle();
+        virtual void* GetNativeHandle() = 0;
 
         /**
            Returns the Window's GLContext

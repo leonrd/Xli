@@ -139,7 +139,7 @@ elseif (XLI_PLATFORM_IOS)
         ios/iDisplay.mm
         ios/iWindow.mm
         ios/iApplication.mm
-        ./ios/AppDelegate.mm)
+        ios/AppDelegate.mm)
 
 
 
