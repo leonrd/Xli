@@ -53,7 +53,14 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
+        iWindow::iWindow()
+        {
+            state_ = Destroying;
+            window_ = 0;
+        }
 
+        Window::State iWindow::CurrentState() const { return state_; }
+        
         void iWindow::SetEventHandler(WindowEventHandler* handler)
         {
             eventHandler = handler;
@@ -66,6 +73,11 @@ namespace Xli
         iWindow::~iWindow()
         {
             [window_ release];
+        }
+
+        WindowImplementation iWindow::GetImplementation()
+        {
+            return WindowImplementationiOS;
         }
 
         void iWindow::OnInitialize()
@@ -112,12 +124,12 @@ namespace Xli
 
         void iWindow::Close() {}
         bool iWindow::IsClosed() { return false; }
-        String iWindow::GetTitle() {}
+        String iWindow::GetTitle() { return "";}
         Vector2i iWindow::GetClientSize() { return Vector2i(0, 0);}
         Vector2i iWindow::GetPosition() { return Vector2i(0, 0); }
-        bool iWindow::IsFullscreen() {}
-        bool iWindow::IsMaximized() {}
-        bool iWindow::IsMinimized() {}
+        bool iWindow::IsFullscreen() { return false; }
+        bool iWindow::IsMaximized() { return false; }
+        bool iWindow::IsMinimized() { return false; }
         int iWindow::GetDisplayIndex() { return 0; }
         void iWindow::Maximize() {}
         void iWindow::Minimize() {}

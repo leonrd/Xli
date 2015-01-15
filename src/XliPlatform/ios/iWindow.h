@@ -32,15 +32,11 @@ namespace Xli
         class iWindow : public Window
         {
         public:        
-            iWindow()
-            {
-                state_ = Destroying;
-                window_ = 0;
-            }
+            iWindow();
         
             virtual ~iWindow();
 
-            State CurrentState() const { return state_; }
+            State CurrentState() const;
 
             /* void Initialize(); */
             /* void Show(); */

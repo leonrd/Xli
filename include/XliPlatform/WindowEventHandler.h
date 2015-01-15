@@ -35,6 +35,7 @@ namespace Xli
         WindowImplementationWin32,
         WindowImplementationAndroid,
         WindowImplementationSDL2,
+        WindowImplementationiOS,
     };
 
     /**
