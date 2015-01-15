@@ -40,23 +40,23 @@ namespace Xli
         {
         public:
             iGLContext() {}
-            virtual ~iGLContext();
+            ~GLContext();
 
             void Initialize(CAEAGLLayer* layer);
 
-            virtual GLContext* CreateSharedContext();
+            GLContext* CreateSharedContext();
 
-            virtual void GetAttributes(GLContextAttributes& result);
-            virtual Vector2i GetDrawableSize();
+            void GetAttributes(GLContextAttributes& result);
+            Vector2i GetDrawableSize();
 
-            virtual void MakeCurrent(Window* window);
-            virtual bool IsCurrent();
-            virtual void Destroy();
+            void MakeCurrent(Window* window);
+            bool IsCurrent();
+            void Destroy();
             
-            virtual void SwapBuffers();
+            void SwapBuffers();
 
-            virtual void SetSwapInterval(int value);
-            virtual int GetSwapInterval();
+            void SetSwapInterval(int value);
+            int GetSwapInterval();
         private:
             CAEAGLLayer* layer_;
             EAGLContext* context_;
