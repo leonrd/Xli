@@ -5,11 +5,6 @@
 
 @implementation uObjC_AppDelegate
 
-- (void)uObjC_OnDidStart:(id)sender
-{
-    sharedApplication->BecomeVisible();
-}
-
 - (void)uObjC_OnUpdateFrame:(id)sender
 {
     sharedApplication->OnUpdateFrame();
@@ -21,14 +16,6 @@
     Xli::PrintLine("------------------------------------------------------------ Test2");
     sharedApplication = Xli::Application::SharedApp();
     sharedApplication->Start();
-    return YES;
-}
-
-// Tells the delegate that the launch process is almost done and the app is almost ready to run.
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-    [self performSelector:@selector(uObjC_OnDidStart:)
-        withObject:self afterDelay:0.0];
     return YES;
 }
 
