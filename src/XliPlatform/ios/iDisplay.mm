@@ -59,7 +59,7 @@ namespace Xli
         return Vector2(72, 72);
     }
 
-    virtual Vector2i GetStatusBarSize()
+    Vector2i Display::GetStatusBarSize()
     {
         return Vector2i(0,0);
     }
