@@ -29,6 +29,8 @@
 # include <XliPlatform/PlatformSpecific/iOS.h>
 #endif
 
+extern Xli::Application RequestApplication();
+
 extern "C" int main(int argc, char** argv)
 {
     int result = EXIT_FAILURE;

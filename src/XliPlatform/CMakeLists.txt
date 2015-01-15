@@ -134,14 +134,17 @@ elseif (XLI_PLATFORM_LINUX)
 elseif (XLI_PLATFORM_IOS)
 
     set(SRC ${SRC}
+        generic/GenericBundle.cpp
+        generic/GenericDialogs.cpp
+        unix/UnixFileSystemBase.cpp
+        cocoa/CocoaFileSystem.mm        
         ios/iInit.mm
         ios/iGLContext.mm
         ios/iDisplay.mm
         ios/iWindow.mm
         ios/iApplication.mm
         ios/AppDelegate.mm
-        ios/PlatformLib.cpp
-        sdl2/SDL2Display_iOS.mm)
+        ios/PlatformLib.cpp)
 
 
 

@@ -27,6 +27,8 @@
 #include "iWindow.h"
 #include "AppDelegate.h"
 
+#include <Xli/Console.h>
+
 namespace Xli
 {
     static PlatformSpecific::iWindow window_;
@@ -45,7 +47,7 @@ namespace Xli
 
         // Need the pool, but little point in actually releasing it
         (void) [[NSAutoreleasePool alloc] init];
-
+        
         // UIApplicationMain doesn't return, but exceptions may be caught here.
         return UIApplicationMain(
             argc, argv, nil, NSStringFromClass([uObjC_AppDelegate class]));
@@ -76,6 +78,7 @@ namespace Xli
 
     void Application::EmitOnStart()
     {
+        PrintLine("----------------- EmitOnStart");
         window_.Initialize();
         window_.SetEventHandler(this);
 
@@ -90,11 +93,13 @@ namespace Xli
 
     void Application::EmitOnDidStart()
     {
+        PrintLine("----------------- EmitOnDidStart");
         OnDidStart();
     }
 
     void Application::EmitOnEnterVisible()
     {
+        PrintLine("----------------- EmitOnEnterVisible");
         window_.Show();
 
         displayLink_.frameInterval = 10;
@@ -105,18 +110,21 @@ namespace Xli
 
     void Application::EmitOnEnterActive()
     {
+        PrintLine("----------------- EmitOnEnterActive");
         displayLink_.frameInterval = 1;
         OnEnterActive();
     }
 
     void Application::EmitOnExitActive()
     {
+        PrintLine("----------------- EmitOnExitActive");
         OnExitActive();
         displayLink_.frameInterval = 10;
     }
 
     void Application::EmitOnEnterBackground()
     {
+        PrintLine("----------------- EmitOnEnterBackground");
         OnEnterBackground();
         displayLink_.paused = YES;
         window_.Hide();
@@ -124,12 +132,14 @@ namespace Xli
 
     void Application::EmitOnTerminate()
     {
+        PrintLine("----------------- EmitOnTerminate");
         OnTerminate();
         _FreeResources();
     }
 
     void Application::EmitOnLowMemory()
     {
+        PrintLine("----------------- EmitOnLowMemory");
         OnLowMemory();
         if (window_.CurrentState() == Window::Hidden)
             _FreeResources();
@@ -141,12 +151,5 @@ namespace Xli
         displayLink_ = 0;
 
         window_.Destroy();
-    }
-
-    // Default OpenGL-based Application
-    Application* Application::SharedApp()
-    {
-        static Application sharedApp;
-        return &sharedApp;
     }
 }

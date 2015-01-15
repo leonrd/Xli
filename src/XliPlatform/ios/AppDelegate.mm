@@ -1,6 +1,7 @@
 #include "AppDelegate.h"
 #include <XliPlatform/Application.h>
 #include <XliPlatform/Window.h>
+#include <Xli/Console.h>
 
 @implementation uObjC_AppDelegate
 
@@ -20,6 +21,7 @@
     // if (launchOptions) {TODO} parse launch options
     //     return NO;
 
+    Xli::PrintLine("------------------------------------------------------------ Test2");
     Xli::Application::SharedApp()->Start(); // remove in favour of main
     
     return YES;

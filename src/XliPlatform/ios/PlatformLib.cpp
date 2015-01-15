@@ -23,15 +23,6 @@
 
 namespace Xli
 {
-    FileSystem* CreateBundleFileSystem()
-    {
-        return 0;
-    }
-
-    NativeFileSystem* CreateNativeFileSystem()
-    {
-        return 0;
-    }
 
     void InitWindow()
     {

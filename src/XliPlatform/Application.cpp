@@ -25,6 +25,8 @@
 #include <Xli/Time.h>
 #include <cassert>
 
+#include <Xli/Console.h>
+
 namespace Xli
 {
     
@@ -45,6 +47,7 @@ namespace Xli
     // Lifecycle    
     void Application::Start()
     {
+        PrintLine("----------------- Start");
         switch (state_)
         {
         case Active:
@@ -66,6 +69,7 @@ namespace Xli
 
     void Application::BecomeVisible()
     {
+        PrintLine("----------------- BecomeVisible");        
         switch (state_)
         {
         case Terminating:
@@ -92,6 +96,7 @@ namespace Xli
 
     void Application::BecomeActive()
     {
+        PrintLine("----------------- BecomeActive");
         switch (state_)
         {
         case Terminating:
@@ -114,6 +119,7 @@ namespace Xli
 
     void Application::ResignActive()
     {
+        PrintLine("----------------- ResignActive");
         switch (state_)
         {
         case Terminating:
@@ -138,6 +144,7 @@ namespace Xli
 
     void Application::EnterBackground()
     {
+        PrintLine("----------------- EnterBackground");
         switch (state_)
         {
         case Active:
@@ -163,6 +170,7 @@ namespace Xli
 
     void Application::Terminate()
     {
+        PrintLine("----------------- Terminate");
         switch (state_)
         {
         case Active:
