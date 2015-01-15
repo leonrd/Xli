@@ -47,7 +47,8 @@ namespace Xli
         (void) [[NSAutoreleasePool alloc] init];
 
         // UIApplicationMain doesn't return, but exceptions may be caught here.
-        return UIApplicationMain(argc, argv, nil, @"uObjC_AppDelegate");
+        return UIApplicationMain(
+            argc, argv, nil, NSStringFromClass([uObjC_AppDelegate class]));
     }
 
     Window* Application::RootWindow()
