@@ -17,12 +17,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
-#include <XliPlatform/InputEventHandler.h> 
 #include <XliPlatform/Window.h>
-#include <Xli/Thread.h>
-#include <Xli/StringBuilder.h>
-#include <cstring>
 #include <cassert>
 
 namespace Xli
@@ -59,6 +54,7 @@ namespace Xli
 
         case Initializing:
         case Hidden:
+            state_ = Visible;
             OnShow();
 
         case Visible:
