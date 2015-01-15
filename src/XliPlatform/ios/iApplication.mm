@@ -76,6 +76,7 @@ namespace Xli
     void Application::EmitOnStart()
     {
         window_.Initialize();
+        window_.SetEventHandler(this);
 
         uObjC_AppDelegate* appDelegate = [UIApplication sharedApplication].delegate;
 
@@ -83,6 +84,7 @@ namespace Xli
                         selector:@selector(uObjC_OnUpdateFrame:)];
         [displayLink_ addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         displayLink_.paused = YES;
+        OnStart();
     }
 
     void Application::EmitOnEnterVisible()

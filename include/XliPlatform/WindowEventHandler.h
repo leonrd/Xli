@@ -16,24 +16,36 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_PLATFORM_H__
-#define __XLI_PLATFORM_H__
+#ifndef __XLI_PLATFORM_WINDOWEVENTHANDLER_H__
+#define __XLI_PLATFORM_WINDOWEVENTHANDLER_H__
 
-/**
-    \defgroup XliPlatform
-    \brief Application interface, windows and input devices
-    \ingroup XliPlatformLibs
-*/
+#include <Xli/Object.h>
+#include <Xli/Vector2.h>
 
-#include <XliPlatform/Application.h>
-#include <XliPlatform/Bundle.h>
-#include <XliPlatform/CommonDialogs.h>
-#include <XliPlatform/Disk.h>
-#include <XliPlatform/Display.h>
-#include <XliPlatform/MessageBox.h>
-#include <XliPlatform/PlatformLib.h>
-#include <XliPlatform/Window.h>
-#include <XliPlatform/InputEventHandler.h>
-#include <XliPlatform/WindowEventHandler.h>
+namespace Xli
+{
+    class Window;
+
+    /**
+        \ingroup XliPlatform
+    */
+    enum WindowImplementation
+    {
+        WindowImplementationUnknown,
+        WindowImplementationWin32,
+        WindowImplementationAndroid,
+        WindowImplementationSDL2,
+    };
+
+    /**
+        \ingroup XliPlatform
+    */
+    class WindowEventHandler: public Object
+    {
+    public:
+        virtual void OnSizeChanged(Window* wnd) {}
+        virtual void OnNativeHandleChanged(Window* wnd) {}
+    };
+}
 
 #endif

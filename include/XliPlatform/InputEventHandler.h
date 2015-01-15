@@ -215,36 +215,41 @@ namespace Xli
     /**
         \ingroup XliPlatform
     */
-    enum WindowImplementation
-    {
-        WindowImplementationUnknown,
-        WindowImplementationWin32,
-        WindowImplementationAndroid,
-        WindowImplementationSDL2,
-    };
-    
-    /**
-        \ingroup XliPlatform
-    */
     class InputEventHandler: public Object
     {
     public:
-        virtual bool OnKeyDown(Window* wnd, Key key);
-        virtual bool OnKeyUp(Window* wnd, Key key);
-        virtual bool OnTextInput(Window* wnd, const String& text);
-        virtual bool OnKeyboardResized(Window* wnd);
+        virtual bool OnKeyDown(Window* wnd, Key key) { return false; }
+        virtual bool OnKeyUp(Window* wnd, Key key) { return false; }
+        virtual bool OnTextInput(Window* wnd, const String& text) { return false; }
+        virtual bool OnKeyboardResized(Window* wnd) { return false; }
         
-        virtual bool OnMouseDown(Window* wnd, Vector2i pos, MouseButton button);
-        virtual bool OnMouseUp(Window* wnd, Vector2i pos, MouseButton button);
-        virtual bool OnMouseMove(Window* wnd, Vector2i pos);
-        virtual bool OnMouseWheel(Window* wnd, Vector2i delta);
+        virtual bool OnMouseDown(Window* wnd, Vector2i pos, MouseButton button) { return false; }
+        virtual bool OnMouseUp(Window* wnd, Vector2i pos, MouseButton button) { return false; }
+        virtual bool OnMouseMove(Window* wnd, Vector2i pos) { return false; }
+        virtual bool OnMouseWheel(Window* wnd, Vector2i delta) { return false; }
         
-        virtual bool OnTouchDown(Window* wnd, Vector2 pos, int id);
-        virtual bool OnTouchMove(Window* wnd, Vector2 pos, int id);
-        virtual bool OnTouchUp(Window* wnd, Vector2 pos, int id);
-        
-        virtual void OnSizeChanged(Window* wnd);
-        virtual void OnNativeHandleChanged(Window* wnd);
+        virtual bool OnTouchDown(Window* wnd, Vector2 pos, int id) { return false; }
+        virtual bool OnTouchMove(Window* wnd, Vector2 pos, int id) { return false; }
+        virtual bool OnTouchUp(Window* wnd, Vector2 pos, int id) { return false; }
+
+        /**
+           Returns true if the specified Key is currently pressed
+        */
+        virtual bool GetKeyState(Key key) { return false; }
+        /**
+           Returns true if the specified MouseButton is currently pressed
+        */
+        virtual bool GetMouseButtonState(MouseButton button) { return false; }
+
+        virtual void BeginTextInput(TextInputHint hint) {}
+        virtual void EndTextInput() {}
+
+        virtual bool HasOnscreenKeyboardSupport() { return false; }
+        virtual bool IsOnscreenKeyboardVisible() { return false; }
+        virtual void SetOnscreenKeyboardPosition(Vector2i position) { }
+        virtual Vector2i GetOnscreenKeyboardPosition() { return Vector2i(0, 0); }
+        virtual Vector2i GetOnscreenKeyboardSize() { return Vector2i(0, 0); }
+
     };
 }
 

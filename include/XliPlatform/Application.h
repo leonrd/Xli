@@ -24,10 +24,10 @@
 
 namespace Xli
 {
-    class Application: public InputEventHandler
+    class Application: public InputEventHandler, public WindowEventHandler
     {
     public:
-        static Application *SharedApp();
+        static Application* SharedApp();
 
         enum State
         {
@@ -54,12 +54,12 @@ namespace Xli
 
         virtual unsigned FrameRate() const;
         virtual void SetFrameRate(unsigned frameRate);
-        virtual void OnUpdateFrame();
-
-        virtual void OnLowMemory();
 
         virtual String GetInitTitle();
         virtual Vector2i GetInitSize();
+
+        virtual void OnUpdateFrame() {}        
+        virtual void OnLowMemory() {}      
     protected:
         virtual void OnStart() {}
         virtual void OnDidStart() {}
@@ -68,6 +68,7 @@ namespace Xli
         virtual void OnExitActive() {}
         virtual void OnEnterBackground() {}
         virtual void OnTerminate() {}
+
 
         Application() : state_(Terminating) {}
         virtual ~Application() {}

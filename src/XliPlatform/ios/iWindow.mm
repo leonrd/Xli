@@ -49,17 +49,18 @@
 @implementation uObjC_GLViewController
 @end
 
-Xli::Window* uStatic__Window;
-Xli::GLContext* uStatic__GLContext;
-
 namespace Xli
 {
     namespace PlatformSpecific
     {
-        iWindow::iWindow()
+
+        void iWindow::SetEventHandler(WindowEventHandler* handler)
         {
-            state_ = Destroying;
-            window_ = 0;
+            eventHandler = handler;
+        }
+        WindowEventHandler* iWindow::GetEventHandler()
+        {
+            return eventHandler;
         }
         
         iWindow::~iWindow()
@@ -84,9 +85,6 @@ namespace Xli
 
             window_.hidden = false;
             [window_ makeKeyWindow];
-
-            uStatic__Window = this;
-            uStatic__GLContext = &context_;
         }
 
         void iWindow::OnShow()
@@ -94,7 +92,10 @@ namespace Xli
             context_.MakeCurrent(0);
         }
 
-        // void OnHide() {}
+        void iWindow::OnHide()
+        {
+            
+        }
 
         void iWindow::OnDraw()
         {
@@ -126,6 +127,7 @@ namespace Xli
         void iWindow::SetPosition(Vector2i pos) {}
         void iWindow::SetTitle(const String& title) {}
         void* iWindow::GetNativeHandle() { return (void*)0; }
+        GLContext* iWindow::GetContext() { return &context_; }
     }
 
     

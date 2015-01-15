@@ -39,7 +39,7 @@ namespace Xli
         class iGLContext : public Xli::GLContext
         {
         public:
-            iGLContext();
+            iGLContext() {}
             virtual ~iGLContext();
 
             void Initialize(CAEAGLLayer* layer);

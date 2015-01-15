@@ -21,11 +21,13 @@
 
 #include <Xli/Object.h>
 #include <Xli/Vector2.h>
-#include <XliPlatform/InputEventHandler.h>
+#include <XliPlatform/WindowEventHandler.h>
 
 namespace Xli
 {
 
+    class GLContext;
+    
     class Window : public Object
     {
     public:        
@@ -51,99 +53,111 @@ namespace Xli
         void Hide();
         void Destroy();
 
-        void OnDraw() {}
+        virtual void OnDraw() {}
 
         /**
             Returns the window implementation type (enum)
         */        
         WindowImplementation GetImplementation();
 
+        /**
+           Returns the window implementation type (enum)
+        */        
+        virtual void SetEventHandler(WindowEventHandler* handler);
+        virtual WindowEventHandler* GetEventHandler();
+
         //{TODO}
         /**
            Closes the window
         */
-        void Close();
+        virtual void Close();
 
         /**
            Returns wether or not the window has been closed by the user or operating system.
         */
-        bool IsClosed();
+        virtual bool IsClosed();
         
         /**
             Sets the fullscreen mode of the window. 
             The window will go fullscreen on the display which contains the windows centre coordinate and stretched to that displays resolution.
         */
-        void SetFullscreen(bool fullscreen);
+        virtual void SetFullscreen(bool fullscreen);
 
         /**
             Returns if this is a fullscreen window
         */
-        bool IsFullscreen();
+        virtual bool IsFullscreen();
 
         /**
             Minimizes the window
         */
-        void Minimize();
+        virtual void Minimize();
 
         /**
             Maximizes the window
         */
-        void Maximize();
+        virtual void Maximize();
 
         /**
             Restores the window from maximized/minimized state to normal position
         */
-        void Restore();
+        virtual void Restore();
 
         /**
             Returns if this window is minimized
         */
-        bool IsMinimized();
+        virtual bool IsMinimized();
 
         /**
             Returns if this window is maximized
         */
-        bool IsMaximized();
+        virtual bool IsMaximized();
 
         /**
             Sets the windows title
         */
-        void SetTitle(const String& title);
+        virtual void SetTitle(const String& title);
 
         /**
             Returns the windows title
         */
-        String GetTitle();
+        virtual String GetTitle();
 
         /**
             Sets the position of the window
         */
-        void SetPosition(Vector2i pos);
+        virtual void SetPosition(Vector2i pos);
 
         /**
             Returns the position of the window
         */
-        Vector2i GetPosition();
+        virtual Vector2i GetPosition();
 
         /**
             Sets the size of the client area of the window
         */
-        void SetClientSize(Vector2i size);
+        virtual void SetClientSize(Vector2i size);
 
         /**
             Returns the size of the client area of the window
         */
-        Vector2i GetClientSize();
+        virtual Vector2i GetClientSize();
 
         /**
             Returns the index for the display containing this windows center coordinate
         */
-        int GetDisplayIndex();
+        virtual int GetDisplayIndex();
 
         /**
             Returns the native windows handle
         */
-        void* GetNativeHandle();
+        virtual void* GetNativeHandle();
+
+        /**
+           Returns the Window's GLContext
+        */        
+        virtual GLContext* GetContext() {}
+        
         /**
             Sets the window that should be used as main window
         */
@@ -161,10 +175,10 @@ namespace Xli
         static Vector2i GetScreenSize();
 
     protected:
-        void OnInitialize() {}
-        void OnShow() {}
-        void OnHide() {}
-        void OnDestroy() {}
+        virtual void OnInitialize() {}
+        virtual void OnShow() {}
+        virtual void OnHide() {}
+        virtual void OnDestroy() {}
 
     private:        
         Window(Window const &);

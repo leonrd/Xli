@@ -32,45 +32,55 @@ namespace Xli
         class iWindow : public Window
         {
         public:        
-            iWindow();
+            iWindow()
+            {
+                state_ = Destroying;
+                window_ = 0;
+            }
         
             virtual ~iWindow();
 
             State CurrentState() const { return state_; }
 
-            void Initialize();
-            void Show();
-            void Hide();
-            void Destroy();
+            /* void Initialize(); */
+            /* void Show(); */
+            /* void Hide(); */
+            /* void Destroy(); */
 
-            virtual void OnDraw();
+            void OnDraw();
 
-            virtual String GetTitle();
-            virtual Vector2i GetClientSize();
-            virtual Vector2i GetPosition();
-            virtual WindowImplementation GetImplementation();
-            virtual bool IsClosed();
-            virtual bool IsFullscreen();
-            virtual bool IsMaximized();
-            virtual bool IsMinimized();
-            virtual int GetDisplayIndex();
-            virtual void Close();
-            virtual void Maximize();
-            virtual void Minimize();
-            virtual void Restore();
-            virtual void SetClientSize(Vector2i size);
-            virtual void SetFullscreen(bool fullscreen);
-            virtual void SetPosition(Vector2i pos);
-            virtual void SetTitle(const String& title);
-            virtual void* GetNativeHandle();
+            String GetTitle();
+            Vector2i GetClientSize();
+            Vector2i GetPosition();
+            WindowImplementation GetImplementation();
+            
+            void SetEventHandler(WindowEventHandler* handler);
+            WindowEventHandler* GetEventHandler();
+            
+            bool IsClosed();
+            bool IsFullscreen();
+            bool IsMaximized();
+            bool IsMinimized();
+            int GetDisplayIndex();
+            void Close();
+            void Maximize();
+            void Minimize();
+            void Restore();
+            void SetClientSize(Vector2i size);
+            void SetFullscreen(bool fullscreen);
+            void SetPosition(Vector2i pos);
+            void SetTitle(const String& title);
+            void* GetNativeHandle();
+            GLContext* GetContext();            
 
         protected:
-            virtual void OnInitialize();
-            virtual void OnShow();
-            virtual void OnHide();
-            virtual void OnDestroy();
+            void OnInitialize();
+            void OnShow();
+            void OnHide();
+            void OnDestroy();
 
         private:
+            Shared<WindowEventHandler> eventHandler;            
             iGLContext context_;
             UIWindow* window_;
             bool _fullscreen;
