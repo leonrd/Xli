@@ -87,6 +87,11 @@ namespace Xli
         OnStart();
     }
 
+    void Application::EmitOnDidStart()
+    {
+        OnDidStart();
+    }
+
     void Application::EmitOnEnterVisible()
     {
         window_.Show();

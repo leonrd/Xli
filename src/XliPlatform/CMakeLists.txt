@@ -139,7 +139,9 @@ elseif (XLI_PLATFORM_IOS)
         ios/iDisplay.mm
         ios/iWindow.mm
         ios/iApplication.mm
-        ios/AppDelegate.mm)
+        ios/AppDelegate.mm
+        ios/PlatformLib.cpp
+        sdl2/SDL2Display_iOS.mm)
 
 
 

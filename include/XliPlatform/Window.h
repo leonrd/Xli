@@ -156,7 +156,7 @@ namespace Xli
         /**
            Returns the Window's GLContext
         */        
-        virtual GLContext* GetContext() {}
+        virtual GLContext* GetContext() = 0;
         
         /**
             Sets the window that should be used as main window

@@ -1,7 +1,6 @@
 #include <Xli/Console.h>
 #include <XliPlatform/Display.h>
 #include <XliPlatform/PlatformSpecific/iOS.h>
-#include <SDL.h>
 #include <sys/sysctl.h>
 #include <stdlib.h>
 #include <Xli/String.h>
