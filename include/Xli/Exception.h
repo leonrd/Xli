@@ -74,7 +74,7 @@ namespace Xli
     /** @} */
 
     /** \ingroup XliExceptions */
-    XLI_DECLARE_EXCEPTION(OverflowException, "Overflow exception");
+    XLI_DECLARE_EXCEPTION(OverflowException, "Overflow");
     /** \ingroup XliExceptions */
     XLI_DECLARE_EXCEPTION(IndexOutOfBoundsException, "Index out of bounds");
     /** \ingroup XliExceptions */
