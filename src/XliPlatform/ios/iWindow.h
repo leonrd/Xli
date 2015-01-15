@@ -38,11 +38,6 @@ namespace Xli
 
             State CurrentState() const;
 
-            /* void Initialize(); */
-            /* void Show(); */
-            /* void Hide(); */
-            /* void Destroy(); */
-
             void OnDraw();
 
             String GetTitle();
