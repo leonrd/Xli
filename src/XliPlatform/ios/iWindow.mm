@@ -58,6 +58,11 @@ namespace Xli
             state_ = Destroying;
             window_ = 0;
         }
+        
+        iWindow::~iWindow()
+        {
+            [window_ release];
+        }
 
         Window::State iWindow::CurrentState() const { return state_; }
         
@@ -68,11 +73,6 @@ namespace Xli
         WindowEventHandler* iWindow::GetEventHandler()
         {
             return eventHandler;
-        }
-        
-        iWindow::~iWindow()
-        {
-            [window_ release];
         }
 
         WindowImplementation iWindow::GetImplementation()
