@@ -86,14 +86,14 @@ namespace Xli
             free(_data);
     }
 
-    void String::ValidateParsingResult(Xli::String typeName, char* endptr) const
+    void String::ValidateParsingResult(Xli::String typeName, char* str, char* endptr) const
     {
         if (errno == ERANGE)
         {
             XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for " + typeName);
         } 
 
-        if (*endptr != '\0')
+        if (*endptr != '\0' || strlen(str) == 0)
         {
             XLI_THROW_INVALID_FORMAT("Unable to convert string to " + typeName);
         }
@@ -443,7 +443,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         long res = strtol(_data, &endptr, 0);
-        ValidateParsingResult("int", endptr);
+        ValidateParsingResult("int", _data, endptr);
         if (res > INT_MAX || INT_MIN > res)
         {
            XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for int");
@@ -456,7 +456,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         unsigned long long res = strtoull(_data, &endptr, 0);
-        ValidateParsingResult("ulong", endptr);
+        ValidateParsingResult("ulong", _data, endptr);
         if (strchr(_data, '-'))
         {
            XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for ulong");
@@ -469,7 +469,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         long long res = strtoll(_data, &endptr, 0);
-        ValidateParsingResult("long", endptr);
+        ValidateParsingResult("long", _data, endptr);
         return res;
     }
 
@@ -480,7 +480,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         double res = strtod(_data, &endptr);
-        ValidateParsingResult("float", endptr);
+        ValidateParsingResult("float", _data, endptr);
         if (res > maxFloatValue || res < minFloatValue)
         {
            XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for float");
@@ -494,7 +494,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         double res = strtod(_data, &endptr);
-        ValidateParsingResult("double", endptr);
+        ValidateParsingResult("double", _data, endptr);
         return res;
     }
 

@@ -47,7 +47,7 @@ namespace Xli
         void Init(float f);
         void Init(double d);
         void Deinit();
-        void ValidateParsingResult(Xli::String typeName, char* endptr) const;
+        void ValidateParsingResult(Xli::String typeName, char* str, char* endptr) const;
 
     public:
         String();
