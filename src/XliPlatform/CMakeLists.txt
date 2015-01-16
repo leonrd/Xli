@@ -144,6 +144,7 @@ elseif (XLI_PLATFORM_IOS)
         ios/iWindow.mm
         ios/iApplication.mm
         ios/AppDelegate.mm
+        ios/AppDelegate+ViewEvents.mm
         ios/PlatformLib.cpp)
 
 

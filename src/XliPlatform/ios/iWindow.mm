@@ -42,13 +42,6 @@
 }
 @end
 
-
-@interface uObjC_GLViewController : UIViewController
-@end
-
-@implementation uObjC_GLViewController
-@end
-
 namespace Xli
 {
     namespace PlatformSpecific
@@ -75,8 +68,8 @@ namespace Xli
             CGRect screenBounds = [[UIScreen mainScreen] bounds];
 
             window_ = [[UIWindow alloc] initWithFrame:screenBounds];
-            window_.rootViewController
-                = [[[uObjC_GLViewController alloc] init] autorelease];
+            window_.rootViewController = (UIViewController *)
+                [UIApplication sharedApplication].delegate;
             window_.rootViewController.view = [[[uObjC_GLView alloc]
                 initWithFrame:screenBounds] autorelease];
 
