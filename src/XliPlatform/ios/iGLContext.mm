@@ -52,6 +52,8 @@ namespace Xli
             assert(frameBuffer_ == 0);
             assert(depthStencilBuffer_ == 0);
 
+            [EAGLContext setCurrentContext:context_];
+
             glGenRenderbuffers(1, &renderBuffer_);
             glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
             [context_ renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer_];
@@ -73,7 +75,6 @@ namespace Xli
                 GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
                 depthStencilBuffer_);
 
-            [EAGLContext setCurrentContext:context_];
             glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
         }
 
