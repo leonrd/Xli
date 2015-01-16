@@ -17,9 +17,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <XliPlatform/Display.h>
-#include <XliPlatform/Window.h>
+#include <UIKit/UIKit.h>
 #include <Xli/Array.h>
+#include <XliPlatform/Display.h>
 
 namespace Xli
 {
@@ -30,17 +30,37 @@ namespace Xli
 
     Recti Display::GetRect(int index)
     {
-        Vector2i size = Window::GetScreenSize();
-        return Recti(0, 0, size.X, size.Y);
+        assert(index == 0);
+
+        CGRect screenBounds = [[UIScreen mainScreen] bounds];
+        return Recti(
+            screenBounds.origin.x, screenBounds.origin.y,
+            screenBounds.size.width, screenBounds.size.height);
     }
 
     bool Display::GetCurrentSettings(int index, DisplaySettings& settings)
     {
-        return false;
+        assert(index == 0);
+
+        UIScreen *screen = [UIScreen mainScreen];
+        CGFloat scale = screen.scale;
+        CGSize screenSize = screen.bounds.size;
+
+        settings.Resolution.X = screenSize.width * scale;
+        settings.Resolution.Y = screenSize.height * scale;
+        settings.RefreshRate = 60;
+        settings.BitsPerPixel = 32;
+        settings.DriverData = 0;
+
+        return true;
     }
 
     void Display::GetSupportedSettings(int index, Array<DisplaySettings>& settings)
     {
+        assert(index == 0);
+
+        int j = settings.Add();
+        GetCurrentSettings(index, settings[j]);
     }
 
     bool Display::ChangeSettings(int index, const DisplaySettings& settings)
@@ -50,17 +70,22 @@ namespace Xli
 
     float Display::GetDensity(int displayIndex)
     {
-        // TODO
-        return 1.0f;
+        assert(index == 0);
+        return [[UIScreen mainScreen] scale];
     }
+
     Vector2 Display::GetDpi(int displayIndex)
     {
-        // TODO
-        return Vector2(72, 72);
+        assert(index == 0);
+
+        CGFloat dpi = 163.0 * [[UIScreen mainScreen] scale];
+        return Vector2(dpi, dpi);
     }
 
     Vector2i Display::GetStatusBarSize()
     {
-        return Vector2i(0,0);
+        CGFloat scale = [[UIScreen mainScreen] scale];
+        CGSize size = [UIApplication sharedApplication].statusBarFrame.size;
+        return Vector2i(size.width * scale, size.height * scale);
     }
 }
