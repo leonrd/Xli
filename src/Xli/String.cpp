@@ -442,8 +442,9 @@ namespace Xli
     {
         char *endptr;
         errno = 0;
-        long res = strtol(_data, &endptr, 0);
-        ValidateParsingResult("int", _data, endptr);
+        char* trimmedData = this->Trim().Ptr();
+        long res = strtol(trimmedData, &endptr, 0);
+        ValidateParsingResult("int", trimmedData, endptr);
         if (res > INT_MAX || INT_MIN > res)
         {
            XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for int");
@@ -455,9 +456,10 @@ namespace Xli
     {
         char *endptr;
         errno = 0;
-        unsigned long long res = strtoull(_data, &endptr, 0);
-        ValidateParsingResult("ulong", _data, endptr);
-        if (strchr(_data, '-'))
+        char* trimmedData = this->Trim().Ptr();
+        unsigned long long res = strtoull(trimmedData, &endptr, 0);
+        ValidateParsingResult("ulong", trimmedData, endptr);
+        if (strchr(trimmedData, '-'))
         {
            XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for ulong");
         }
@@ -468,8 +470,9 @@ namespace Xli
     {
         char *endptr;
         errno = 0;
-        long long res = strtoll(_data, &endptr, 0);
-        ValidateParsingResult("long", _data, endptr);
+        char* trimmedData = this->Trim().Ptr();
+        long long res = strtoll(trimmedData, &endptr, 0);
+        ValidateParsingResult("long", trimmedData, endptr);
         return res;
     }
 
@@ -479,8 +482,9 @@ namespace Xli
         float maxFloatValue = 3.402823e38;
         char *endptr;
         errno = 0;
-        double res = strtod(_data, &endptr);
-        ValidateParsingResult("float", _data, endptr);
+        char* trimmedData = this->Trim().Ptr();
+        double res = strtod(trimmedData, &endptr);
+        ValidateParsingResult("float", trimmedData, endptr);
         if (res > maxFloatValue || res < minFloatValue)
         {
            XLI_THROW_OVERFLOW_EXCEPTION("Value was either too large or too small for float");
@@ -493,19 +497,21 @@ namespace Xli
     {
         char *endptr;
         errno = 0;
-        double res = strtod(_data, &endptr);
-        ValidateParsingResult("double", _data, endptr);
+        char* trimmedData = this->Trim().Ptr();
+        double res = strtod(trimmedData, &endptr);
+        ValidateParsingResult("double", trimmedData, endptr);
         return res;
     }
 
     bool String::ToBool() const
     {
-        if (!strcmp(_data, "true")) return true;
-        if (!strcmp(_data, "false")) return false;
-        if (!strcmp(_data, "TRUE")) return true;
-        if (!strcmp(_data, "FALSE")) return false;
-        if (!strcmp(_data, "True")) return true;
-        if (!strcmp(_data, "False")) return false;
+        char* trimmedData = this->Trim().Ptr();
+        if (!strcmp(trimmedData, "true")) return true;
+        if (!strcmp(trimmedData, "false")) return false;
+        if (!strcmp(trimmedData, "TRUE")) return true;
+        if (!strcmp(trimmedData, "FALSE")) return false;
+        if (!strcmp(trimmedData, "True")) return true;
+        if (!strcmp(trimmedData, "False")) return false;
         XLI_THROW_INVALID_FORMAT("Unable to convert string to bool");
     }
 
