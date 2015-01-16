@@ -7,7 +7,6 @@ set(LIBS Xli XliPlatform)
 
 if (XLI_PLATFORM_ANDROID)
 
-    set(SRC ${SRC} egl/EGLContext.cpp)
     set(LIBS ${LIBS} android log EGL GLESv2)
 
 elseif (XLI_PLATFORM_IOS)

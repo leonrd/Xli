@@ -46,7 +46,20 @@ namespace Xli
         {
             const char* name = getenv("XLI_APP_NAME");
             return name ? name : "XliApp";
-        }        
+        }
+
+        class CTAction : public Object
+        {
+        public:
+            virtual void Execute() = 0;
+        };
+        
+        /* class CTKeyboardResize : public WindowAction */
+        /* { */
+        /* public: */
+        /*     CTKeyboardResize() {} */
+        /*     virtual void Execute(); */
+        /* }; */
     }
 }
 

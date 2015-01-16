@@ -28,9 +28,10 @@ namespace Xli
         return 1;
     }
 
+    Vector2i Display::GetScreenSize() { return Vector2i(0, 0); }
     Recti Display::GetRect(int index)
     {
-        Vector2i size = Window::GetScreenSize();
+        Vector2i size = Display::GetScreenSize();
         return Recti(0, 0, size.X, size.Y);
     }
 
@@ -59,6 +60,15 @@ namespace Xli
         return Vector2(72, 72);
     }
 
+    bool Display::IsStatusBarVisible()
+    {
+        return true;
+    }
+
+    Vector2i Display::GetStatusBarPosition()
+    {
+        return Vector2i(0, 0);
+    } 
     Vector2i Display::GetStatusBarSize()
     {
         return Vector2i(0,0);

@@ -52,13 +52,21 @@ namespace Xli
         */
         static Recti GetRect(int index);
 
+        static void GetSupportedSettings(int index, Array<DisplaySettings>& settings);        
         static bool GetCurrentSettings(int index, DisplaySettings& settings);
-        static void GetSupportedSettings(int index, Array<DisplaySettings>& settings);
         static bool ChangeSettings(int index, const DisplaySettings& settings);
-
+        
+        static Vector2i GetStatusBarPosition();
         static Vector2i GetStatusBarSize();
+        static bool IsStatusBarVisible();
+        
         static float GetDensity(int displayIndex);
         static Vector2 GetDpi(int displayIndex);
+
+        /**
+           Returns the size of the primary monitor
+        */
+        static Vector2i GetScreenSize();
     };
 }
 

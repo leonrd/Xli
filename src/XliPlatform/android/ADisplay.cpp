@@ -33,7 +33,7 @@ namespace Xli
 
     Recti Display::GetRect(int index)
     {
-        Vector2i size = Window::GetScreenSize();
+        Vector2i size = Display::GetScreenSize();
         return Recti(0, 0, size.X, size.Y);
     }
 
@@ -58,5 +58,41 @@ namespace Xli
     Vector2 Display::GetDpi(int displayIndex)
     {
         return PlatformSpecific::AShim::GetDpi();
+    }
+
+    bool Display::IsStatusBarVisible()
+    {
+        return true;
+    }
+
+    Vector2i Display::GetStatusBarPosition()
+    {
+        return Vector2i(0, 0);
+    } 
+
+    Vector2i Display::GetStatusBarSize()
+    {
+        Vector2i size = Display::GetScreenSize();
+        if (!IsStatusBarVisible())
+        {
+            return Vector2i(size.X, 0);
+        } else {
+            return Vector2i(size.Y, PlatformSpecific::AShim::GetStatusBarHeight());
+        }
+    }
+
+    Vector2i Display::GetScreenSize()
+    {
+        int w = 0;
+        int h = 0;
+        if (Xli::PlatformSpecific::AShim::SupportsNativeUI())
+        {
+            w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
+            h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
+        } else {
+            w = ANativeWindow_getWidth(Xli::Application::SharedApp()->window);
+            h = ANativeWindow_getHeight(Xli::Application::SharedApp()->window);
+        }
+        return Vector2i(w, h);
     }
 }

@@ -169,11 +169,6 @@ namespace Xli
         */
         static Window* GetMainWindow();
 
-        /**
-            Returns the size of the primary monitor
-        */
-        static Vector2i GetScreenSize();
-
     protected:
         virtual void OnInitialize() {}
         virtual void OnShow() {}

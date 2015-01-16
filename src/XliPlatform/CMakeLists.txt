@@ -99,14 +99,17 @@ set(SDL2_STATIC_SRC
 if (XLI_PLATFORM_ANDROID)
 
     set(SRC ${SRC}
+        android/AApplication.cpp
+        android/AInternal.cpp
+        android/ALogStream.cpp 
         android/AFileSystem.cpp
-        android/ACrossThread.cpp
         android/AJniHelper.cpp
         android/AMessageBox.cpp
         android/AShim.cpp
         android/AStream.cpp
         android/AWindow.cpp
         android/ADisplay.cpp
+        android/EGLContext.cpp
         generic/GenericDialogs.cpp
         unix/UnixFileSystemBase.cpp)
 

@@ -20,6 +20,7 @@
 #define __XLI_KEYEVENT_ANDROID_H__
 
 #include <XliPlatform/Window.h>
+#include <XliPlatform/InputEventHandler.h>
 
 namespace Xli
 {

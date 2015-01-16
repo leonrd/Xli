@@ -68,6 +68,11 @@ namespace Xli
         
         void iWindow::SetEventHandler(WindowEventHandler* handler)
         {
+            if (handler != 0)
+                handler->AddRef();
+
+            if (handler != 0)
+                handler->Release();
             eventHandler = handler;
         }
         WindowEventHandler* iWindow::GetEventHandler()
@@ -122,28 +127,31 @@ namespace Xli
             window_ = 0;
         }
 
-        void iWindow::Close() {}
-        bool iWindow::IsClosed() { return false; }
         String iWindow::GetTitle() { return "";}
+        void iWindow::SetTitle(const String& title) {}        
+
         Vector2i iWindow::GetClientSize() { return Vector2i(0, 0);}
+        void iWindow::SetClientSize(Vector2i size) {}        
+
         Vector2i iWindow::GetPosition() { return Vector2i(0, 0); }
+        void iWindow::SetPosition(Vector2i pos) {}        
+
         bool iWindow::IsFullscreen() { return false; }
+        void iWindow::SetFullscreen(bool fullscreen) {}
+        
         bool iWindow::IsMaximized() { return false; }
         bool iWindow::IsMinimized() { return false; }
-        int iWindow::GetDisplayIndex() { return 0; }
         void iWindow::Maximize() {}
         void iWindow::Minimize() {}
         void iWindow::Restore() {}
-        void iWindow::SetClientSize(Vector2i size) {}
-        void iWindow::SetFullscreen(bool fullscreen) {}
-        void iWindow::SetPosition(Vector2i pos) {}
-        void iWindow::SetTitle(const String& title) {}
+        void iWindow::Close() {}
+        bool iWindow::IsClosed() { return false; }        
+        
+        int iWindow::GetDisplayIndex() { return 0; }
+
         void* iWindow::GetNativeHandle() { return (void*)0; }
         GLContext* iWindow::GetContext() { return &context_; }
     }
-
-    
-    Vector2i Window::GetScreenSize() { return Vector2i(0, 0); }
 
     Window* Window::GetMainWindow() { return (Window*)0; }
 

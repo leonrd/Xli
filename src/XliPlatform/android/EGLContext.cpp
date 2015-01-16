@@ -18,32 +18,26 @@
 //
 
 #include <XliGL.h>
+#include <XliPlatform/Window.h>
 #include <Xli/Console.h>
 #include <Xli/Shared.h>
-#include <XliPlatform/Window.h>
+
+#include <android/native_window.h>
 #include <EGL/egl.h>
-#include <Xli/Console.h>
 #include <stdlib.h>
 
-#ifdef XLI_PLATFORM_ANDROID
-# include <android/native_window.h>
-# define NATIVE_HANDLE ANativeWindow*
-#endif
+#include "EGLContext.h"
 
 namespace Xli
 {
-    class EglContext: public GLContext
+    namespace PlatformSpecific
     {
-        Shared<Window> window;
-        NATIVE_HANDLE handle;
-        EGLDisplay display;
-        EGLSurface surface;
-        EGLContext context;
-        EGLConfig config;
-        int swapInterval;
-
-    public:
-        EglContext(Window* wnd, const GLContextAttributes& attribs)
+        AGLContext::~AGLContext()
+        {
+            Destroy();
+        }
+    
+        void AGLContext::Initialize(const GLContextAttributes& attribs)
         {
             swapInterval = -1;
             handle = NULL;
@@ -54,17 +48,17 @@ namespace Xli
             eglInitialize(display, 0, 0);
 
             const EGLint iattribs[] =
-            {
-                EGL_RED_SIZE, 5,
-                EGL_GREEN_SIZE, 6,
-                EGL_BLUE_SIZE, 5,
-                EGL_ALPHA_SIZE, 0,
-                EGL_DEPTH_SIZE, 16,
-                EGL_STENCIL_SIZE, 0,
-                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-                //EGL_RENDER_BUFFER, attribs.Buffers <= 1 ? EGL_SINGLE_BUFFER : EGL_BACK_BUFFER,
-                EGL_NONE
-            };
+                {
+                    EGL_RED_SIZE, 5,
+                    EGL_GREEN_SIZE, 6,
+                    EGL_BLUE_SIZE, 5,
+                    EGL_ALPHA_SIZE, 0,
+                    EGL_DEPTH_SIZE, 16,
+                    EGL_STENCIL_SIZE, 0,
+                    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                    //EGL_RENDER_BUFFER, attribs.Buffers <= 1 ? EGL_SINGLE_BUFFER : EGL_BACK_BUFFER,
+                    EGL_NONE
+                };
 
             EGLint numConfigs;
             EGLConfig configs[128];
@@ -106,11 +100,9 @@ namespace Xli
 #ifdef XLI_DEBUG
             Error->WriteLine((String)"DEBUG: Selected EGLConfig[" + (int)cc + "]");
 #endif
-
-            MakeCurrent(wnd);
         }
 
-        virtual ~EglContext()
+        void AGLContext::Destroy()
         {
             if (display != EGL_NO_DISPLAY)
             {
@@ -125,18 +117,18 @@ namespace Xli
                 eglTerminate(display);
             }
         }
-
-        virtual GLContext* CreateSharedContext()
+    
+        GLContext* AGLContext::CreateSharedContext()
         {
             XLI_THROW_NOT_SUPPORTED(XLI_FUNCTION);
         }
 
-        virtual void MakeCurrent(Window* wnd)
+        void AGLContext::MakeCurrent(Window* wnd)
         {
             if (wnd)
                 window = wnd;
 
-            if (wnd && (NATIVE_HANDLE)wnd->GetNativeHandle() != handle)
+            if (wnd && (ANativeWindow*)wnd->GetNativeHandle() != handle)
             {
 #ifdef XLI_PLATFORM_ANDROID
                 if (wnd->GetImplementation() == WindowImplementationAndroid)
@@ -150,7 +142,7 @@ namespace Xli
                 if (surface != EGL_NO_SURFACE) 
                     eglDestroySurface(display, surface);
                 
-                surface = eglCreateWindowSurface(display, config, (NATIVE_HANDLE)wnd->GetNativeHandle(), NULL);
+                surface = eglCreateWindowSurface(display, config, (ANativeWindow*)wnd->GetNativeHandle(), NULL);
 
                 if (surface == EGL_NO_SURFACE)
                     XLI_THROW("Unable to create EGL Surface");
@@ -158,10 +150,10 @@ namespace Xli
                 if (context == EGL_NO_CONTEXT)
                 {
                     const EGLint context_attribs[] =
-                    {
-                        EGL_CONTEXT_CLIENT_VERSION, 2,
-                        EGL_NONE
-                    };
+                        {
+                            EGL_CONTEXT_CLIENT_VERSION, 2,
+                            EGL_NONE
+                        };
 
                     context = eglCreateContext(display, config, EGL_NO_CONTEXT, context_attribs);
 
@@ -176,33 +168,33 @@ namespace Xli
             }
         }
 
-        virtual bool IsCurrent()
+        bool AGLContext::IsCurrent()
         {
             return eglGetCurrentContext() == context;
         }
 
-        virtual void SwapBuffers()
+        void AGLContext::SwapBuffers()
         {
             eglSwapBuffers(display, surface);
         }
         
-        virtual void SetSwapInterval(int value)
+        void AGLContext::SetSwapInterval(int value)
         {
             if (eglSwapInterval(display, value))
                 swapInterval = value;
         }
 
-        virtual int GetSwapInterval()
+        int AGLContext::GetSwapInterval()
         {
             return swapInterval;
         }
 
-        virtual Vector2i GetDrawableSize()
+        Vector2i AGLContext::GetDrawableSize()
         {
             return window->GetClientSize();
         }
 
-        virtual void GetAttributes(GLContextAttributes& result)
+        void AGLContext::GetAttributes(GLContextAttributes& result)
         {
             memset(&result, 0, sizeof(GLContextAttributes));
             eglGetConfigAttrib(display, config, EGL_RED_SIZE, &result.ColorBits.R);
@@ -213,16 +205,15 @@ namespace Xli
             eglGetConfigAttrib(display, config, EGL_STENCIL_SIZE, &result.StencilBits);
             eglGetConfigAttrib(display, config, EGL_SAMPLES, &result.Samples);
 /*
-            EGLint renderBuffer;
-            eglGetConfigAttrib(display, config, EGL_RENDER_BUFFER, &renderBuffer);
-            result.Buffers = renderBuffer == EGL_SINGLE_BUFFER ? 1 : 2;
+  EGLint renderBuffer;
+  eglGetConfigAttrib(display, config, EGL_RENDER_BUFFER, &renderBuffer);
+  result.Buffers = renderBuffer == EGL_SINGLE_BUFFER ? 1 : 2;
 */
             result.Buffers = 2;
         }
-    };
-
+    }
     GLContext* GLContext::Create(Window* window, const GLContextAttributes& attribs)
     {
-        return new EglContext(window, attribs);
+        return new PlatformSpecific::AGLContext();
     }
 }

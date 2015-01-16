@@ -16,31 +16,51 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_PLATFORM_SPECIFIC_ANDROID_H__
-#define __XLI_PLATFORM_SPECIFIC_ANDROID_H__
+#ifndef __XLI_GL_EGL_CONTEXT_H__
+#define __XLI_GL_EGL_CONTEXT_H__
 
-#include <jni.h>
+#include <Xli/Vector4.h>
+#include <Xli/Object.h>
+#include <Xli/Shared.h>
+#include <XliGL.h>
 
-struct android_app;
+#include <android/native_window.h>
+#include <EGL/egl.h>
+#include <stdlib.h>
 
 namespace Xli
 {
     namespace PlatformSpecific
     {
-        /**
-            \ingroup XliPlatform
-        */
-        class Android
+        class AGLContext : public Xli::GLContext
         {
         public:
-            static void OnJNILoad(JNIEnv* env, jclass shim_class);
-            static void Init(struct android_app* app);
-            static void SetLogTag(const char* tag);
+            AGLContext() {}
+            virtual ~AGLContext();
 
-            static JavaVM* GetJavaVM();
-            static jobject GetActivity();
+            void Initialize(const GLContextAttributes& attribs);
 
-            static void ProcessMessages();
+            virtual GLContext* CreateSharedContext();
+
+            virtual void GetAttributes(GLContextAttributes& result);
+            virtual Vector2i GetDrawableSize();
+
+            virtual void MakeCurrent(Window* window);
+            virtual bool IsCurrent();
+            virtual void Destroy();
+            
+            virtual void SwapBuffers();
+
+            virtual void SetSwapInterval(int value);
+            virtual int GetSwapInterval();
+        private:
+            Shared<Window> window;
+            ANativeWindow* handle;
+            EGLDisplay display;
+            EGLSurface surface;
+            EGLContext context;
+            EGLConfig config;
+            int swapInterval;
         };
     }
 }

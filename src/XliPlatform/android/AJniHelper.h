@@ -20,7 +20,6 @@
 #define __XLI_AJNI_ANDROID_H__
 
 #include <jni.h>
-#include "ACrossThread.h"
 #include "AShim.h"
 
 namespace Xli
@@ -56,23 +55,6 @@ namespace Xli
             jobject GetInstance(jclass cls, const char* constructor_sig, ...);
             jclass GetCustomClass(const char* class_path);
         };        
-
-        class CTError : public WindowAction
-        {
-        public:
-            String message;
-            int errorCode;
-            CTError(String message, int errorCode) 
-            { 
-                this->message = message; 
-                this->errorCode = errorCode;
-            }
-            virtual void Execute()
-            {
-                String finalMessage = "XLiError (" + String(errorCode)+ ") - " + message;
-                XLI_THROW(finalMessage.Ptr());
-            }
-        };
     };
 };
 

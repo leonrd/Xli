@@ -16,58 +16,29 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_CTKEY_ANDROID_H__
-#define __XLI_CTKEY_ANDROID_H__
+#ifndef __XLI_PLATFORM_SPECIFIC_ANDROID_LOGSTREAM_H__
+#define __XLI_PLATFORM_SPECIFIC_ANDROID_LOGSTREAM_H__
 
-#include "AKeyEvent.h"
-#include <Xli/MutexQueue.h>
+#include <Xli/Stream.h>
 
 namespace Xli
 {
     namespace PlatformSpecific
     {
-        class WindowAction : public Object
-        {
-        public:
-            virtual void Execute() = 0;
-        };
 
-        class CTKeyAction : public WindowAction
+        class ALogStream: public Stream
         {
-        public:
-            Xli::Key KeyEvent;
-            bool KeyDown;
-            CTKeyAction(AKeyEvent keyEvent, bool keyDown) 
-            { 
-                this->KeyEvent = AndroidToXliKeyEvent(keyEvent);
-                this->KeyDown = keyDown;
-            }
-            virtual void Execute();
-        };
+        private:
+            int prio;
+            Array<char> buf;
 
-        class CTTextAction : public WindowAction
-        {
         public:
-            String Text;
-            CTTextAction(String text) { this->Text = text; }
-            virtual void Execute();
+            ALogStream(int prio);
+            virtual ~ALogStream();
+            virtual bool CanWrite() const;
+            virtual void Write(const void* src, int elmSize, int elmCount);
         };
-
-        class CTKeyboardResize : public WindowAction
-        {
-        public:
-            CTKeyboardResize() {}
-            virtual void Execute();
-        };
-
-        class CTQueue
-        {
-        public:
-            static MutexQueue<WindowAction*> ctActionQueue;
-            static void EnqueueCrossThreadEvent(WindowAction* action);
-            static void ProcessCrossThreadEvents();
-        };            
-    };
-};
+    }
+}
 
 #endif

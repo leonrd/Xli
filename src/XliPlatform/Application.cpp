@@ -38,7 +38,7 @@ namespace Xli
     Vector2i Application::GetInitSize()
     {
 #if defined(XLI_PLATFORM_IOS) || defined(XLI_PLATFORM_ANDROID)
-        return Window::GetScreenSize();
+        return Display::GetScreenSize();
 #else
         return Vector2i(1280, 720);
 #endif

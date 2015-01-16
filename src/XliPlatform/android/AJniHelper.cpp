@@ -23,7 +23,6 @@
 #include <XliHttpClient.h>
 #include <pthread.h>
 #include <stdarg.h>
-#include "ACrossThread.h"
 #include "AJniHelper.h"
 
 #define DEBUG_JNI
@@ -36,72 +35,6 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
-        void CTTextAction::Execute() 
-        {
-            if (GlobalWindow) {
-                GlobalEventHandler->OnTextInput(GlobalWindow, this->Text);
-            }
-        }
-        void CTKeyAction::Execute() 
-        {
-            if (GlobalWindow) {
-                if (this->KeyDown)
-                {
-                    GlobalEventHandler->OnKeyDown(GlobalWindow, this->KeyEvent);
-                } else {
-                    GlobalEventHandler->OnKeyUp(GlobalWindow, this->KeyEvent); 
-                }
-            }
-        }
-
-        void CTKeyboardResize::Execute()
-        {
-            if (GlobalWindow) {
-                GlobalEventHandler->OnKeyboardResized(GlobalWindow);
-            }
-        }
-
-        extern "C"
-        {
-            void JNICALL XliJ_OnKeyUp (JNIEnv *env , jobject obj, jint keyCode) 
-            {
-                CTQueue::EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, false));
-            }
-
-            void JNICALL XliJ_OnKeyDown (JNIEnv *env , jobject obj, jint keyCode) 
-            {
-                CTQueue::EnqueueCrossThreadEvent(new CTKeyAction((AKeyEvent)keyCode, true));
-            }
-
-            void JNICALL XliJ_OnTextInput (JNIEnv *env , jobject obj, jstring keyChars) 
-            {
-                const char* jChars = env->GetStringUTFChars((jstring)keyChars, NULL);        
-                CTQueue::EnqueueCrossThreadEvent(new CTTextAction(String(jChars)));
-                env->ReleaseStringUTFChars((jstring)keyChars, jChars);
-            }
-
-            void JNICALL XliJ_JavaThrowError (JNIEnv *env , jobject obj, jint errorCode, jstring errorMessage) 
-            {
-                char const* cerrorMessage = env->GetStringUTFChars(errorMessage, NULL);
-                String finalMessage = String("JavaThrown:")+String(cerrorMessage); 
-                CTQueue::EnqueueCrossThreadEvent(new CTError(finalMessage, errorCode));
-                env->ReleaseStringUTFChars(errorMessage, cerrorMessage);
-            }
-
-            void JNICALL XliJ_UnoSurfaceReady (JNIEnv *env , jobject obj, jobject unoSurface)
-            {
-                LOGD("\n\nUnoSurface: Ready on c++ side\n\n\n");
-                GlobalInit = 1;
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnNativeHandleChanged(GlobalWindow);
-            }
-
-            void JNICALL XliJ_OnKeyboardResized (JNIEnv *env , jobject obj) 
-            {
-                CTQueue::EnqueueCrossThreadEvent(new CTKeyboardResize());
-            }
-        }
-
         struct ANativeActivity* AndroidActivity = 0;
         
         static pthread_key_t JniThreadKey;
@@ -125,27 +58,6 @@ namespace Xli
             pthread_setspecific(JniShimKey, NULL);
         }
 
-        static void AttachNativeCallbacks(jclass shim_class, JNIEnv* l_env)
-        {
-            LOGD("Registering native functions");
-            static JNINativeMethod native_funcs[] = {
-                {(char* const)"XliJ_OnKeyUp", (char* const)"(I)V", (void *)&XliJ_OnKeyUp},
-                {(char* const)"XliJ_OnKeyDown", (char* const)"(I)V", (void *)&XliJ_OnKeyDown},
-                {(char* const)"XliJ_OnTextInput", (char* const)"(Ljava/lang/String;)V", (void *)&XliJ_OnTextInput},
-                {(char* const)"XliJ_JavaThrowError", (char* const)"(ILjava/lang/String;)V", (void *)&XliJ_JavaThrowError},
-                {(char* const)"XliJ_UnoSurfaceReady", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_UnoSurfaceReady},
-                {(char* const)"XliJ_OnKeyboardResized", (char* const)"()V", (void *)&XliJ_OnKeyboardResized},
-            };
-            // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 6);
-            if (attached < 0) {
-                LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
-                XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");
-            } else {
-                LOGD("Native functions registered");
-            }
-        }
-
         void AJniHelper::Init(JNIEnv* env, jclass shim_class)
         {
             if (pthread_key_create(&JniThreadKey, JniDestroyThread))
@@ -154,8 +66,7 @@ namespace Xli
             if (pthread_key_create(&JniShimKey, JniDestroyShim))
                 LOGE("JNI ERROR: Unable to create shim pthread key"); // Not fatal
 
-            AShim::CacheMids(env, shim_class);
-            AttachNativeCallbacks(shim_class, env);
+            AShim::CacheMids(env, shim_class);            
         }
 
         AJniHelper::AJniHelper()
@@ -316,7 +227,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     jclass shimClass = env->FindClass("com/Shim/XliJ");
     Xli::PlatformSpecific::AJniHelper::Init(env, shimClass);
-
+    Xli::PlatformSpecific::OnJNILoad(env, shimClass);
     LOGE ("----------");
     
     return JNI_VERSION_1_6;
