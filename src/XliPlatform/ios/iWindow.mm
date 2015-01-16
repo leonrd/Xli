@@ -53,23 +53,11 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
-        iWindow::iWindow()
-        {
-            state_ = Destroying;
-            window_ = 0;
-        }
-        
-        iWindow::~iWindow()
-        {
-            [window_ release];
-        }
-
-        Window::State iWindow::CurrentState() const { return state_; }
-        
         void iWindow::SetEventHandler(WindowEventHandler* handler)
         {
             eventHandler = handler;
         }
+
         WindowEventHandler* iWindow::GetEventHandler()
         {
             return eventHandler;
@@ -125,28 +113,31 @@ namespace Xli
             window_ = 0;
         }
 
-        void iWindow::Close() {}
-        bool iWindow::IsClosed() { return false; }
         String iWindow::GetTitle() { return "";}
-
         Vector2i iWindow::GetClientSize() { return context_.GetDrawableSize(); }
         Vector2i iWindow::GetPosition() { return Vector2i(0, 0); }
-        bool iWindow::IsFullscreen() { return false; }
-        bool iWindow::IsMaximized() { return false; }
-        bool iWindow::IsMinimized() { return false; }
+
+        bool iWindow::IsClosed() { return CurrentState() == Hidden; }
+        bool iWindow::IsFullscreen() { return CurrentState() == Visible; }
+        bool iWindow::IsMaximized() { return CurrentState() == Visible; }
+        bool iWindow::IsMinimized() { return CurrentState() == Hidden; }
+
         int iWindow::GetDisplayIndex() { return 0; }
-        void iWindow::Maximize() {}
-        void iWindow::Minimize() {}
-        void iWindow::Restore() {}
+
+        void iWindow::Close() { Destroy(); }
+        void iWindow::Maximize() { Show(); }
+        void iWindow::Minimize() { Hide(); }
+        void iWindow::Restore() { Show(); }
+
         void iWindow::SetClientSize(Vector2i size) {}
         void iWindow::SetFullscreen(bool fullscreen) {}
         void iWindow::SetPosition(Vector2i pos) {}
         void iWindow::SetTitle(const String& title) {}
-        void* iWindow::GetNativeHandle() { return (void*)0; }
+
+        void *iWindow::GetNativeHandle() { return (void *)window_; }
         GLContext* iWindow::GetContext() { return &context_; }
     }
 
-    
     Vector2i Window::GetScreenSize() { return Vector2i(0, 0); }
 
     Window* Window::GetMainWindow() { return (Window*)0; }

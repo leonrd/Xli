@@ -32,11 +32,10 @@ namespace Xli
         class iWindow : public Window
         {
         public:        
-            iWindow();
-        
-            virtual ~iWindow();
-
-            State CurrentState() const;
+            iWindow()
+            {
+                window_ = 0;
+            }
 
             void OnDraw();
 
@@ -52,15 +51,19 @@ namespace Xli
             bool IsFullscreen();
             bool IsMaximized();
             bool IsMinimized();
+
             int GetDisplayIndex();
+
             void Close();
             void Maximize();
             void Minimize();
             void Restore();
+
             void SetClientSize(Vector2i size);
             void SetFullscreen(bool fullscreen);
             void SetPosition(Vector2i pos);
             void SetTitle(const String& title);
+
             void* GetNativeHandle();
             GLContext* GetContext();            
 
@@ -74,12 +77,6 @@ namespace Xli
             Shared<WindowEventHandler> eventHandler;            
             iGLContext context_;
             UIWindow* window_;
-            bool _fullscreen;
-            
-            iWindow(iWindow const &);
-            void operator=(iWindow const &);
-
-            State state_;
         };        
     }
 }
