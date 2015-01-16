@@ -40,9 +40,10 @@ namespace Xli
         {
         public:
             iGLContext() {}
-            ~GLContext();
+            ~iGLContext();
 
             void Initialize(CAEAGLLayer* layer);
+            void Destroy();
 
             GLContext* CreateSharedContext();
 
@@ -51,7 +52,6 @@ namespace Xli
 
             void MakeCurrent(Window* window);
             bool IsCurrent();
-            void Destroy();
             
             void SwapBuffers();
 
