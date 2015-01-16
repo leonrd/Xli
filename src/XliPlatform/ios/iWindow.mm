@@ -75,6 +75,9 @@ namespace Xli
 
             window_.rootViewController.view.contentScaleFactor
                 = [[UIScreen mainScreen] scale];
+            // TODO: Is this something we want on by default? Is there a setting
+            // for it somewhere?
+            window_.rootViewController.view.multipleTouchEnabled = YES;
 
             context_.Initialize(
                 (CAEAGLLayer *) window_.rootViewController.view.layer);

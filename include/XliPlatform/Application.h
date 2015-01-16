@@ -19,6 +19,8 @@
 #ifndef __XLI_APPLICATION_H__
 #define __XLI_APPLICATION_H__
 
+#include <stdint.h>
+
 #include <XliPlatform/Window.h>
 #include <XliPlatform/InputEventHandler.h>
 

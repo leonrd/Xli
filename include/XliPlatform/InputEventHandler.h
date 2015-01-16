@@ -222,15 +222,17 @@ namespace Xli
         virtual bool OnKeyUp(Window* wnd, Key key) { return false; }
         virtual bool OnTextInput(Window* wnd, const String& text) { return false; }
         virtual bool OnKeyboardResized(Window* wnd) { return false; }
-        
+
         virtual bool OnMouseDown(Window* wnd, Vector2i pos, MouseButton button) { return false; }
         virtual bool OnMouseUp(Window* wnd, Vector2i pos, MouseButton button) { return false; }
         virtual bool OnMouseMove(Window* wnd, Vector2i pos) { return false; }
         virtual bool OnMouseWheel(Window* wnd, Vector2i delta) { return false; }
-        
-        virtual bool OnTouchDown(Window* wnd, Vector2 pos, int id) { return false; }
-        virtual bool OnTouchMove(Window* wnd, Vector2 pos, int id) { return false; }
-        virtual bool OnTouchUp(Window* wnd, Vector2 pos, int id) { return false; }
+
+        typedef uintptr_t TouchEventId;
+        virtual bool OnTouchDown(Window *wnd, Vector2 pos, TouchEventId id) { return false; }
+        virtual bool OnTouchMove(Window *wnd, Vector2 pos, TouchEventId id) { return false; }
+        virtual bool OnTouchUp(Window *wnd, Vector2 pos, TouchEventId id) { return false; }
+        virtual bool OnTouchCancel(Window *wnd, Vector2 pos, TouchEventId id) { return false; }
 
         /**
            Returns true if the specified Key is currently pressed
@@ -249,7 +251,6 @@ namespace Xli
         virtual void SetOnscreenKeyboardPosition(Vector2i position) { }
         virtual Vector2i GetOnscreenKeyboardPosition() { return Vector2i(0, 0); }
         virtual Vector2i GetOnscreenKeyboardSize() { return Vector2i(0, 0); }
-
     };
 }
 
