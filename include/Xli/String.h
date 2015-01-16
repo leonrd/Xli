@@ -47,6 +47,7 @@ namespace Xli
         void Init(float f);
         void Init(double d);
         void Deinit();
+        char* TrimLeft(char* str) const;
         void ValidateParsingResult(Xli::String typeName, char* str, char* endptr) const;
 
     public:
