@@ -39,27 +39,44 @@ namespace Xli
         class iGLContext : public Xli::GLContext
         {
         public:
-            iGLContext() {}
-            virtual ~iGLContext();
+            iGLContext()
+            {
+                layer_ = 0;
+                context_ = 0;
+
+                size_ = Xli::Vector2t<GLint>();
+
+                renderBuffer_ = 0;
+                frameBuffer_ = 0;
+                depthStencilBuffer_ = 0;
+            }
 
             void Initialize(CAEAGLLayer* layer);
+            void AllocateBuffersAndMakeCurrent();
+            void FreeBuffers();
+            void Destroy();
 
-            virtual GLContext* CreateSharedContext();
+            GLContext* CreateSharedContext();
 
-            virtual void GetAttributes(GLContextAttributes& result);
-            virtual Vector2i GetDrawableSize();
+            void GetAttributes(GLContextAttributes& result);
+            Vector2i GetDrawableSize();
 
-            virtual void MakeCurrent(Window* window);
-            virtual bool IsCurrent();
-            virtual void Destroy();
+            void MakeCurrent(Window* window);
+            bool IsCurrent();
             
-            virtual void SwapBuffers();
+            void SwapBuffers();
 
-            virtual void SetSwapInterval(int value);
-            virtual int GetSwapInterval();
+            void SetSwapInterval(int value);
+            int GetSwapInterval();
         private:
             CAEAGLLayer* layer_;
             EAGLContext* context_;
+
+            Xli::Vector2t<GLint> size_;
+
+            GLuint renderBuffer_;
+            GLuint frameBuffer_;
+            GLuint depthStencilBuffer_;
         };
     }
 }

@@ -42,30 +42,10 @@
 }
 @end
 
-
-@interface uObjC_GLViewController : UIViewController
-@end
-
-@implementation uObjC_GLViewController
-@end
-
 namespace Xli
 {
     namespace PlatformSpecific
     {
-        iWindow::iWindow()
-        {
-            state_ = Destroying;
-            window_ = 0;
-        }
-        
-        iWindow::~iWindow()
-        {
-            [window_ release];
-        }
-
-        Window::State iWindow::CurrentState() const { return state_; }
-        
         void iWindow::SetEventHandler(WindowEventHandler* handler)
         {
             if (handler != 0)
@@ -75,6 +55,7 @@ namespace Xli
                 handler->Release();
             eventHandler = handler;
         }
+
         WindowEventHandler* iWindow::GetEventHandler()
         {
             return eventHandler;
@@ -92,10 +73,13 @@ namespace Xli
             CGRect screenBounds = [[UIScreen mainScreen] bounds];
 
             window_ = [[UIWindow alloc] initWithFrame:screenBounds];
-            window_.rootViewController
-                = [[[uObjC_GLViewController alloc] init] autorelease];
+            window_.rootViewController = (UIViewController *)
+                [UIApplication sharedApplication].delegate;
             window_.rootViewController.view = [[[uObjC_GLView alloc]
-                                                initWithFrame:screenBounds] autorelease];
+                initWithFrame:screenBounds] autorelease];
+
+            window_.rootViewController.view.contentScaleFactor
+                = [[UIScreen mainScreen] scale];
 
             context_.Initialize(
                 (CAEAGLLayer *) window_.rootViewController.view.layer);
@@ -106,12 +90,12 @@ namespace Xli
 
         void iWindow::OnShow()
         {
-            context_.MakeCurrent(0);
+            context_.AllocateBuffersAndMakeCurrent();
         }
 
         void iWindow::OnHide()
         {
-            
+            context_.FreeBuffers();
         }
 
         void iWindow::OnDraw()
@@ -128,30 +112,32 @@ namespace Xli
         }
 
         String iWindow::GetTitle() { return "";}
-        void iWindow::SetTitle(const String& title) {}        
 
-        Vector2i iWindow::GetClientSize() { return Vector2i(0, 0);}
-        void iWindow::SetClientSize(Vector2i size) {}        
-
+        Vector2i iWindow::GetClientSize() { return context_.GetDrawableSize(); }
         Vector2i iWindow::GetPosition() { return Vector2i(0, 0); }
-        void iWindow::SetPosition(Vector2i pos) {}        
 
-        bool iWindow::IsFullscreen() { return false; }
-        void iWindow::SetFullscreen(bool fullscreen) {}
-        
-        bool iWindow::IsMaximized() { return false; }
-        bool iWindow::IsMinimized() { return false; }
-        void iWindow::Maximize() {}
-        void iWindow::Minimize() {}
-        void iWindow::Restore() {}
-        void iWindow::Close() {}
-        bool iWindow::IsClosed() { return false; }        
-        
+        bool iWindow::IsClosed() { return CurrentState() == Hidden; }
+        bool iWindow::IsFullscreen() { return CurrentState() == Visible; }
+        bool iWindow::IsMaximized() { return CurrentState() == Visible; }
+        bool iWindow::IsMinimized() { return CurrentState() == Hidden; }
+
         int iWindow::GetDisplayIndex() { return 0; }
 
-        void* iWindow::GetNativeHandle() { return (void*)0; }
+        void iWindow::Close() { Destroy(); }
+        void iWindow::Maximize() { Show(); }
+        void iWindow::Minimize() { Hide(); }
+        void iWindow::Restore() { Show(); }
+
+        void iWindow::SetClientSize(Vector2i size) {}
+        void iWindow::SetFullscreen(bool fullscreen) {}
+        void iWindow::SetPosition(Vector2i pos) {}
+        void iWindow::SetTitle(const String& title) {}
+
+        void *iWindow::GetNativeHandle() { return (void *)window_; }
         GLContext* iWindow::GetContext() { return &context_; }
     }
+
+    Vector2i Window::GetScreenSize() { return Vector2i(0, 0); }
 
     Window* Window::GetMainWindow() { return (Window*)0; }
 

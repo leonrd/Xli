@@ -100,9 +100,7 @@ namespace Xli
     void Application::EmitOnEnterVisible()
     {
         PrintLine("----------------- EmitOnEnterVisible");
-        window_.Show();
-
-        displayLink_.frameInterval = 10;
+        displayLink_.frameInterval = 3;
         displayLink_.paused = NO;
 
         OnEnterVisible();
@@ -119,7 +117,7 @@ namespace Xli
     {
         PrintLine("----------------- EmitOnExitActive");
         OnExitActive();
-        displayLink_.frameInterval = 10;
+        displayLink_.frameInterval = 3;
     }
 
     void Application::EmitOnEnterBackground()
@@ -127,7 +125,6 @@ namespace Xli
         PrintLine("----------------- EmitOnEnterBackground");
         OnEnterBackground();
         displayLink_.paused = YES;
-        window_.Hide();
     }
 
     void Application::EmitOnTerminate()

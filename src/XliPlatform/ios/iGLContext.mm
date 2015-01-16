@@ -26,65 +26,76 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
-        
-        iGLContext::~iGLContext()
-        {
-            Destroy();
-        }
-
         void iGLContext::Initialize(CAEAGLLayer *layer)
         {
             layer_ = layer;
             context_
                 = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-            [EAGLContext setCurrentContext:context_];
 
             layer_.opaque = YES;
 
             //  NOTE: Unretained backing -- the default.
             //  Differs from prior SDL implementation.
             layer_.drawableProperties = [NSDictionary
-                                         dictionaryWithObject:kEAGLColorFormatRGBA8
-                                         forKey:kEAGLDrawablePropertyColorFormat];
+                dictionaryWithObject:kEAGLColorFormatRGBA8
+                forKey:kEAGLDrawablePropertyColorFormat];
 
-            GLuint renderBuffer;
-            glGenRenderbuffers(1, &renderBuffer);
-            glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+            CGSize layerSize = layer_.bounds.size;
+            size_.X = layerSize.width;
+            size_.Y = layerSize.height;
+            size_ *= layer_.contentsScale;
+        }
+
+        void iGLContext::AllocateBuffersAndMakeCurrent()
+        {
+            assert(renderBuffer_ == 0);
+            assert(frameBuffer_ == 0);
+            assert(depthStencilBuffer_ == 0);
+
+            [EAGLContext setCurrentContext:context_];
+
+            glGenRenderbuffers(1, &renderBuffer_);
+            glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
             [context_ renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer_];
 
-            GLint backingWidth, backingHeight;
-            glGetRenderbufferParameteriv(
-                GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
-            glGetRenderbufferParameteriv(
-                GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
-
-            GLuint frameBuffer;
-            glGenFramebuffers(1, &frameBuffer);
-            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+            glGenFramebuffers(1, &frameBuffer_);
+            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_);
             glFramebufferRenderbuffer(
                 GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,
-                renderBuffer);
+                renderBuffer_);
 
-            GLuint depthStencilBuffer;
-            glGenRenderbuffers(1, &depthStencilBuffer);
-            glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBuffer);
+            glGenRenderbuffers(1, &depthStencilBuffer_);
+            glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBuffer_);
             glRenderbufferStorage(
-                GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, backingWidth,
-                backingHeight);
+                GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, size_.X, size_.Y);
             glFramebufferRenderbuffer(
                 GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                depthStencilBuffer);
+                depthStencilBuffer_);
             glFramebufferRenderbuffer(
                 GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
-                depthStencilBuffer);
+                depthStencilBuffer_);
 
-            glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-            glClearColor(0, 104.0/255.0, 55.0/255.0, 1.0);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
+        }
+
+        void iGLContext::FreeBuffers()
+        {
+            glFinish();
+
+            glDeleteRenderbuffers(1, &renderBuffer_);
+            glDeleteFramebuffers(1, &frameBuffer_);
+            glDeleteRenderbuffers(1, &depthStencilBuffer_);
+
+            renderBuffer_ = 0;
+            frameBuffer_ = 0;
+            depthStencilBuffer_ = 0;
         }
 
         void iGLContext::Destroy()
         {
+            if ([EAGLContext currentContext] == context_)
+                [EAGLContext setCurrentContext:nil];
+
             [context_ release];
 
             layer_ = 0;
@@ -98,13 +109,13 @@ namespace Xli
 
         Xli::Vector2i iGLContext::GetDrawableSize()
         {
-            CGRect bounds = layer_.bounds;
-            return Xli::Vector2i(bounds.size.width, bounds.size.height);
+            return Xli::Vector2i(size_);
         }
 
         void iGLContext::MakeCurrent(Xli::Window *)
         {
             [EAGLContext setCurrentContext:context_];
+            glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
         }
 
         bool iGLContext::IsCurrent()
@@ -117,23 +128,28 @@ namespace Xli
             [context_ presentRenderbuffer:GL_RENDERBUFFER];
         }
 
-        // NOT Supported
         GLContext* iGLContext::CreateSharedContext()
         {
+            // TODO: What does a shared context mean in this context?
+
+            // EAGLContext has the concept of a sharegroup, allowing textures
+            // and renderbuffers to be shared. Currently, we create a shared
+            // group per context, but we also only create one context.
+
             XLI_THROW_NOT_SUPPORTED(XLI_FUNCTION);
         }
 
         void iGLContext::SetSwapInterval(int value)
         {
-            XLI_THROW_NOT_SUPPORTED(XLI_FUNCTION);
+            // iOS v-syncs, regardless.
         }
 
         int iGLContext::GetSwapInterval()
         {
-            XLI_THROW_NOT_SUPPORTED(XLI_FUNCTION);
+            return 1;
         }
     }
-    
+
     GLContext* GLContext::Create(Window* wnd, const GLContextAttributes& attribs)
     {
         return new PlatformSpecific::iGLContext();
