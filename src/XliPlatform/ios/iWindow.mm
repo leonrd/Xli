@@ -90,7 +90,10 @@ namespace Xli
             window_.rootViewController
                 = [[[uObjC_GLViewController alloc] init] autorelease];
             window_.rootViewController.view = [[[uObjC_GLView alloc]
-                                                initWithFrame:screenBounds] autorelease];
+                initWithFrame:screenBounds] autorelease];
+
+            window_.rootViewController.view.contentScaleFactor
+                = [[UIScreen mainScreen] scale];
 
             context_.Initialize(
                 (CAEAGLLayer *) window_.rootViewController.view.layer);
@@ -101,12 +104,12 @@ namespace Xli
 
         void iWindow::OnShow()
         {
-            context_.MakeCurrent(0);
+            context_.AllocateBuffersAndMakeCurrent();
         }
 
         void iWindow::OnHide()
         {
-            
+            context_.FreeBuffers();
         }
 
         void iWindow::OnDraw()
@@ -125,7 +128,8 @@ namespace Xli
         void iWindow::Close() {}
         bool iWindow::IsClosed() { return false; }
         String iWindow::GetTitle() { return "";}
-        Vector2i iWindow::GetClientSize() { return Vector2i(0, 0);}
+
+        Vector2i iWindow::GetClientSize() { return context_.GetDrawableSize(); }
         Vector2i iWindow::GetPosition() { return Vector2i(0, 0); }
         bool iWindow::IsFullscreen() { return false; }
         bool iWindow::IsMaximized() { return false; }

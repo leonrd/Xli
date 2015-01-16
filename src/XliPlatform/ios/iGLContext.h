@@ -39,10 +39,21 @@ namespace Xli
         class iGLContext : public Xli::GLContext
         {
         public:
-            iGLContext() {}
-            ~iGLContext();
+            iGLContext()
+            {
+                layer_ = 0;
+                context_ = 0;
+
+                size_ = Xli::Vector2t<GLint>();
+
+                renderBuffer_ = 0;
+                frameBuffer_ = 0;
+                depthStencilBuffer_ = 0;
+            }
 
             void Initialize(CAEAGLLayer* layer);
+            void AllocateBuffersAndMakeCurrent();
+            void FreeBuffers();
             void Destroy();
 
             GLContext* CreateSharedContext();
@@ -60,6 +71,12 @@ namespace Xli
         private:
             CAEAGLLayer* layer_;
             EAGLContext* context_;
+
+            Xli::Vector2t<GLint> size_;
+
+            GLuint renderBuffer_;
+            GLuint frameBuffer_;
+            GLuint depthStencilBuffer_;
         };
     }
 }
