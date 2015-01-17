@@ -18,14 +18,12 @@
 //
 
 #include <XliPlatform/Application.h>
-#include <XliPlatform/Display.h>
-#include <XliPlatform/PlatformLib.h>
-#include <Xli/Managed.h>
-#include <Xli/Thread.h>
-#include <Xli/Time.h>
-#include <cassert>
+#include <XliPlatform/Window.h>
 
 #include <Xli/Console.h>
+#include <Xli/Exception.h>
+
+#include <cassert>
 
 namespace Xli
 {
@@ -48,23 +46,14 @@ namespace Xli
     void Application::Start()
     {
         PrintLine("----------------- Start");
-        switch (state_)
-        {
-        case Active:
-        case Visible:
-        case Background:
-            assert("Invalid state transition");
 
-            Terminate();
+        if (state_ != Uninitialized)
+            XLI_THROW("Start() called on running Application");
 
-        case Terminating:
-            state_ = Starting;
-            EmitOnStart();
+        state_ = Starting;
+        EmitOnStart();
 
-        case Starting:
-            // On it!
-            break;
-        }
+        assert(state_ == Starting);
     }
 
     void Application::BecomeVisible()
@@ -73,8 +62,9 @@ namespace Xli
         switch (state_)
         {
         case Terminating:
-            assert("Invalid state transition");
+            XLI_THROW("BecomeVisible() called on terminating Application");
 
+        case Uninitialized:
             Start();
 
         case Starting:
@@ -86,12 +76,14 @@ namespace Xli
             break;
 
         case Active:
-            ResignActive();
-
+            // Sub-state of Visible
         case Visible:
             // On it!
             break;
         }
+
+        assert(state_ == Active
+            || state_ == Visible);
     }
 
     void Application::BecomeActive()
@@ -100,46 +92,36 @@ namespace Xli
         switch (state_)
         {
         case Terminating:
-            assert(!"Invalid state transition");
+            XLI_THROW("BecomeActive() called on terminating Application");
 
-            Start();
-
+        case Uninitialized:
         case Background:
         case Starting:
             BecomeVisible();
 
         case Visible:
-            EmitOnEnterActive();
             state_ = Active;
+            EmitOnEnterActive();
 
         case Active:
+            // On it!
             break;
         }
+
+        assert(state_ == Active);
     }
 
     void Application::ResignActive()
     {
         PrintLine("----------------- ResignActive");
-        switch (state_)
-        {
-        case Terminating:
-            assert(!"Invalid state transition");
 
-            Start();
+        if (state_ != Active)
+            return;
 
-        case Starting:
-        case Background:
-            assert(!"Invalid state transition");
+        state_ = Visible;
+        EmitOnExitActive();
 
-            BecomeVisible();
-            break;
-
-        case Active:
-        case Visible:
-            state_ = Visible;
-            EmitOnExitActive();
-            break;
-        }
+        assert(state_ == Visible);
     }
 
     void Application::EnterBackground()
@@ -147,25 +129,27 @@ namespace Xli
         PrintLine("----------------- EnterBackground");
         switch (state_)
         {
+        case Terminating:
+            XLI_THROW("EnterBackground() called on terminating Application");
+
+        case Uninitialized:
+            Start();
+
         case Active:
+            // Harmless, if not active
             ResignActive();
 
         case Visible:
         case Starting:
             state_ = Background;
             EmitOnEnterBackground();
-            break;
-
-        case Terminating:
-            assert(!"Invalid state transition");
-
-            Start();
-            return EnterBackground();
 
         case Background:
             // On it!
             break;
         }
+
+        assert(state_ == Background);
     }
 
     void Application::Terminate()
@@ -173,6 +157,10 @@ namespace Xli
         PrintLine("----------------- Terminate");
         switch (state_)
         {
+        case Uninitialized:
+            // No point in initializing now.
+            break;
+
         case Active:
             ResignActive();
 
@@ -181,11 +169,15 @@ namespace Xli
             EnterBackground();
 
         case Background:
+            state_ = Terminating;
             EmitOnTerminate();
 
         case Terminating:
             // On it!
             break;
         }
+
+        assert(state_ == Uninitialized
+            || state_ == Terminating);
     }
 }

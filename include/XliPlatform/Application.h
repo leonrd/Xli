@@ -33,11 +33,12 @@ namespace Xli
 
         enum State
         {
-            Terminating,
+            Uninitialized,
             Starting,
             Visible,
             Active,
             Background,
+            Terminating,
         };
 
         virtual int Run(int argc, char **argv);
@@ -72,7 +73,7 @@ namespace Xli
         virtual void OnTerminate() {}
 
 
-        Application() : state_(Terminating) {}
+        Application() : state_(Uninitialized) {}
         virtual ~Application() {}
 
     private:
