@@ -27,23 +27,24 @@ namespace Xli
 {
 
     class GLContext;
-    
+
     class Window : public Object
     {
-    public:        
+    public:
         enum State
         {
-            Destroying,
+            Uninitialized,
             Initializing,
             Visible,
             Hidden,
+            Destroying,
         };
 
         Window()
         {
-            state_ = Destroying;
+            state_ = Uninitialized;
         }
-        
+
         virtual ~Window() {}
 
         State CurrentState() const { return state_; }
@@ -180,7 +181,10 @@ namespace Xli
         virtual void OnHide() {}
         virtual void OnDestroy() {}
 
-    private:        
+        // Called on/after OnDestroy if re-initialization is allowed
+        void SetUninitialized();
+
+    private:
         Window(Window const &);
         void operator=(Window const &);
 

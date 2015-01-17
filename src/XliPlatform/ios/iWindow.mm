@@ -107,6 +107,8 @@ namespace Xli
             [window_ release];
 
             window_ = 0;
+
+            Window::SetUninitialized();
         }
 
         String iWindow::GetTitle() { return "";}

@@ -18,30 +18,26 @@
 //
 
 #include <XliPlatform/Window.h>
-#include <cassert>
+#include <Xli/Console.h>
+#include <Xli/Exception.h>
+
+#include <assert.h>
 
 namespace Xli
 {
     void Window::Initialize()
     {
-        switch (state_)
+        if (state_ != Uninitialized)
         {
-        case Visible:
-            assert(!"Invalid state transition");
-            Hide();
-
-        case Hidden:
-            assert(!"Invalid state transition");
-            Destroy();
-
-        case Destroying:
-            state_ = Initializing;
-            OnInitialize();
-
-        case Initializing:
-            // On it!
-            break;
+            if (state_ == Destroying)
+                XLI_THROW("Initialize() called on destroyed Window");
+            return;
         }
+
+        state_ = Initializing;
+        OnInitialize();
+
+        assert(state_ == Initializing);
     }
 
     void Window::Show()
@@ -49,7 +45,9 @@ namespace Xli
         switch (state_)
         {
         case Destroying:
-            assert("Invalid state transition");
+            XLI_THROW("Show() called on destroyed Window");
+
+        case Uninitialized:
             Initialize();
 
         case Initializing:
@@ -61,6 +59,8 @@ namespace Xli
             // On it!
             break;
         }
+
+        assert(state_ == Visible);
     }
 
     void Window::Hide()
@@ -68,20 +68,26 @@ namespace Xli
         switch (state_)
         {
         case Destroying:
-            assert("Invalid state transition");
+            XLI_THROW("Hide() called on destroyed Window");
+
+        case Uninitialized:
             Initialize();
-            return Hide();
+            state_ = Hidden;
+            break;
 
         case Visible:
             OnHide();
 
         case Initializing:
+            // Implicitly Hidden once initialization completes.
             state_ = Hidden;
 
         case Hidden:
             // On it!
             break;
         }
+
+        assert(state_ == Hidden);
     }
 
     void Window::Destroy()
@@ -98,7 +104,19 @@ namespace Xli
 
         case Destroying:
             // On it!
+        case Uninitialized:
+            // Nothing to do
             break;
         }
+
+        assert(state_ == Uninitialized
+            || state_ == Destroying);
+    }
+
+    void Window::SetUninitialized()
+    {
+        if (state_ != Destroying)
+            XLI_THROW("SetUninitialized() called on live Window");
+        state_ = Uninitialized;
     }
 }
