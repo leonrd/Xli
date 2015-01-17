@@ -20,11 +20,11 @@ static inline void processTouchEvents(
 }
 
 
-@interface uObjC_AppDelegate (TouchEvents)
+@interface Xli_AppDelegate (TouchEvents)
 @end
 
 
-@implementation uObjC_AppDelegate (TouchEvents)
+@implementation Xli_AppDelegate (TouchEvents)
 
 // Tells the receiver when one or more fingers touch down in a view or window.
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event

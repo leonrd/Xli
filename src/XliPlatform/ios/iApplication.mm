@@ -50,7 +50,7 @@ namespace Xli
         
         // UIApplicationMain doesn't return, but exceptions may be caught here.
         return UIApplicationMain(
-            argc, argv, nil, NSStringFromClass([uObjC_AppDelegate class]));
+            argc, argv, nil, NSStringFromClass([Xli_AppDelegate class]));
     }
 
     Window* Application::RootWindow()
@@ -82,10 +82,11 @@ namespace Xli
         window_.Initialize();
         window_.SetEventHandler(this);
 
-        uObjC_AppDelegate* appDelegate = [UIApplication sharedApplication].delegate;
+        Xli_AppDelegate* appDelegate = (Xli_AppDelegate *)
+            [UIApplication sharedApplication].delegate;
 
         displayLink_ = [CADisplayLink displayLinkWithTarget:appDelegate
-                        selector:@selector(uObjC_OnUpdateFrame:)];
+                        selector:@selector(Xli_OnUpdateFrame:)];
         [displayLink_ addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         displayLink_.paused = YES;
         OnStart();

@@ -1,11 +1,11 @@
 #include <XliPlatform/Window.h>
 #include "AppDelegate.h"
 
-@interface uObjC_AppDelegate (ViewEvents)
+@interface Xli_AppDelegate (ViewEvents)
 @end
 
 
-@implementation uObjC_AppDelegate (ViewEvents)
+@implementation Xli_AppDelegate (ViewEvents)
 
 // Notifies the view controller that its view is about to be added to a view hierarchy.
 - (void)viewWillAppear:(BOOL)animated
