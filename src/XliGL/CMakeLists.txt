@@ -3,10 +3,11 @@ file(GLOB SRC
     ../../include/XliGL.h
     *.cpp)
 
-set(LIBS Xli XliPlatform)
+set(LIBS Xli)
 
 if (XLI_PLATFORM_ANDROID)
 
+    set(SRC ${SRC})
     set(LIBS ${LIBS} android log EGL GLESv2)
 
 elseif (XLI_PLATFORM_IOS)
@@ -25,7 +26,7 @@ elseif (XLI_PLATFORM_LINUX)
 
     add_definitions(`sdl2-config --cflags`)
     set(SRC ${SRC} sdl2/SDL2GLContext.cpp)
-    set(LIBS ${LIBS} SDL2)
+    set(LIBS ${LIBS} XliPlatform SDL2)
 
     if (NOT XLI_ARCH_ARM)
         add_definitions(-DXLI_HAS_GLEW)

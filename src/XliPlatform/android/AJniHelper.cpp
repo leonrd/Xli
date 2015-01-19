@@ -66,16 +66,20 @@ namespace Xli
             if (pthread_key_create(&JniShimKey, JniDestroyShim))
                 LOGE("JNI ERROR: Unable to create shim pthread key"); // Not fatal
 
-            AShim::CacheMids(env, shim_class);            
+            AShim::CacheMids(env, shim_class);        
         }
 
         AJniHelper::AJniHelper()
         {
-            if (AndroidActivity->vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK)
+            int status_ = (int)AndroidActivity->vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+            if (status_ != JNI_OK)
             {
-                if (AndroidActivity->vm->AttachCurrentThread(&env, NULL) != JNI_OK)
+            	status_ = (int)AndroidActivity->vm->AttachCurrentThread(&env, NULL);
+                if (status_ != JNI_OK)
                     XLI_THROW("JNI ERROR: Failed to attach current thread");
-
+            }
+            if (!pthread_getspecific(JniShimKey))
+            {
                 jclass tmpCls = GetCustomClass("com/Shim/XliJ");
                 jclass *shim_class = new jclass;
                 *shim_class = reinterpret_cast<jclass>(env->NewGlobalRef(tmpCls));
@@ -227,7 +231,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     jclass shimClass = env->FindClass("com/Shim/XliJ");
     Xli::PlatformSpecific::AJniHelper::Init(env, shimClass);
-    Xli::PlatformSpecific::OnJNILoad(env, shimClass);
+    Xli::PlatformSpecific::Android::OnJNILoad(env, shimClass);
     LOGE ("----------");
     
     return JNI_VERSION_1_6;

@@ -22,6 +22,7 @@
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/Display.h>
 #include <XliPlatform/Window.h>
+#include <XliPlatform/Application.h>
 #include "AShim.h"
 
 namespace Xli
@@ -90,8 +91,8 @@ namespace Xli
             w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
             h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
         } else {
-            w = ANativeWindow_getWidth(Xli::Application::SharedApp()->window);
-            h = ANativeWindow_getHeight(Xli::Application::SharedApp()->window);
+            w = ANativeWindow_getWidth(Xli::PlatformSpecific::AndroidApplication->window);
+            h = ANativeWindow_getHeight(Xli::PlatformSpecific::AndroidApplication->window);
         }
         return Vector2i(w, h);
     }

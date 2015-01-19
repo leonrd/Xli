@@ -29,7 +29,10 @@
 # include <XliPlatform/PlatformSpecific/iOS.h>
 #endif
 
-extern Xli::Application RequestApplication();
+namespace Xli
+{
+    extern Application* InitializeSharedApp();
+}
 
 extern "C" int main(int argc, char** argv)
 {
@@ -38,13 +41,13 @@ extern "C" int main(int argc, char** argv)
     try
     {
         Xli::CoreLib::Init();
-
+        
 #if defined(XLI_PLATFORM_ANDROID)
         Xli::PlatformSpecific::Android::Init((struct android_app*)*argv);
 #elif defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
-
+        Xli::Application::application_ = Xli::InitializeSharedApp();        
         result = Xli::Application::SharedApp()->Run(argc, argv);
     }
     catch (const Xli::Exception& e)

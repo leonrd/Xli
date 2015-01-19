@@ -20,6 +20,7 @@
 #define __XLI_PLATFORM_SPECIFIC_ANDROID_H__
 
 #include <jni.h>
+#include <XliPlatform/Application.h>
 
 struct android_app;
 
@@ -34,7 +35,7 @@ namespace Xli
         {
         public:
             static void OnJNILoad(JNIEnv* env, jclass shim_class);
-            static void Init(struct android_app* app);
+            static void Init(struct android_app* native_app);
             static void SetLogTag(const char* tag);
 
             static JavaVM* GetJavaVM();

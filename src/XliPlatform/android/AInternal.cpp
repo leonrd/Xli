@@ -18,15 +18,19 @@
 //
 
 #include <XliPlatform/PlatformSpecific/Android.h>
+#include <XliPlatform/Application.h>
 #include <Xli/MutexQueue.h>
+#include <Xli/Console.h>
+#include <XliGL/GLContext.h>
 
 #include "../../../3rdparty/android_native_app_glue/android_native_app_glue.h"
 #include "AInternal.h"
 #include "AShim.h"
 #include "AKeyEvent.h"
+#include "ALogStream.h"
 
 static Xli::MutexQueue<Xli::PlatformSpecific::CTAction*> cross_thread_event_queue;
-static struct android_app* GlobalAndroidApp = 0;
+// static Xli::Application* application;
 
 namespace Xli
 {
@@ -73,11 +77,6 @@ namespace Xli
             return "<UNKNOWN>";
         }
 
-        void OnSurfaceReady()
-        {
-            // give to context via window
-        }
-
         void Android::ProcessMessages()
         {
             int ident;
@@ -87,7 +86,7 @@ namespace Xli
             {
                 if (source != NULL)
                 {
-                    source->process(GlobalAndroidApp, source);
+                    source->process(Xli::PlatformSpecific::AndroidApplication, source);
                 }
             }
         }
@@ -100,39 +99,25 @@ namespace Xli
             switch (cmd)
             {
             case APP_CMD_START:
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppWillEnterForeground(GlobalWindow);
                 break;
-            case APP_CMD_RESUME:
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppDidEnterForeground(GlobalWindow);
+            case APP_CMD_RESUME:                
                 break;
             case APP_CMD_PAUSE:
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppWillEnterBackground(GlobalWindow);
+                Xli::Application::SharedApp()->ResignActive();
                 break;
             case APP_CMD_STOP:
-                if (GlobalFlags & WindowFlagsDisableBackgroundProcess)
-                    handle_cmd(app, APP_CMD_DESTROY);
-                else if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppDidEnterBackground(GlobalWindow);
+                Xli::Application::SharedApp()->EnterBackground();
                 break;
             case (APP_CMD_GAINED_FOCUS):
+                //Xli::Application::SharedApp()->BecomeActive();
                 break;
             case (APP_CMD_LOST_FOCUS):
                 break;
             case APP_CMD_DESTROY:
-                if (!app->destroyRequested)
-                {
-                    if (GlobalEventHandler)
-                        GlobalEventHandler->OnAppTerminating(GlobalWindow);
-                    app->destroyRequested = 1;
-                    if (GlobalEventHandler)
-                        GlobalEventHandler->OnClosed(GlobalWindow);
-                }
+                Xli::Application::SharedApp()->Terminate();
                 break;
             case APP_CMD_LOW_MEMORY:
-                Xli::Application::SharedApp()->Terminate();
+                Xli::Application::SharedApp()->OnLowMemory();
                 break;
             }
         }
@@ -141,16 +126,16 @@ namespace Xli
         {
             // We want to trap menubutton events but let the rest go to android
             // we will be capturing input and text events from java objects
-            if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY &&
-                AKeyEvent_getKeyCode(event) == AKEYCODE_MENU)
-            {
-                int32_t action = AKeyEvent_getAction(event);
-                if (action == AKEY_EVENT_ACTION_DOWN) {
-                    return GlobalEventHandler->OnKeyDown(GlobalWindow, KeyMenu);
-                } else if (action == AKEY_EVENT_ACTION_UP) {
-                    return GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
-                }
-            }
+            // if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY &&
+            //     AKeyEvent_getKeyCode(event) == AKEYCODE_MENU)
+            // {
+            //     int32_t action = AKeyEvent_getAction(event);
+            //     if (action == AKEY_EVENT_ACTION_DOWN) {
+            //         return GlobalEventHandler->OnKeyDown(GlobalWindow, KeyMenu);
+            //     } else if (action == AKEY_EVENT_ACTION_UP) {
+            //         return GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
+            //     }
+            // }
             return 0;
         }
 
@@ -160,13 +145,16 @@ namespace Xli
             {
                 char const* cerrorMessage = env->GetStringUTFChars(errorMessage, NULL);
                 String finalMessage = String("JavaThrown:") + String(cerrorMessage);
-                cross_thread_event_queue.Enqueue(new CTError(finalMessage, errorCode))
+                cross_thread_event_queue.Enqueue(new CTError(finalMessage, errorCode));
                 env->ReleaseStringUTFChars(errorMessage, cerrorMessage);
             }
 
             void JNICALL XliJ_UnoSurfaceReady (JNIEnv* env, jobject obj, jobject unoSurface)
             {
-                Android::OnSurfaceReady();
+                // give to context via window
+                Window* window = Application::SharedApp()->RootWindow();
+                Application::SharedApp()->OnNativeHandleChanged(window);
+                window->Show();
             }
 
             void JNICALL XliJ_OnTick (JNIEnv* env, jobject obj)
@@ -193,25 +181,30 @@ namespace Xli
             }
         }
 
-        Android::OnJNILoad(JNIEnv* env, jclass shim_class)
+        void Android::OnJNILoad(JNIEnv* env, jclass shim_class)
         {
             AttachNativeCallbacks(shim_class, env);
         }
-        
-        void Android::Init(struct android_app* app)
-        {
-            app->userData = 0;
-            app->onAppCmd = handle_cmd;
-            app->onInputEvent = handle_input;
 
-            GlobalAndroidApp = app;
-            AndroidActivity = app->activity;
+        // Application* Android::SharedApp()
+        // {
+        //     return application;
+        // }
+        
+        void Android::Init(struct android_app* native_app)
+        {
+            native_app->userData = 0;
+            native_app->onAppCmd = handle_cmd;
+            native_app->onInputEvent = handle_input;
+
+            Xli::PlatformSpecific::AndroidApplication = native_app;
+            AndroidActivity = native_app->activity;
 
             Out->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_INFO)));
             Error->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_WARN)));
 
             // Request VSync Callbacks
-            Android::RequestChoreographer();
+            // Android::RequestChoreographer();
         }
     }
 }

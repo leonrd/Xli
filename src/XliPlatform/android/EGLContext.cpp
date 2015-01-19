@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 #include "EGLContext.h"
+#include "AWindow.h"
 
 namespace Xli
 {
@@ -130,14 +131,12 @@ namespace Xli
 
             if (wnd && (ANativeWindow*)wnd->GetNativeHandle() != handle)
             {
-#ifdef XLI_PLATFORM_ANDROID
-                if (wnd->GetImplementation() == WindowImplementationAndroid)
+                if (((AWindow*)wnd)->GetImplementation() == WindowImplementationAndroid) //{TODO} cast is ugly hack, fix
                 {
                     EGLint format;
                     eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
                     ANativeWindow_setBuffersGeometry((ANativeWindow*)wnd->GetNativeHandle(), 0, 0, format);
                 }
-#endif
 
                 if (surface != EGL_NO_SURFACE) 
                     eglDestroySurface(display, surface);

@@ -30,13 +30,13 @@
 
 #include <Xli/Console.h>
 
-
+extern Xli::Application* TMP_SHARED_APP();
 
 namespace Xli
 {
     static PlatformSpecific::AWindow window_;
     static bool event_loop_running = true;
-
+    
     int Application::Run(int argc, char** argv)
     {
         while (event_loop_running)
@@ -59,8 +59,6 @@ namespace Xli
     {
     }
 
-    // void OnUpdateFrame() {}
-
     void Application::EmitOnStart()
     {
         PrintLine("----------------- EmitOnStart");
@@ -78,7 +76,6 @@ namespace Xli
     void Application::EmitOnEnterVisible()
     {
         PrintLine("----------------- EmitOnEnterVisible");
-        window_.Show();
         OnEnterVisible();
     }
 

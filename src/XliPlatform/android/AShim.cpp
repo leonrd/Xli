@@ -519,7 +519,7 @@ namespace Xli
         bool AShim::SupportsNativeUI()
         {
             AJniHelper jni;
-            bool result = (bool)jni->CallStaticIntMethod(jni.GetShim(), supportsNativeUI);
+            bool result = (bool)jni->CallStaticBooleanMethod(jni.GetShim(), supportsNativeUI);
             return result;
         }
     }

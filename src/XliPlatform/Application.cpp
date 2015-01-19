@@ -29,6 +29,7 @@
 
 namespace Xli
 {
+    Application* Application::application_;
     
     String Application::GetInitTitle()
     {

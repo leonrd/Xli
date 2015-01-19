@@ -31,9 +31,9 @@ namespace Xli
     {
         class AWindow : public Window
         {
-        public:        
+        public:
             AWindow();
-        
+
             virtual ~AWindow();
 
             State CurrentState() const;
@@ -44,10 +44,10 @@ namespace Xli
             Vector2i GetClientSize();
             Vector2i GetPosition();
             WindowImplementation GetImplementation();
-            
+
             void SetEventHandler(WindowEventHandler* handler);
             WindowEventHandler* GetEventHandler();
-            
+
             bool IsClosed();
             bool IsFullscreen();
             bool IsMaximized();
@@ -62,7 +62,7 @@ namespace Xli
             void SetPosition(Vector2i pos);
             void SetTitle(const String& title);
             void* GetNativeHandle();
-            GLContext* GetContext();            
+            GLContext* GetContext();
 
         protected:
             void OnInitialize();
@@ -71,16 +71,16 @@ namespace Xli
             void OnDestroy();
 
         private:
-            Shared<WindowEventHandler> eventHandler;            
+            Shared<WindowEventHandler> eventHandler;
             AGLContext context_;
             //UIWindow* window_;
             bool _fullscreen;
-            
+
             AWindow(AWindow const &);
             void operator=(AWindow const &);
 
             State state_;
-        };        
+        };
     }
 }
 

@@ -22,13 +22,15 @@
 #include <XliPlatform/Window.h>
 #include <XliPlatform/InputEventHandler.h>
 
+extern "C" int main(int argc, char** argv);
+
 namespace Xli
 {
+    class Application;
+        
     class Application: public InputEventHandler, public WindowEventHandler
     {
     public:
-        static Application* SharedApp();
-
         enum State
         {
             Terminating,
@@ -38,6 +40,11 @@ namespace Xli
             Background,
         };
 
+        static Application* SharedApp()
+        {
+            return application_;
+        }
+        
         virtual int Run(int argc, char **argv);
 
         char const *GetTitle() const;
@@ -59,7 +66,8 @@ namespace Xli
         virtual Vector2i GetInitSize();
 
         virtual void OnUpdateFrame() {}        
-        virtual void OnLowMemory() {}      
+        virtual void OnLowMemory() {}
+        
     protected:
         virtual void OnStart() {}
         virtual void OnDidStart() {}
@@ -88,6 +96,8 @@ namespace Xli
         void EmitOnLowMemory();
 
         State state_;
+        static Application* application_;
+        friend int ::main(int argc, char** argv);
     };
 }
 

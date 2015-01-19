@@ -26,9 +26,12 @@
 #include <errno.h>
 #include <unistd.h>
 
+
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/InputEventHandler.h>
+#include <XliPlatform/Application.h>
 #include <XliPlatform/Window.h>
+#include <XliGL/GLContext.h>
 #include <Xli/Console.h>
 #include "AJniHelper.h"
 #include "AWindow.h"
@@ -47,7 +50,7 @@ namespace Xli
             //     nativeFlags |= AWINDOW_FLAG_FULLSCREEN;
             // if (GlobalFlags & WindowFlagsDisablePowerSaver)
             //     nativeFlags |= AWINDOW_FLAG_KEEP_SCREEN_ON | AWINDOW_FLAG_TURN_SCREEN_ON;
-            //ANativeActivity_setWindowFlags(GlobalAndroidApp->activity, nativeFlags, 0);
+            //ANativeActivity_setWindowFlags(GlobalAndroidApp->activity, nativeFlags, 0);            
         }
 
         AWindow::~AWindow()
@@ -71,19 +74,20 @@ namespace Xli
             return eventHandler;
         }
         
-        WindowImplementation GetImplementation()
+        WindowImplementation AWindow::GetImplementation()
         {
             return WindowImplementationAndroid;
         }
 
         void AWindow::OnInitialize()
         {
-            //{TODO} need to subscribe to the android window events            
+            context_.Initialize(Xli::GLContextAttributes::Default());
         }
 
         void AWindow::OnShow()
         {
-            context_.MakeCurrent(0);
+            context_.MakeCurrent(this);
+            Xli::Application::SharedApp()->BecomeVisible();
         }
 
         void AWindow::OnHide()
@@ -111,7 +115,8 @@ namespace Xli
 
         Vector2i AWindow::GetClientSize()
         {
-            return Vector2i(GlobalWidth, GlobalHeight);
+            return Vector2i(0, 0);
+//Vector2i(GlobalWidth, GlobalHeight);
         }
         void AWindow::SetClientSize(Vector2i size) {}
 
@@ -152,26 +157,26 @@ namespace Xli
                 AJniHelper jni;
                 return (void*)ANativeWindow_fromSurface(jni.GetEnv(), unoSurface);                    
             } else {
-                return GlobalAndroidApp->window;
+                return Xli::PlatformSpecific::AndroidApplication->window;
             }
         }
         GLContext* AWindow::GetContext() { return &context_; }
+    }
+    Window* Window::GetMainWindow()
+    {
+        return Xli::Application::SharedApp()->RootWindow();
+    }
+    void Window::SetMainWindow(Window* wnd) {}
 
-        Window* Window::GetMainWindow()
-        {
-            return GlobalWindow;
-        }
-        void Window::SetMainWindow(Window* wnd) {}
+    void InitWindow()
+    {
+    }
+
+    void TerminateWindow()
+    {
     }
 }
 
-    // void InitWindow()
-    // {
-    // }
-
-    // void TerminateWindow()
-    // {
-    // }
 
 // Window* Window::Create(int width, int height, const String& title, int flags)
 // {

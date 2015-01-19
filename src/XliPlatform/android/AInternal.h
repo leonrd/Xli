@@ -41,6 +41,7 @@ namespace Xli
     namespace PlatformSpecific
     {
         extern ANativeActivity* AndroidActivity;
+        static struct android_app* AndroidApplication;
 
         XLI_INLINE const char* AGetAppName()
         {
@@ -53,13 +54,23 @@ namespace Xli
         public:
             virtual void Execute() = 0;
         };
-        
-        /* class CTKeyboardResize : public WindowAction */
-        /* { */
-        /* public: */
-        /*     CTKeyboardResize() {} */
-        /*     virtual void Execute(); */
-        /* }; */
+
+        class CTError : public CTAction
+        {
+        public:
+            String message;
+            int errorCode;
+            CTError(String message, int errorCode)
+            {
+                this->message = message;
+                this->errorCode = errorCode;
+            }
+            virtual void Execute()
+            {
+                String finalMessage = "XLiError (" + String(errorCode)+ ") - " + message;
+                XLI_THROW(finalMessage.Ptr());
+            }
+        };
     }
 }
 
