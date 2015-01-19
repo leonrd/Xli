@@ -19,6 +19,8 @@
 #ifndef __XLI_APPLICATION_H__
 #define __XLI_APPLICATION_H__
 
+#include <stdint.h>
+
 #include <XliPlatform/Window.h>
 #include <XliPlatform/InputEventHandler.h>
 
@@ -33,11 +35,12 @@ namespace Xli
     public:
         enum State
         {
-            Terminating,
+            Uninitialized,
             Starting,
             Visible,
             Active,
             Background,
+            Terminating,
         };
 
         static Application* SharedApp()
@@ -78,7 +81,7 @@ namespace Xli
         virtual void OnTerminate() {}
 
 
-        Application() : state_(Terminating) {}
+        Application() : state_(Uninitialized) {}
         virtual ~Application() {}
 
     private:

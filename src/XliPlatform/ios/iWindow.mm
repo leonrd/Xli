@@ -32,10 +32,10 @@
 #include <OpenGLES/ES2/glext.h>
 #include <QuartzCore/QuartzCore.h>
 
-@interface uObjC_GLView : UIView
+@interface Xli_GLView : UIView
 @end
 
-@implementation uObjC_GLView
+@implementation Xli_GLView
 + (Class)layerClass
 {
     return [CAEAGLLayer class];
@@ -75,11 +75,14 @@ namespace Xli
             window_ = [[UIWindow alloc] initWithFrame:screenBounds];
             window_.rootViewController = (UIViewController *)
                 [UIApplication sharedApplication].delegate;
-            window_.rootViewController.view = [[[uObjC_GLView alloc]
+            window_.rootViewController.view = [[[Xli_GLView alloc]
                 initWithFrame:screenBounds] autorelease];
 
             window_.rootViewController.view.contentScaleFactor
                 = [[UIScreen mainScreen] scale];
+            // TODO: Is this something we want on by default? Is there a setting
+            // for it somewhere?
+            window_.rootViewController.view.multipleTouchEnabled = YES;
 
             context_.Initialize(
                 (CAEAGLLayer *) window_.rootViewController.view.layer);
@@ -109,6 +112,8 @@ namespace Xli
             [window_ release];
 
             window_ = 0;
+
+            Window::SetUninitialized();
         }
 
         String iWindow::GetTitle() { return "";}

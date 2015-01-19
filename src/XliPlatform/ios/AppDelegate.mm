@@ -3,9 +3,9 @@
 #include <XliPlatform/Window.h>
 #include <Xli/Console.h>
 
-@implementation uObjC_AppDelegate
+@implementation Xli_AppDelegate
 
-- (void)uObjC_OnUpdateFrame:(id)sender
+- (void)Xli_OnUpdateFrame:(id)sender
 {
     sharedApplication->OnUpdateFrame();
 }

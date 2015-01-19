@@ -150,6 +150,7 @@ elseif (XLI_PLATFORM_IOS)
         ios/iApplication.mm
         ios/AppDelegate.mm
         ios/AppDelegate+ViewEvents.mm
+        ios/AppDelegate+TouchEvents.mm
         ios/PlatformLib.cpp)
 
     set(LIBS ${LIBS} XliPlatform)
