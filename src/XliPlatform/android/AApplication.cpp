@@ -62,7 +62,6 @@ namespace Xli
     void Application::EmitOnStart()
     {
         PrintLine("----------------- EmitOnStart");
-        window_.Initialize();
         window_.SetEventHandler(this);        
         OnStart();
     }
