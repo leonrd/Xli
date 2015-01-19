@@ -58,6 +58,42 @@ namespace Xli
             virtual void Execute() = 0;
         };
 
+
+
+        class CTTouchEvent : public CTAction
+        {
+        public:
+            int id;
+            int x;
+            int y;
+            int type;
+            CTTouchEvent(int pointerID, int x, int y, int type)
+            {
+                this->id = pointerID;
+                this->x = x;
+                this->y = y;
+                this->type = type;
+            }
+            virtual void Execute()
+            {
+                Application* app = Xli::Application::SharedApp();
+                Window* win = app->RootWindow();
+                switch (type)
+                {
+                case 0:                    
+                    app->OnTouchMove(win, Vector2(x, y), id);
+                    break;
+                case 1:
+                    app->OnTouchDown(win, Vector2(x, y), id);
+                    break;
+                case 2:
+                    app->OnTouchUp(win, Vector2(x, y), id);
+                    break;
+                }
+                
+            }
+        };
+    
         class CTSurfaceSizeChanged : public CTAction
         {
         public:

@@ -124,26 +124,17 @@ namespace Xli
         }
         void AWindow::SetPosition(Vector2i pos) {}
 
-        bool AWindow::IsFullscreen()
-        {
-            return true; //{TODO} need to query java for this
-        }
         void AWindow::SetFullscreen(bool fullscreen) {}
 
-        
-        bool AWindow::IsMaximized()
-        {
-            return true;
-        }
-        bool AWindow::IsMinimized()
-        {
-            return false; //{TODO}
-        }
         void AWindow::Maximize() {}
         void AWindow::Minimize() {}
         void AWindow::Restore() {}
         void AWindow::Close() {}
-        bool AWindow::IsClosed() { return false; }
+
+        bool AWindow::IsClosed() { return CurrentState() == Hidden; }
+        bool AWindow::IsFullscreen() { return CurrentState() == Visible; }
+        bool AWindow::IsMaximized() { return CurrentState() == Visible; }
+        bool AWindow::IsMinimized() { return CurrentState() == Hidden; }
 
         int AWindow::GetDisplayIndex() { return 0; }
 

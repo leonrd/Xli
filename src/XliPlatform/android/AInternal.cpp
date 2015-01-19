@@ -156,6 +156,11 @@ namespace Xli
             {
                 cross_thread_event_queue.Enqueue(new CTSurfaceSizeChanged());
             }
+
+            void JNICALL XliJ_OnSurfaceTouch(JNIEnv* env, jobject obj, int pointerID, int x, int y, int type)
+            {
+                cross_thread_event_queue.Enqueue(new CTTouchEvent(pointerID, x, y, type));                
+            }
             
             void JNICALL XliJ_OnTick (JNIEnv* env, jobject obj)
             {
@@ -180,10 +185,11 @@ namespace Xli
                 {(char* const)"XliJ_JavaThrowError", (char* const)"(ILjava/lang/String;)V", (void *)&XliJ_JavaThrowError},
                 {(char* const)"XliJ_UnoSurfaceReady", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_UnoSurfaceReady},
                 {(char* const)"XliJ_SurfaceSizeChanged", (char* const)"(II)V", (void *)&XliJ_SurfaceSizeChanged},
+                {(char* const)"XliJ_OnSurfaceTouch", (char* const)"(IIII)V", (void *)&XliJ_OnSurfaceTouch},
                 {(char* const)"XliJ_OnTick", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_OnTick},
             };
             // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 3);
+            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 4);
             if (attached < 0) {
                 LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
                 XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");
