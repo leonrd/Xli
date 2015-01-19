@@ -107,9 +107,10 @@ namespace Xli
                 Xli::Application::SharedApp()->EnterBackground();
                 break;
             case (APP_CMD_GAINED_FOCUS):
-                //Xli::Application::SharedApp()->BecomeActive();
+                Xli::Application::SharedApp()->BecomeActive();
                 break;
             case (APP_CMD_LOST_FOCUS):
+                Xli::Application::SharedApp()->ResignActive();
                 break;
             case APP_CMD_DESTROY:
                 Xli::Application::SharedApp()->Terminate();
