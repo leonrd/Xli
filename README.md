@@ -1,8 +1,8 @@
-Xli is a modular and cross-platform app development framework for C++. It is being used to implement the Uno C++ runtime and core library among some other things. 
+Xli is a modular and cross-platform app development framework for C++. It is being used to implement the Uno C++ runtime and core library among some other things.
 
 Xli is officially supported on **Android**, **iOS**, **OS X** and **Windows**. The build system also implements support for **Linux** and **Raspberry PI**, but these are not regularly tested. Additionally we're using [SDL2] as fallback, so any other platforms supported by [SDL2] could be added with some tweaks here and there.
 
-Header documentation can be generated using `doxygen`. 
+Header documentation can be generated using `doxygen`.
 
 Please see the <a href="modules.html">Modules</a> page for an overview of the functionality.
 
@@ -42,7 +42,7 @@ To clean up any old builds from the source tree, delete the directories `build` 
    * This should produce .so files located here:
      - `lib/android/armeabi-v7a`
 
-Debug binaries can be produced by replacing command in step 2 with `./build-android.sh --debug`. 
+Debug binaries can be produced by replacing command in step 2 with `./build-android.sh --debug`.
 
 Specific architectures can be built by providing the `--archs=` option in step 2 (`armeabi-v7a`).
 
@@ -63,8 +63,6 @@ Uno users can use the *Uno Native Build environment* provided by Outracks, conta
 - Xcode with most recent iOS SDK
 - Xcode command line tools
 - OS X (>= 10.7)
-
-**MacPorts** users can execute `sudo port install cmake` to install [CMake].
 
 ### Instructions
 
@@ -126,8 +124,6 @@ List of available options can be shown using `./build.sh --help`.
 - Xcode
 - Xcode command line tools
 - OS X (>= 10.7)
-
-**MacPorts** users can execute `sudo port install cmake` to install [CMake].
 
 ### Instructions
 
