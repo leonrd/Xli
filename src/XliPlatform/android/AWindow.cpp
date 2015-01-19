@@ -29,6 +29,7 @@
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/InputEventHandler.h>
 #include <XliPlatform/Application.h>
+#include <XliPlatform/Display.h>
 #include <XliPlatform/Window.h>
 #include <XliGL/GLContext.h>
 #include <Xli/Console.h>
@@ -113,8 +114,7 @@ namespace Xli
 
         Vector2i AWindow::GetClientSize()
         {
-            return Vector2i(0, 0);
-//Vector2i(GlobalWidth, GlobalHeight);
+            return Display::GetScreenSize();
         }
         void AWindow::SetClientSize(Vector2i size) {}
 
