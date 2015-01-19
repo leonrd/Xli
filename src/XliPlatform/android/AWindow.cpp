@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/InputEventHandler.h>
 #include <XliPlatform/Application.h>
@@ -37,6 +36,8 @@
 #include "AWindow.h"
 #include "AShim.h"
 
+#include <Xli/Console.h>
+
 static int GlobalFlags = 0;
 
 namespace Xli
@@ -45,20 +46,13 @@ namespace Xli
     {
         AWindow::AWindow()
         {
-            // int nativeFlags = 0;
-            // if (GlobalFlags & WindowFlagsFullscreen)
-            //     nativeFlags |= AWINDOW_FLAG_FULLSCREEN;
-            // if (GlobalFlags & WindowFlagsDisablePowerSaver)
-            //     nativeFlags |= AWINDOW_FLAG_KEEP_SCREEN_ON | AWINDOW_FLAG_TURN_SCREEN_ON;
-            //ANativeActivity_setWindowFlags(GlobalAndroidApp->activity, nativeFlags, 0);            
+            PrintLine("~~~~~~~~~~~~~~~~~ Window Construct");
         }
 
         AWindow::~AWindow()
         {
             SetEventHandler(0);
         }
-
-        Window::State AWindow::CurrentState() const { return state_; }
         
         void AWindow::SetEventHandler(WindowEventHandler* handler)
         {
@@ -81,17 +75,20 @@ namespace Xli
 
         void AWindow::OnInitialize()
         {
+            PrintLine("~~~~~~~~~~~~~~~~~ Window OnInitialize");
             context_.Initialize(Xli::GLContextAttributes::Default());
         }
 
         void AWindow::OnShow()
         {
+            PrintLine("~~~~~~~~~~~~~~~~~ Window OnShow");
             context_.MakeCurrent(this);
             Xli::Application::SharedApp()->BecomeVisible();
         }
 
         void AWindow::OnHide()
         {
+            PrintLine("~~~~~~~~~~~~~~~~~ Window OnHide");
         }
 
         void AWindow::OnDraw()
@@ -101,6 +98,7 @@ namespace Xli
 
         void AWindow::OnDestroy()
         {
+            PrintLine("~~~~~~~~~~~~~~~~~ Window OnDestroy");
             // context_.Destroy();
             // [window_ release];
 
@@ -191,26 +189,6 @@ namespace Xli
 //     return GlobalWindow;
 // }
 
-// Window* Window::CreateFrom(void* nativeWindowHandle)
-// {
-//     XLI_THROW_NOT_SUPPORTED(XLI_FUNCTION);
-// }
-
-// virtual void SetEventHandler(InputEventHandler* handler)
-// {
-//     if (handler != 0)
-//         handler->AddRef();
-
-//     if (GlobalEventHandler != 0)
-//         GlobalEventHandler->Release();
-
-//     GlobalEventHandler = handler;
-// }
-
-// virtual InputEventHandler* GetEventHandler()
-// {
-//     return GlobalEventHandler;
-// }
 
 // virtual void Close()
 // {
@@ -223,65 +201,6 @@ namespace Xli
 
 //     if (GlobalEventHandler != 0)
 //         GlobalEventHandler->OnClosed(this);
-// }
-
-
-// virtual void ShowCursor(bool show)
-// {
-// }
-
-// virtual void BeginTextInput(TextInputHint hint)
-// {
-//     AShim::RaiseSoftKeyboard();
-// }
-
-// virtual void EndTextInput()
-// {
-//     AShim::HideSoftKeyboard();
-// }
-
-// virtual bool IsTextInputActive()
-// {
-//     return AShim::KeyboardVisible();
-// }
-
-// virtual bool HasOnscreenKeyboardSupport()
-// {
-//     return true;
-// }
-
-// virtual bool IsOnscreenKeyboardVisible()
-// {
-//     return AShim::KeyboardVisible();
-// }
-
-// virtual Vector2i GetOnscreenKeyboardPosition()
-// {
-//     return Vector2i(0, GlobalHeight - AShim::GetKeyboardSize());
-// }
-
-// virtual Vector2i GetOnscreenKeyboardSize()
-// {
-//     return Vector2i(GlobalWidth, AShim::GetKeyboardSize());
-// }
-
-// virtual bool GetKeyState(Key key)
-// {
-//     return false;
-// }
-
-// virtual bool GetMouseButtonState(MouseButton button)
-// {
-//     return false;
-// }
-
-// virtual Vector2i GetMousePosition()
-// {
-//     return Vector2i(0, 0);
-// }
-
-// virtual void SetMousePosition(Vector2i position)
-// {
 // }
 
 // virtual SystemCursor GetSystemCursor()

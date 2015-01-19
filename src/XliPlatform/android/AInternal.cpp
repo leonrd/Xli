@@ -17,8 +17,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <XliPlatform/PlatformSpecific/Android.h>
-#include <XliPlatform/Application.h>
 #include <Xli/MutexQueue.h>
 #include <Xli/Console.h>
 #include <XliGL/GLContext.h>
@@ -151,28 +149,41 @@ namespace Xli
 
             void JNICALL XliJ_UnoSurfaceReady (JNIEnv* env, jobject obj, jobject unoSurface)
             {
-                // give to context via window
-                Window* window = Application::SharedApp()->RootWindow();
-                Application::SharedApp()->OnNativeHandleChanged(window);
-                window->Show();
+                cross_thread_event_queue.Enqueue(new CTSurfaceReady());
             }
 
+            void JNICALL XliJ_SurfaceSizeChanged (JNIEnv* env, jobject obj, int width, int height)
+            {
+                cross_thread_event_queue.Enqueue(new CTSurfaceSizeChanged());
+            }
+            
             void JNICALL XliJ_OnTick (JNIEnv* env, jobject obj)
             {
                 Xli::Application::SharedApp()->OnUpdateFrame();
             }            
         }
 
+        void Android::ProcessCrossThreadEvents()
+        {
+            while ((cross_thread_event_queue.Count() > 0))
+            {
+                CTAction* action = cross_thread_event_queue.Dequeue();
+                action->Execute();
+                delete action;
+            }
+        }
+        
         static void AttachNativeCallbacks(jclass shim_class, JNIEnv* l_env)
         {
             LOGD("Registering native functions");
             static JNINativeMethod native_funcs[] = {
                 {(char* const)"XliJ_JavaThrowError", (char* const)"(ILjava/lang/String;)V", (void *)&XliJ_JavaThrowError},
                 {(char* const)"XliJ_UnoSurfaceReady", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_UnoSurfaceReady},
-                {(char* const)"XliJ_OnTick", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_UnoSurfaceReady},
+                {(char* const)"XliJ_SurfaceSizeChanged", (char* const)"(II)V", (void *)&XliJ_SurfaceSizeChanged},
+                {(char* const)"XliJ_OnTick", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_OnTick},
             };
             // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 2);
+            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 3);
             if (attached < 0) {
                 LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
                 XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");

@@ -19,6 +19,7 @@
 
 #include <XliPlatform/Application.h>
 #include <XliPlatform/Window.h>
+#include <XliPlatform/Display.h>
 
 #include <Xli/Console.h>
 #include <Xli/Exception.h>

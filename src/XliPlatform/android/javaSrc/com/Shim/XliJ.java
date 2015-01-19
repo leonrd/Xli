@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import com.Shim.FrameChoreographer;
 import android.annotation.SuppressLint;
 import android.app.NativeActivity;
 import android.content.Context;
@@ -68,9 +68,15 @@ public class XliJ extends android.app.NativeActivity {
     public static native void XliJ_JavaThrowError(int code, String throwMessage);
     public static native void XliJ_UnoSurfaceReady(Surface unoSurface);
     public static native void XliJ_OnKeyboardResized();
+    public static native void XliJ_FrameTick();
 
     //--------------------------------------------
     // System
+    public static void StartFrameChoreographer()
+    {
+    	new FrameChoreographer();
+    }
+    
     public static void RootSurfaceChanged(Surface unoSurface)
     {
         if (nSupportsNativeUI) {
@@ -352,5 +358,5 @@ public class XliJ extends android.app.NativeActivity {
 			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");			
 			return false;
 		}
-    }
+    }	
 }

@@ -42,6 +42,7 @@ namespace Xli
             static jobject GetActivity();
 
             static void ProcessMessages();
+            static void ProcessCrossThreadEvents();
         };
     }
 }

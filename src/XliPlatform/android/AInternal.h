@@ -24,6 +24,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <jni.h>
+
+#include <XliPlatform/PlatformSpecific/Android.h>
+#include <XliPlatform/Application.h>
 #include <XliPlatform/Window.h>
 
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, Xli::PlatformSpecific::AGetAppName(), __VA_ARGS__))
@@ -55,6 +58,28 @@ namespace Xli
             virtual void Execute() = 0;
         };
 
+        class CTSurfaceSizeChanged : public CTAction
+        {
+        public:
+            virtual void Execute()
+            {
+                Application* app = Xli::Application::SharedApp();
+                app->OnSizeChanged(app->RootWindow());
+            }
+        };
+        
+        class CTSurfaceReady : public CTAction
+        {
+        public:
+            virtual void Execute()
+            {
+                // give to context via window
+                Window* window = Application::SharedApp()->RootWindow();
+                Application::SharedApp()->OnNativeHandleChanged(window);
+                window->Show();
+            }
+        };
+        
         class CTError : public CTAction
         {
         public:

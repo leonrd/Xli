@@ -42,6 +42,11 @@ namespace Xli
         while (event_loop_running)
         {
             PlatformSpecific::Android::ProcessMessages();
+            PlatformSpecific::Android::ProcessCrossThreadEvents();
+            if (window_.CurrentState() == Window::Visible)
+            {
+                Xli::Application::SharedApp()->OnUpdateFrame();                
+            }
         }
     }
 

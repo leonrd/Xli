@@ -36,8 +36,6 @@ namespace Xli
 
             virtual ~AWindow();
 
-            State CurrentState() const;
-
             void OnDraw();
 
             String GetTitle();
@@ -73,13 +71,10 @@ namespace Xli
         private:
             Shared<WindowEventHandler> eventHandler;
             AGLContext context_;
-            //UIWindow* window_;
             bool _fullscreen;
 
             AWindow(AWindow const &);
             void operator=(AWindow const &);
-
-            State state_;
         };
     }
 }
