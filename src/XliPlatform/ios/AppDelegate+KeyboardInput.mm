@@ -42,8 +42,6 @@ static UIKeyboardType _Xli_keyboardForHint(Xli::TextInputHint hint)
 static UITextField *_Xli_initializeKeyboard(
     UIViewController<UITextFieldDelegate> *delegate)
 {
-    NSLog(@"Initializing keyboard");
-
     UITextField *textField = [[UITextField alloc] initWithFrame:CGRectZero];
 
     textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
