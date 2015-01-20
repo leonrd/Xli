@@ -126,12 +126,10 @@ elseif (XLI_PLATFORM_WIN32)
         win32/Win32Display.cpp
         win32/Win32.cpp)
 
-    set(LIBS ${LIBS} XliPlatform)
-
 elseif (XLI_PLATFORM_LINUX)
 
     add_definitions(`sdl2-config --cflags`)
-    set(LIBS ${LIBS} SDL2 pthread XliPlatform)
+    set(LIBS ${LIBS} SDL2 pthread)
 
     set(SRC ${SRC} ${SDL2_SRC}
         xdg/XdgFileSystem.cpp)
@@ -153,9 +151,6 @@ elseif (XLI_PLATFORM_IOS)
         ios/AppDelegate+TouchEvents.mm
         ios/AppDelegate+ViewEvents.mm
         ios/PlatformLib.cpp)
-
-    set(LIBS ${LIBS} XliPlatform)
-
 
 elseif (XLI_PLATFORM_OSX)
 
@@ -201,8 +196,6 @@ elseif (XLI_PLATFORM_OSX)
         ${SDL2_DIR}/src/video/x11/SDL_x11window.c
         ${SDL2_DIR}/src/video/x11/SDL_x11xinput2.c
         sdl2/SDL2Display_OSX.mm)
-
-    set(LIBS ${LIBS} XliPlatform)
 
 endif()
 
