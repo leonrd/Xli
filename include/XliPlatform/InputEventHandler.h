@@ -20,6 +20,7 @@
 #define __XLI_PLATFORM_INPUTEVENTHANDLER_H__
 
 #include <Xli/Object.h>
+#include <Xli/Rectangle.h>
 #include <Xli/Vector2.h>
 
 namespace Xli
@@ -220,6 +221,7 @@ namespace Xli
     public:
         virtual bool OnKeyDown(Window* wnd, Key key) { return false; }
         virtual bool OnKeyUp(Window* wnd, Key key) { return false; }
+        virtual bool OnClearTextInput(Window* wnd) { return false; }
         virtual bool OnTextInput(Window* wnd, const String& text) { return false; }
         virtual bool OnKeyboardResized(Window* wnd) { return false; }
 
@@ -251,6 +253,11 @@ namespace Xli
         virtual void SetOnscreenKeyboardPosition(Vector2i position) { }
         virtual Vector2i GetOnscreenKeyboardPosition() { return Vector2i(0, 0); }
         virtual Vector2i GetOnscreenKeyboardSize() { return Vector2i(0, 0); }
+        virtual Recti GetOnscreenKeyboardBounds()
+        {
+            return Recti(
+                GetOnscreenKeyboardPosition(), GetOnscreenKeyboardSize());
+        }
     };
 }
 
