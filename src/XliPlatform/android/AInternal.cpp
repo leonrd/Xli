@@ -103,16 +103,16 @@ namespace Xli
             case APP_CMD_RESUME:
                 break;
             case APP_CMD_PAUSE:
-                Application::SharedApp()->ResignActive();
+                Application::SharedApp()->ExitInteractive();
                 break;
             case APP_CMD_STOP:
                 Application::SharedApp()->EnterBackground();
                 break;
             case (APP_CMD_GAINED_FOCUS):
-                Application::SharedApp()->BecomeActive();
+                Application::SharedApp()->EnterInteractive();
                 break;
             case (APP_CMD_LOST_FOCUS):
-                Application::SharedApp()->ResignActive();
+                Application::SharedApp()->ExitInteractive();
                 break;
             case APP_CMD_DESTROY:
                 Application::SharedApp()->Terminate();

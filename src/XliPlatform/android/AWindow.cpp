@@ -84,7 +84,7 @@ namespace Xli
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnShow");
             context_.MakeCurrent(this);
-            Xli::Application::SharedApp()->BecomeVisible();
+            Xli::Application::SharedApp()->EnterForeground();
         }
 
         void AWindow::OnHide()
@@ -132,8 +132,8 @@ namespace Xli
         void AWindow::Close() {}
 
         bool AWindow::IsClosed() { return CurrentState() == Hidden; }
-        bool AWindow::IsFullscreen() { return CurrentState() == Visible; }
-        bool AWindow::IsMaximized() { return CurrentState() == Visible; }
+        bool AWindow::IsFullscreen() { return CurrentState() == Foreground; }
+        bool AWindow::IsMaximized() { return CurrentState() == Foreground; }
         bool AWindow::IsMinimized() { return CurrentState() == Hidden; }
 
         int AWindow::GetDisplayIndex() { return 0; }

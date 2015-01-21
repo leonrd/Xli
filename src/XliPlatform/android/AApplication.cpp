@@ -68,22 +68,22 @@ namespace Xli
         OnDidStart();
     }
 
-    void Application::EmitOnEnterVisible()
+    void Application::EmitOnEnterForeground()
     {
-        PrintLine("----------------- EmitOnEnterVisible");
-        OnEnterVisible();
+        PrintLine("----------------- EmitOnEnterForeground");
+        OnEnterForeground();
     }
 
-    void Application::EmitOnEnterActive()
+    void Application::EmitOnEnterInteractive()
     {
-        PrintLine("----------------- EmitOnEnterActive");
-        OnEnterActive();
+        PrintLine("----------------- EmitOnEnterInteractive");
+        OnEnterInteractive();
     }
 
-    void Application::EmitOnExitActive()
+    void Application::EmitOnExitInteractive()
     {
-        PrintLine("----------------- EmitOnExitActive");
-        OnExitActive();
+        PrintLine("----------------- EmitOnExitInteractive");
+        OnExitInteractive();
     }
 
     void Application::EmitOnEnterBackground()

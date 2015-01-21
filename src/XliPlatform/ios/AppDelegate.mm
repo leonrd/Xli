@@ -36,19 +36,19 @@
 // Tells the delegate that the app is about to enter the foreground.
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-    sharedApplication->BecomeVisible();
+    sharedApplication->EnterForeground();
 }
 
 // Tells the delegate that the app has become active.
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-    sharedApplication->BecomeActive();
+    sharedApplication->EnterInteractive();
 }
 
 // Tells the delegate that the app is about to become inactive.
 - (void)applicationWillResignActive:(UIApplication *)application
 {
-    sharedApplication->ResignActive();
+    sharedApplication->ExitInteractive();
 }
 
 // Tells the delegate that the app is now in the background.

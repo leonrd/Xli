@@ -29,7 +29,7 @@
 namespace Xli
 {
     Application* Application::application_;
-    
+
     String Application::GetInitTitle()
     {
         return "Xli Application";
@@ -44,7 +44,7 @@ namespace Xli
 #endif
     }
 
-    // Lifecycle    
+    // Lifecycle
     void Application::Start()
     {
         PrintLine("----------------- Start");
@@ -58,13 +58,13 @@ namespace Xli
         assert(state_ == Starting);
     }
 
-    void Application::BecomeVisible()
+    void Application::EnterForeground()
     {
-        PrintLine("----------------- BecomeVisible");        
+        PrintLine("----------------- EnterForeground");
         switch (state_)
         {
         case Terminating:
-            XLI_THROW("BecomeVisible() called on terminating Application");
+            XLI_THROW("EnterForeground() called on terminating Application");
 
         case Uninitialized:
             Start();
@@ -73,57 +73,57 @@ namespace Xli
             EmitOnDidStart();
 
         case Background:
-            state_ = Visible;
-            EmitOnEnterVisible();
+            state_ = Foreground;
+            EmitOnEnterForeground();
             break;
 
-        case Active:
-            // Sub-state of Visible
-        case Visible:
+        case Interactive:
+            // Sub-state of Foreground.
+        case Foreground:
             // On it!
             break;
         }
 
-        assert(state_ == Active
-            || state_ == Visible);
+        assert(state_ == Foreground
+            || state_ == Interactive);
     }
 
-    void Application::BecomeActive()
+    void Application::EnterInteractive()
     {
-        PrintLine("----------------- BecomeActive");
+        PrintLine("----------------- EnterInteractive");
         switch (state_)
         {
         case Terminating:
-            XLI_THROW("BecomeActive() called on terminating Application");
+            XLI_THROW("EnterInteractive() called on terminating Application");
 
         case Uninitialized:
-        case Background:
         case Starting:
-            BecomeVisible();
+        case Background:
+            EnterForeground();
 
-        case Visible:
-            state_ = Active;
-            EmitOnEnterActive();
+        case Foreground:
+            state_ = Interactive;
+            EmitOnEnterInteractive();
 
-        case Active:
+        case Interactive:
             // On it!
             break;
         }
 
-        assert(state_ == Active);
+        assert(state_ == Interactive);
     }
 
-    void Application::ResignActive()
+    void Application::ExitInteractive()
     {
-        PrintLine("----------------- ResignActive");
+        PrintLine("----------------- ExitInteractive");
 
-        if (state_ != Active)
+        if (state_ != Interactive)
             return;
 
-        state_ = Visible;
-        EmitOnExitActive();
+        state_ = Foreground;
+        EmitOnExitInteractive();
 
-        assert(state_ == Visible);
+        assert(state_ == Foreground);
     }
 
     void Application::EnterBackground()
@@ -137,11 +137,11 @@ namespace Xli
         case Uninitialized:
             Start();
 
-        case Active:
-            // Harmless, if not active
-            ResignActive();
+        case Interactive:
+            // Harmless if not Interactive
+            ExitInteractive();
 
-        case Visible:
+        case Foreground:
         case Starting:
             state_ = Background;
             EmitOnEnterBackground();
@@ -163,10 +163,8 @@ namespace Xli
             // No point in initializing now.
             break;
 
-        case Active:
-            ResignActive();
-
-        case Visible:
+        case Interactive:
+        case Foreground:
         case Starting:
             EnterBackground();
 
