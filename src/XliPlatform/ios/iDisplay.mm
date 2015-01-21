@@ -85,13 +85,17 @@ namespace Xli
 
     bool Display::IsStatusBarVisible()
     {
-        return true;
+        return ![UIApplication sharedApplication].statusBarHidden;
     }
 
     Vector2i Display::GetStatusBarPosition()
     {
-        return Vector2i(0, 0);
-    } 
+        CGFloat scale = [[UIScreen mainScreen] scale];
+        CGPoint position
+            = [UIApplication sharedApplication].statusBarFrame.origin;
+        return Vector2i(position.x * scale, position.y * scale);
+    }
+
     Vector2i Display::GetStatusBarSize()
     {
         CGFloat scale = [[UIScreen mainScreen] scale];
