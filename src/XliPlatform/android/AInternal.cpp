@@ -121,20 +121,38 @@ namespace Xli
             }
         }
 
-        static int32_t handle_input(struct android_app* app, AInputEvent* event)
+        static int32_t handle_input(struct android_app* native_app, AInputEvent* event)
         {
-            // We want to trap menubutton events but let the rest go to android
+            // We want to trap backbutton & menubutton events but let the rest go to android
             // we will be capturing input and text events from java objects
-            // if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY &&
-            //     AKeyEvent_getKeyCode(event) == AKEYCODE_MENU)
-            // {
-            //     int32_t action = AKeyEvent_getAction(event);
-            //     if (action == AKEY_EVENT_ACTION_DOWN) {
-            //         return GlobalEventHandler->OnKeyDown(GlobalWindow, KeyMenu);
-            //     } else if (action == AKEY_EVENT_ACTION_UP) {
-            //         return GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
-            //     }
-            // }
+            Application* app = Application::SharedApp();
+            Window* win = app->RootWindow();
+            if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+            {
+                if (AKeyEvent_getKeyCode(event) == AKEYCODE_MENU)
+                {
+                    int32_t action = AKeyEvent_getAction(event);
+                    if (action == AKEY_EVENT_ACTION_DOWN) {
+                        return app->OnKeyDown(win, KeyMenu);
+                    } else if (action == AKEY_EVENT_ACTION_UP) {
+                        return app->OnKeyUp(win, KeyMenu);
+                    }
+                } else if (AKeyEvent_getKeyCode(event) == AKEYCODE_BACK) {
+                    int32_t action = AKeyEvent_getAction(event);
+                    if (action == AKEY_EVENT_ACTION_UP) {
+                       // we only release on 'up' and minimize keyboard doesnt give
+                       // us a down event. This way we get a consistent behaviour
+                       // at the expense of a little detail. This may have to
+                       // be reviewed but feels good for now
+                        bool r1 = app->OnKeyDown(win, BackButton);
+                        bool r2 = app->OnKeyUp(win, BackButton);
+                        //return (r1 || r2); // {TODO} this is the correct method, however until we 
+                        //                             make this safe for our nativeactivity it is 
+                        //                             just safer to eat the event
+                        return true;
+                    }
+                }
+            }
             return 0;
         }
 
