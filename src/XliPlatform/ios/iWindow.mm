@@ -142,8 +142,6 @@ namespace Xli
         GLContext* iWindow::GetContext() { return &context_; }
     }
 
-    Vector2i Window::GetScreenSize() { return Vector2i(0, 0); }
-
     Window* Window::GetMainWindow() { return (Window*)0; }
 
     void Window::SetMainWindow(Window* wnd) {}

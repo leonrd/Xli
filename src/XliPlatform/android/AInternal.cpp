@@ -178,6 +178,11 @@ namespace Xli
             {
                 
             }
+
+            void JNICALL XliJ_OnKeyboardResized (JNIEnv* env, jobject obj)
+            {
+                
+            }
         }
 
         void Android::ProcessCrossThreadEvents()
@@ -200,9 +205,10 @@ namespace Xli
                 {(char* const)"XliJ_OnSurfaceTouch", (char* const)"(IIII)V", (void *)&XliJ_OnSurfaceTouch},
                 {(char* const)"XliJ_FrameTick", (char* const)"(I)V", (void *)&XliJ_FrameTick},
                 {(char* const)"XliJ_TimerCallback", (char* const)"(I)V", (void *)&XliJ_TimerCallback},
+                {(char* const)"XliJ_OnKeyboardResized", (char* const)"()V", (void *)&XliJ_OnKeyboardResized},
             };
             // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 6);
+            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 7);
             if (attached < 0) {
                 LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
                 XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");

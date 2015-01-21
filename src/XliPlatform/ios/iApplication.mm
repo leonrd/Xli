@@ -31,6 +31,8 @@
 
 namespace Xli
 {
+    static Xli_AppDelegate *appDelegate_ = 0;
+
     static PlatformSpecific::iWindow window_;
     static CADisplayLink* displayLink_ = 0;
 
@@ -74,18 +76,16 @@ namespace Xli
             = 1.0 / frameRate / displayLink_.duration;
     }
 
-    // void OnUpdateFrame() {}
-
     void Application::EmitOnStart()
     {
         PrintLine("----------------- EmitOnStart");
         window_.Initialize();
         window_.SetEventHandler(this);
 
-        Xli_AppDelegate* appDelegate = (Xli_AppDelegate *)
+        appDelegate_ = (Xli_AppDelegate *)
             [UIApplication sharedApplication].delegate;
 
-        displayLink_ = [CADisplayLink displayLinkWithTarget:appDelegate
+        displayLink_ = [CADisplayLink displayLinkWithTarget:appDelegate_
                         selector:@selector(Xli_OnUpdateFrame:)];
         [displayLink_ addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         displayLink_.paused = YES;
@@ -149,5 +149,41 @@ namespace Xli
         displayLink_ = 0;
 
         window_.Destroy();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Keyboard + TextInput
+    ////////////////////////////////////////////////////////////////////////////
+
+    void Application::BeginTextInput(TextInputHint hint)
+    {
+        [appDelegate_ Xli_showKeyboardWithHint:hint];
+    }
+
+    void Application::EndTextInput()
+    {
+        [appDelegate_ Xli_hideKeyboard];
+    }
+
+    bool Application::IsOnscreenKeyboardVisible()
+    {
+        return [appDelegate_ Xli_isKeyboardVisible];
+    }
+
+    Recti Application::GetOnscreenKeyboardBounds()
+    {
+        return appDelegate_->_Xli_keyboardBounds;
+    }
+
+    Vector2i Application::GetOnscreenKeyboardPosition()
+    {
+        Recti bounds = appDelegate_->_Xli_keyboardBounds;
+        return bounds.Position();
+    }
+
+    Vector2i Application::GetOnscreenKeyboardSize()
+    {
+        Recti bounds = appDelegate_->_Xli_keyboardBounds;
+        return bounds.Size();
     }
 }

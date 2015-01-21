@@ -114,4 +114,25 @@ namespace Xli
     {
         window_.Destroy();
     }
+
+    void Application::BeginTextInput(TextInputHint hint)
+    {
+        Xli::PlatformSpecific::AShim::RaiseSoftKeyboard();
+    }
+    void Application::EndTextInput()
+    {
+        Xli::PlatformSpecific::AShim::HideSoftKeyboard();
+    }
+    bool Application::IsOnscreenKeyboardVisible()
+    {
+        return Xli::PlatformSpecific::AShim::KeyboardVisible();
+    }
+    Vector2i Application::GetOnscreenKeyboardPosition()
+    {        
+        return Vector2i(0, Display::GetScreenSize().Y - Xli::PlatformSpecific::AShim::GetKeyboardSize());
+    }
+    Vector2i Application::GetOnscreenKeyboardSize()
+    {
+        return Vector2i(Display::GetScreenSize().X, PlatformSpecific::AShim::GetKeyboardSize());
+    }
 }

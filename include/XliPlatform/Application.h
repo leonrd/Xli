@@ -68,9 +68,28 @@ namespace Xli
         virtual String GetInitTitle();
         virtual Vector2i GetInitSize();
 
-        virtual void OnUpdateFrame() {}        
+        // Keyboard and TextInput
+        void BeginTextInput(TextInputHint hint);
+        void EndTextInput();
+
+#if defined(XLI_PLATFORM_ANDROID) || defined(XLI_PLATFORM_IOS)
+        bool HasOnscreenKeyboardSupport() { return true; }
+        bool IsOnscreenKeyboardVisible();
+#endif
+
+#if !defined(XLI_PLATFORM_ANDROID) && !defined(XLI_PLATFORM_IOS)
+        void SetOnscreenKeyboardPosition(Vector2i position);
+#endif
+
+        Vector2i GetOnscreenKeyboardPosition();
+        Vector2i GetOnscreenKeyboardSize();
+#if defined(XLI_PLATFORM_IOS)
+        Recti GetOnscreenKeyboardBounds();
+#endif
+
+        virtual void OnUpdateFrame() {}
         virtual void OnLowMemory() {}
-        
+
     protected:
         virtual void OnStart() {}
         virtual void OnDidStart() {}
