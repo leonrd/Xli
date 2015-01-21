@@ -27,6 +27,7 @@
 #include <Xli/Time.h>
 
 #include "AWindow.h"
+#include "AShim.h"
 
 #include <Xli/Console.h>
 
@@ -36,18 +37,10 @@ namespace Xli
 {
     static PlatformSpecific::AWindow window_;
     static bool event_loop_running = true;
-    
+
     int Application::Run(int argc, char** argv)
     {
-        while (event_loop_running)
-        {
-            PlatformSpecific::Android::ProcessMessages();
-            PlatformSpecific::Android::ProcessCrossThreadEvents();
-            if (window_.CurrentState() == Window::Visible)
-            {
-                Xli::Application::SharedApp()->OnUpdateFrame();                
-            }
-        }
+        return PlatformSpecific::AShim::BeginMainLooper();
     }
 
     Window* Application::RootWindow()
@@ -67,7 +60,7 @@ namespace Xli
     void Application::EmitOnStart()
     {
         PrintLine("----------------- EmitOnStart");
-        window_.SetEventHandler(this);        
+        window_.SetEventHandler(this);
         OnStart();
     }
 

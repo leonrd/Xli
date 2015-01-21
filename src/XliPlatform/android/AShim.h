@@ -60,8 +60,11 @@ namespace Xli
             static jmethodID getUnoSurface;
             static jmethodID getUnoSurfaceWidth;
             static jmethodID getUnoSurfaceHeight;
-            static jmethodID supportsNativeUI;            
-            
+            static jmethodID supportsNativeUI;
+            static jmethodID beginMainLooper;
+            static jmethodID registerTimer;
+            static jmethodID unregisterTimer;
+
         public:
             static int kbVisible;
 
@@ -78,7 +81,7 @@ namespace Xli
             static int ShowMessageBox(const String& message, const String& caption, int buttons, int hints);
             static bool HasVibrator();
             static void VibrateForMilliseconds(int milliseconds);
-            
+
             static bool ConnectedToNetwork();
             static String HeadersToString(const HttpRequest* req);
             static JObjRef SendHttpAsync(const HttpRequest* req, const void* content, long byteLength);
@@ -101,7 +104,10 @@ namespace Xli
             static jobject GetUnoSurface();
             static int GetUnoSurfaceWidth();
             static int GetUnoSurfaceHeight();
-            static bool SupportsNativeUI();            
+            static bool SupportsNativeUI();
+            static int BeginMainLooper();
+            static int RegisterTimer(int millisecondsDelay);
+            static void UnregisterTimer(int timerID);
         };
     };
 };

@@ -60,6 +60,9 @@ namespace Xli
         jmethodID AShim::sendHttpAsyncA;
         jmethodID AShim::sendHttpAsyncB;
         jmethodID AShim::supportsNativeUI;
+        jmethodID AShim::beginMainLooper;
+        jmethodID AShim::registerTimer;
+        jmethodID AShim::unregisterTimer;
 
         void AShim::CacheMids(JNIEnv *env, jclass shimClass)
         {
@@ -90,6 +93,9 @@ namespace Xli
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
             supportsNativeUI = env->GetStaticMethodID(shimClass, "SupportsNativeUI", "()Z");
+            beginMainLooper = env->GetStaticMethodID(shimClass, "BeginMainLooper", "()I");
+            registerTimer = env->GetStaticMethodID(shimClass, "RegisterTimer", "(I)I");
+            unregisterTimer = env->GetStaticMethodID(shimClass, "UnregisterTimer", "(I)V");
 
             if (!raiseKeyboard) XLI_THROW("Cannot cache mid for raiseKeyboard.");
             if (!hideKeyboard) XLI_THROW("Cannot cache mid for hideKeyboard.");
@@ -117,6 +123,7 @@ namespace Xli
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
             if (!supportsNativeUI) XLI_THROW("Cannot cache mid for supportsNativeUI.");
+            if (!beginMainLooper) XLI_THROW("Cannot cache mid for beginMainLooper.");
             LOGD("Mids Cached");
         }
 
@@ -253,7 +260,7 @@ namespace Xli
             jstring jurl = jni->NewStringUTF(url.Ptr());
             jstring jmethod = jni->NewStringUTF(method.Ptr());
             jint jtimeout = (jint)req->GetTimeout();
-                
+
             String headers = HeadersToString(req);
             jstring jheaders = jni->NewStringUTF(headers.Ptr());
 
@@ -521,6 +528,26 @@ namespace Xli
             AJniHelper jni;
             bool result = (bool)jni->CallStaticBooleanMethod(jni.GetShim(), supportsNativeUI);
             return result;
+        }
+
+        int AShim::BeginMainLooper()
+        {
+            AJniHelper jni;
+            int result = (int)jni->CallStaticIntMethod(jni.GetShim(), beginMainLooper);
+            // Need to check exceptions here
+            return result;
+        }
+
+        int AShim::RegisterTimer(int millisecondsDelay)
+        {
+            AJniHelper jni;
+            return (int)jni->CallStaticIntMethod(jni.GetShim(), registerTimer, millisecondsDelay);
+        }
+
+        void AShim::UnregisterTimer(int timerID)
+        {
+            AJniHelper jni;
+            return jni->CallStaticVoidMethod(jni.GetShim(), unregisterTimer, timerID);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Xli
         {
             Destroy();
         }
-    
+
         void AGLContext::Initialize(const GLContextAttributes& attribs)
         {
             swapInterval = -1;
@@ -66,7 +66,7 @@ namespace Xli
 
             if (!eglChooseConfig(display, iattribs, configs, 128, &numConfigs) || numConfigs == 0)
                 XLI_THROW("Unable to choose EGL config");
-        
+
             EGLint cs = 0, cd = 0, cb = 0;
             int cc = 0;
 
@@ -86,7 +86,7 @@ namespace Xli
                 Error->WriteLine(String::Format("DEBUG: EGLConfig[%d]:  M %d  D %d  S %d  B %d  R %d  G %d  B %d  A %d", i, samples, depth, stencil, buffer, r, g, b, a));
 #endif
 
-                if (samples >= cs && depth >= cd && buffer >= cb && 
+                if (samples >= cs && depth >= cd && buffer >= cb &&
                     samples <= attribs.Samples && r <= attribs.ColorBits.R && g <= attribs.ColorBits.G && b <= attribs.ColorBits.B && a <= attribs.ColorBits.A)
                 {
                     cs = samples;
@@ -118,7 +118,7 @@ namespace Xli
                 eglTerminate(display);
             }
         }
-    
+
         GLContext* AGLContext::CreateSharedContext()
         {
             XLI_THROW_NOT_SUPPORTED(XLI_FUNCTION);
@@ -138,9 +138,9 @@ namespace Xli
                     ANativeWindow_setBuffersGeometry((ANativeWindow*)wnd->GetNativeHandle(), 0, 0, format);
                 }
 
-                if (surface != EGL_NO_SURFACE) 
+                if (surface != EGL_NO_SURFACE)
                     eglDestroySurface(display, surface);
-                
+
                 surface = eglCreateWindowSurface(display, config, (ANativeWindow*)wnd->GetNativeHandle(), NULL);
 
                 if (surface == EGL_NO_SURFACE)
@@ -158,7 +158,7 @@ namespace Xli
 
                     if (context == EGL_NO_CONTEXT)
                         XLI_THROW("Unable to create EGL Context");
-                }                
+                }
             }
 
             if (eglMakeCurrent(display, surface, surface, wnd != 0 ? context : 0) == EGL_FALSE)
@@ -176,7 +176,7 @@ namespace Xli
         {
             eglSwapBuffers(display, surface);
         }
-        
+
         void AGLContext::SetSwapInterval(int value)
         {
             if (eglSwapInterval(display, value))

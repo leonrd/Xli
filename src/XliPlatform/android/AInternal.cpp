@@ -28,12 +28,12 @@
 #include "ALogStream.h"
 
 static Xli::MutexQueue<Xli::PlatformSpecific::CTAction*> cross_thread_event_queue;
-// static Xli::Application* application;
+//static Xli::Application* application;
 
 namespace Xli
 {
     namespace PlatformSpecific
-    {        
+    {
         void Android::SetLogTag(const char* tag)
         {
             setenv("XLI_APP_NAME", tag, 1);
@@ -88,7 +88,7 @@ namespace Xli
                 }
             }
         }
-        
+
         static void handle_cmd(struct android_app* app, int32_t cmd)
         {
 #ifdef XLI_DEBUG
@@ -98,25 +98,25 @@ namespace Xli
             {
             case APP_CMD_START:
                 break;
-            case APP_CMD_RESUME:                
+            case APP_CMD_RESUME:
                 break;
             case APP_CMD_PAUSE:
-                Xli::Application::SharedApp()->ResignActive();
+                Application::SharedApp()->ResignActive();
                 break;
             case APP_CMD_STOP:
-                Xli::Application::SharedApp()->EnterBackground();
+                Application::SharedApp()->EnterBackground();
                 break;
             case (APP_CMD_GAINED_FOCUS):
-                Xli::Application::SharedApp()->BecomeActive();
+                Application::SharedApp()->BecomeActive();
                 break;
             case (APP_CMD_LOST_FOCUS):
-                Xli::Application::SharedApp()->ResignActive();
+                Application::SharedApp()->ResignActive();
                 break;
             case APP_CMD_DESTROY:
-                Xli::Application::SharedApp()->Terminate();
+                Application::SharedApp()->Terminate();
                 break;
             case APP_CMD_LOW_MEMORY:
-                Xli::Application::SharedApp()->OnLowMemory();
+                Application::SharedApp()->OnLowMemory();
                 break;
             }
         }
@@ -140,7 +140,7 @@ namespace Xli
 
         extern "C"
         {
-            void JNICALL XliJ_JavaThrowError (JNIEnv* env , jobject obj, jint errorCode, jstring errorMessage) 
+            void JNICALL XliJ_JavaThrowError (JNIEnv* env , jobject obj, jint errorCode, jstring errorMessage)
             {
                 char const* cerrorMessage = env->GetStringUTFChars(errorMessage, NULL);
                 String finalMessage = String("JavaThrown:") + String(cerrorMessage);
@@ -160,13 +160,24 @@ namespace Xli
 
             void JNICALL XliJ_OnSurfaceTouch(JNIEnv* env, jobject obj, int pointerID, int x, int y, int type)
             {
-                cross_thread_event_queue.Enqueue(new CTTouchEvent(pointerID, x, y, type));                
+                cross_thread_event_queue.Enqueue(new CTTouchEvent(pointerID, x, y, type));
             }
-            
-            void JNICALL XliJ_OnTick (JNIEnv* env, jobject obj)
+
+            void JNICALL XliJ_FrameTick (JNIEnv* env, jobject obj, int milliseconds)
             {
-                Xli::Application::SharedApp()->OnUpdateFrame();
-            }            
+                Window* window = Application::SharedApp()->RootWindow();
+                PlatformSpecific::Android::ProcessMessages();
+                PlatformSpecific::Android::ProcessCrossThreadEvents();
+                if (window->CurrentState() == Window::Visible)
+                {
+                    Application::SharedApp()->OnUpdateFrame();
+                }
+            }
+
+            void JNICALL XliJ_TimerCallback (JNIEnv* env, jobject obj, int timerID)
+            {
+                
+            }
         }
 
         void Android::ProcessCrossThreadEvents()
@@ -178,7 +189,7 @@ namespace Xli
                 delete action;
             }
         }
-        
+
         static void AttachNativeCallbacks(jclass shim_class, JNIEnv* l_env)
         {
             LOGD("Registering native functions");
@@ -187,10 +198,11 @@ namespace Xli
                 {(char* const)"XliJ_UnoSurfaceReady", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_UnoSurfaceReady},
                 {(char* const)"XliJ_SurfaceSizeChanged", (char* const)"(II)V", (void *)&XliJ_SurfaceSizeChanged},
                 {(char* const)"XliJ_OnSurfaceTouch", (char* const)"(IIII)V", (void *)&XliJ_OnSurfaceTouch},
-                {(char* const)"XliJ_OnTick", (char* const)"(Landroid/view/Surface;)V", (void *)&XliJ_OnTick},
+                {(char* const)"XliJ_FrameTick", (char* const)"(I)V", (void *)&XliJ_FrameTick},
+                {(char* const)"XliJ_TimerCallback", (char* const)"(I)V", (void *)&XliJ_TimerCallback},
             };
             // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 4);
+            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 6);
             if (attached < 0) {
                 LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
                 XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");
@@ -204,11 +216,6 @@ namespace Xli
             AttachNativeCallbacks(shim_class, env);
         }
 
-        // Application* Android::SharedApp()
-        // {
-        //     return application;
-        // }
-        
         void Android::Init(struct android_app* native_app)
         {
             native_app->userData = 0;
@@ -221,8 +228,7 @@ namespace Xli
             Out->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_INFO)));
             Error->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_WARN)));
 
-            // Request VSync Callbacks
-            // Android::RequestChoreographer();
+            //application = Xli::Application::SharedApp();
         }
     }
 }
