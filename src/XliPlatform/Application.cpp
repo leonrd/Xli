@@ -137,12 +137,14 @@ namespace Xli
         case Uninitialized:
             Start();
 
+        case Starting:
+            EmitOnDidStart();
+
         case Interactive:
             // Harmless if not Interactive
             ExitInteractive();
 
         case Foreground:
-        case Starting:
             state_ = Background;
             EmitOnEnterBackground();
 
@@ -165,8 +167,11 @@ namespace Xli
 
         case Interactive:
         case Foreground:
-        case Starting:
             EnterBackground();
+
+        case Starting:
+            // Never entered Foreground or Background.
+            // OnDidStart NOT emitted.
 
         case Background:
             state_ = Terminating;
