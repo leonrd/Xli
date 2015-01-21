@@ -21,4 +21,12 @@
     [super viewDidDisappear:animated];
 }
 
+- (void)viewWillLayoutSubviews
+{
+    Xli::Window *window = sharedApplication->RootWindow();
+    window->Hide();
+    window->Show();
+    sharedApplication->OnSizeChanged(window);
+}
+
 @end
