@@ -60,7 +60,6 @@ namespace Xli
             static jmethodID getUnoSurface;
             static jmethodID getUnoSurfaceWidth;
             static jmethodID getUnoSurfaceHeight;
-            static jmethodID supportsNativeUI;
             static jmethodID beginMainLooper;
             static jmethodID registerTimer;
             static jmethodID unregisterTimer;
@@ -104,7 +103,6 @@ namespace Xli
             static jobject GetUnoSurface();
             static int GetUnoSurfaceWidth();
             static int GetUnoSurfaceHeight();
-            static bool SupportsNativeUI();
             static int BeginMainLooper();
             static int RegisterTimer(int millisecondsDelay);
             static void UnregisterTimer(int timerID);

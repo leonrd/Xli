@@ -2,6 +2,8 @@ package com.Shim;
 
 import android.app.NativeActivity;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -13,6 +15,7 @@ public class UnoSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     
 	public UnoSurfaceView(NativeActivity context) {
 		super(context);
+        pointerCoords = new PointerCoords();
         nativeActivity = context;
         getHolder().addCallback(this);
         setZOrderOnTop(false);
@@ -43,5 +46,32 @@ public class UnoSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.d("XliApp","surfaceDestroyed");		
+	}
+
+    static PointerCoords pointerCoords;
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		int action = event.getAction();
+		event.getPointerCoords(0,pointerCoords);
+		
+		switch (action) {
+		case MotionEvent.ACTION_MOVE:
+			com.Shim.XliJ.XliJ_OnSurfaceTouch(0, (int)pointerCoords.x, (int)pointerCoords.y, 0);
+			break;
+		case MotionEvent.ACTION_DOWN:
+			com.Shim.XliJ.XliJ_OnSurfaceTouch(0, (int)pointerCoords.x, (int)pointerCoords.y, 1);
+			break;
+	    case MotionEvent.ACTION_UP:
+	    	com.Shim.XliJ.XliJ_OnSurfaceTouch(0, (int)pointerCoords.x, (int)pointerCoords.y, 2);
+	        performClick();
+	        break;
+	    }
+		return true;
+	}
+	
+	@Override
+	public boolean performClick()
+	{
+		return super.performClick();
 	}
 }

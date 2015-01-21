@@ -54,7 +54,7 @@ namespace Xli
         {
             SetEventHandler(0);
         }
-        
+
         void AWindow::SetEventHandler(WindowEventHandler* handler)
         {
             if (handler != 0)
@@ -68,7 +68,7 @@ namespace Xli
         {
             return eventHandler;
         }
-        
+
         WindowImplementation AWindow::GetImplementation()
         {
             return WindowImplementationAndroid;
@@ -140,14 +140,9 @@ namespace Xli
 
         void* AWindow::GetNativeHandle()
         {
-            if (Xli::PlatformSpecific::AShim::SupportsNativeUI())
-            {
-                jobject unoSurface = AShim::GetUnoSurface();
-                AJniHelper jni;
-                return (void*)ANativeWindow_fromSurface(jni.GetEnv(), unoSurface);                    
-            } else {
-                return Xli::PlatformSpecific::AndroidApplication->window;
-            }
+            jobject unoSurface = AShim::GetUnoSurface();
+            AJniHelper jni;
+            return (void*)ANativeWindow_fromSurface(jni.GetEnv(), unoSurface);
         }
         GLContext* AWindow::GetContext() { return &context_; }
     }

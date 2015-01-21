@@ -35,9 +35,9 @@ public class KeyboardHelper {
 	static Hidden hiddenText;
     static int keyboardSize;
     static ViewGroup hiddenLayout;
-    
+
     public static int GetKeyboardSize() { return (int)keyboardSize; }
-	
+
     public static void ShowKeyboard() {
         if (hiddenText == null)
         {
@@ -70,23 +70,23 @@ public class KeyboardHelper {
             hiddenText.setVisibility(View.VISIBLE);
         }});
     }
-        
+
     public static void AttachHiddenView()
-    {    	
+    {
         Log.d("XliApp","Attempting to attach hidden view");
         if (hiddenLayout == null)
         {
-        	
+
             hiddenLayout = new FrameLayout(XliJ.nActivity);
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
                 try {
-                	XliJ.nActivity.setContentView(hiddenLayout);                    
+                    com.Shim.XliJ.nRootLayout.addView(hiddenLayout);
                     hiddenText = new Hidden(XliJ.nActivity, XliJ.nActivity);
-                    hiddenLayout.addView(hiddenText);                    
+                    hiddenLayout.addView(hiddenText);
                     hiddenText.setVisibility(View.VISIBLE);
                     hiddenText.requestFocus();
                     HideKeyboard();
-                    Log.i("XliApp","Successfully created input capture View.");                    
+                    Log.i("XliApp","Successfully created input capture View.");
                 } catch (Exception e) {
                     Log.e("XliApp","Unable to create Layout or View for input capture.");
                     XliJ.XliJ_JavaThrowError(-1, "Unable to create Layout or View for input capture.");
@@ -108,8 +108,8 @@ public class KeyboardHelper {
                     Log.i("XliApp","Successfully attached View Tree Observer.");
                 } catch (Exception e) {
                     Log.e("XliApp","Unable to attach keyboard height monitor.");
-                    XliJ.XliJ_JavaThrowError(-1, "Unable to attach keyboard height monitor.");                    
-                }                
+                    XliJ.XliJ_JavaThrowError(-1, "Unable to attach keyboard height monitor.");
+                }
             }});
         }
     }

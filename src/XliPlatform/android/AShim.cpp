@@ -59,7 +59,6 @@ namespace Xli
         jmethodID AShim::getUnoSurfaceHeight;
         jmethodID AShim::sendHttpAsyncA;
         jmethodID AShim::sendHttpAsyncB;
-        jmethodID AShim::supportsNativeUI;
         jmethodID AShim::beginMainLooper;
         jmethodID AShim::registerTimer;
         jmethodID AShim::unregisterTimer;
@@ -92,7 +91,6 @@ namespace Xli
             getUnoSurfaceHeight = env->GetStaticMethodID(shimClass, "GetUnoSurfaceHeight","()I");
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
-            supportsNativeUI = env->GetStaticMethodID(shimClass, "SupportsNativeUI", "()Z");
             beginMainLooper = env->GetStaticMethodID(shimClass, "BeginMainLooper", "()I");
             registerTimer = env->GetStaticMethodID(shimClass, "RegisterTimer", "(I)I");
             unregisterTimer = env->GetStaticMethodID(shimClass, "UnregisterTimer", "(I)V");
@@ -122,7 +120,6 @@ namespace Xli
             if (!getUnoSurfaceHeight) XLI_THROW("Cannot cache mid for getUnoSurfaceHeight.");
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
-            if (!supportsNativeUI) XLI_THROW("Cannot cache mid for supportsNativeUI.");
             if (!beginMainLooper) XLI_THROW("Cannot cache mid for beginMainLooper.");
             LOGD("Mids Cached");
         }
@@ -520,13 +517,6 @@ namespace Xli
         {
             AJniHelper jni;
             int result = (int)jni->CallStaticIntMethod(jni.GetShim(), getUnoSurfaceHeight);
-            return result;
-        }
-
-        bool AShim::SupportsNativeUI()
-        {
-            AJniHelper jni;
-            bool result = (bool)jni->CallStaticBooleanMethod(jni.GetShim(), supportsNativeUI);
             return result;
         }
 

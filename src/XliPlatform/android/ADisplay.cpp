@@ -84,16 +84,8 @@ namespace Xli
 
     Vector2i Display::GetScreenSize()
     {
-        int w = 0;
-        int h = 0;
-        if (Xli::PlatformSpecific::AShim::SupportsNativeUI())
-        {
-            w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
-            h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
-        } else {
-            w = ANativeWindow_getWidth(Xli::PlatformSpecific::AndroidApplication->window);
-            h = ANativeWindow_getHeight(Xli::PlatformSpecific::AndroidApplication->window);
-        }
+        int w = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceWidth();
+        int h = (int)Xli::PlatformSpecific::AShim::GetUnoSurfaceHeight();
         return Vector2i(w, h);
     }
 }

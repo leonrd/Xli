@@ -28,31 +28,41 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.Shim.FrameChoreographer;
+
+import com.Shim.FrameTicker;
+
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.NativeActivity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
+import android.view.Choreographer;
+import android.widget.LinearLayout;
 
 public class XliJ extends android.app.NativeActivity {
-	
+
 	//--------------------------------------------
 	// Cached Activity
 	public static NativeActivity nActivity;
+    public static LinearLayout nRootLayout;    
 	public static Surface nRootSurface;
 	public static int nRootSurfaceWidth = 400;
 	public static int nRootSurfaceHeight = 800;
-    public static boolean nSupportsNativeUI = false;
+    public static com.Shim.FrameTicker ft;
+    public static Choreographer cgrapher;
+    public static XliCppThreadHandler MainThreadHandler;
     public static void CacheActivity(final NativeActivity activity) { nActivity = activity; }
-    public static void SetSupportsNativeUI(final boolean supported) { nSupportsNativeUI = supported; }
-	
+    public static void CacheRootUILayout(final LinearLayout layout) { nRootLayout = layout; }
+
 	//--------------------------------------------
 	// Callbacks to C++ code
     public static native void XliJ_OnKeyUp(int keyCode);
@@ -67,52 +77,63 @@ public class XliJ extends android.app.NativeActivity {
     public static native void XliJ_HttpAbortedCallback(long requestPointer);
     public static native void XliJ_JavaThrowError(int code, String throwMessage);
     public static native void XliJ_UnoSurfaceReady(Surface unoSurface);
+    public static native void XliJ_SurfaceSizeChanged(int width, int height);
     public static native void XliJ_OnKeyboardResized();
-    public static native void XliJ_FrameTick();
+    public static native void XliJ_FrameTick(int milliseconds);
+    public static native void XliJ_TimerCallback(int id);
+    public static native void XliJ_OnSurfaceTouch(int pointerID, int x, int y, int type);
 
     //--------------------------------------------
     // System
-    public static void StartFrameChoreographer()
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+	public static int BeginMainLooper()
     {
-    	new FrameChoreographer();
+        // this thread doesnt have a looper yet
+        Looper.prepare();
+        
+        // vsync callback
+        ft = new FrameTicker();
+        cgrapher = Choreographer.getInstance();
+        cgrapher.postFrameCallback(ft);
+
+        // Needed for custom message handling
+        MainThreadHandler = new XliCppThreadHandler();
+
+        //process messages
+        Looper.loop();
+        return 0;
     }
     
+    public static int RegisterTimer(int delay)
+    {
+    	int timer_id = MainThreadHandler.registerRepeating(delay);
+    	return timer_id;
+    }
+    
+    public static void UnregisterTimer(int timerID)
+    {
+    	MainThreadHandler.unregisterRepeating(timerID);
+    }
+
     public static void RootSurfaceChanged(Surface unoSurface)
     {
-        if (nSupportsNativeUI) {
-            nRootSurface = unoSurface;
-            XliJ_UnoSurfaceReady(unoSurface);
-        }
+        nRootSurface = unoSurface;
+        XliJ_UnoSurfaceReady(unoSurface);
     }
 	public static void RootSurfaceChangedDimensions(int width, int height) {
-        if (nSupportsNativeUI) {
-            nRootSurfaceHeight = height;
-            nRootSurfaceWidth = width;
-        }
+        nRootSurfaceHeight = height;
+        nRootSurfaceWidth = width;
+        XliJ_SurfaceSizeChanged(width, height);
 	}
     public static Surface GetUnoSurface() {
-        if (nSupportsNativeUI) {
         return nRootSurface;
-        } else {
-            return null;
-        }
     }
     public static int GetUnoSurfaceWidth() {
-        if (nSupportsNativeUI) {
-            return nRootSurfaceWidth;
-        } else {
-            return -1;
-        }
+        return nRootSurfaceWidth;
     }
     public static int GetUnoSurfaceHeight() {
-        if (nSupportsNativeUI) {
-            return nRootSurfaceHeight;
-        } else {
-            return -1;
-        }
-    }
-    public static boolean SupportsNativeUI() {
-        return nSupportsNativeUI;
+        return nRootSurfaceHeight;
     }
     public static void HideStatusBar() {
     	SystemHelper.hideStatusBar(nActivity);
@@ -142,29 +163,21 @@ public class XliJ extends android.app.NativeActivity {
     }
     public static void VibrateForMilliseconds(int milliseconds)
     {
-    	VibratorHelper.VibrateForMilliseconds(milliseconds);    	
+    	VibratorHelper.VibrateForMilliseconds(milliseconds);
     }
 
 
     //--------------------------------------------
     // Keyboard
     public static void RaiseKeyboard() {
-        if (!nSupportsNativeUI) {
-            KeyboardHelper.ShowKeyboard();
-        }
+        KeyboardHelper.ShowKeyboard();
     }
     public static int GetKeyboardSize()
     {
-        if (!nSupportsNativeUI) {
-            return 0;
-        } else {
-            return KeyboardHelper.GetKeyboardSize();
-        }
+        return KeyboardHelper.GetKeyboardSize();
     }
     public static void HideKeyboard() {
-        if (!nSupportsNativeUI) {
-            KeyboardHelper.HideKeyboard();
-        }
+        KeyboardHelper.HideKeyboard();
     }
 
     //--------------------------------------------
@@ -194,20 +207,18 @@ public class XliJ extends android.app.NativeActivity {
     public static HashMap<String,String> StringToHeadersMap(String headers)
     {
     	//{TODO} Add validation/sanity-checks for headers
-    	HashMap<String,String> h = new HashMap<String,String>();    	    	
+    	HashMap<String,String> h = new HashMap<String,String>();
     	if (headers.trim().length()==0) return h;
-    	
+
     	for (String pair : headers.split("\n"))
     	{
     		String[] kv = pair.split(":",2);
     		if (kv.length>1)
     		{
     			h.put(kv[0], kv[1]);
-    			Log.e("XliApp", kv[0]+":"+kv[1]);
     		} else if (kv.length == 1) {
     			h.put(kv[0], "");
-    			Log.e("XliApp", kv[0]+":*null*");        			
-    		}    		
+    		}
     	}
     	return h;
     }
@@ -216,14 +227,14 @@ public class XliJ extends android.app.NativeActivity {
                                           int timeout, long requestPointer, boolean verifyHost) {
     	return HttpHelper.SendHttpAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost);
     }
-	
+
 	public static int SendHttpStringAsync(String url, String method, String headers, String body,
-    								 			int timeout, long requestPointer, boolean verifyHost) {				
+    								 			int timeout, long requestPointer, boolean verifyHost) {
         return HttpHelper.SendHttpStringAsync(url, method, StringToHeadersMap(headers), body, timeout, requestPointer, verifyHost);
     }
 
 	public static byte[] ReadAllBytesFromHttpInputStream(InputStream stream, long requestPointer) throws IOException
-    {    	
+    {
 		return HttpHelper.ReadAllBytesFromHttpInputStream(stream, requestPointer);
     }
 
@@ -247,11 +258,11 @@ public class XliJ extends android.app.NativeActivity {
 		return StreamHelper.AsyncProgressiveInputStreamToByteArray((InputStream)GetObject(stream), requestPointer);
     }
     public static byte[] ReadAllBytesFromInputStream(InputStream stream) throws IOException
-    {    	
+    {
 		return StreamHelper.ReadAllBytesFromInputStream(stream);
     }
     public static byte[] ReadBytesFromInputStream(BufferedInputStream stream, int bytesToRead)
-    {    	
+    {
     	return StreamHelper.ReadBytesFromInputStream(stream, bytesToRead);
     }
 
@@ -285,10 +296,10 @@ public class XliJ extends android.app.NativeActivity {
 			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
 			return -1;
 		}
-    	
+
     }
     public static int ReserveObject()
-    {    	
+    {
     	try {
 			_objSem.acquire();
 	    	int key = _objKey.incrementAndGet();
@@ -343,7 +354,7 @@ public class XliJ extends android.app.NativeActivity {
 			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
 			return null;
 		}
-  	
+
     }
     public static boolean TryReleaseObject(int key)
     {
@@ -355,8 +366,8 @@ public class XliJ extends android.app.NativeActivity {
 	    	return true;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");			
+			XliJ_JavaThrowError(-1, "Threading error in Xli.HoldObject");
 			return false;
 		}
-    }	
+    }
 }
