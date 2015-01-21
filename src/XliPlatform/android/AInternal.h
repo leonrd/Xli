@@ -28,6 +28,7 @@
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/Application.h>
 #include <XliPlatform/Window.h>
+#include "AKeyEvent.h"
 
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, Xli::PlatformSpecific::AGetAppName(), __VA_ARGS__))
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, Xli::PlatformSpecific::AGetAppName(), __VA_ARGS__))
@@ -58,7 +59,53 @@ namespace Xli
             virtual void Execute() = 0;
         };
 
-
+        class CTKeyAction : public CTAction
+        {
+        public:
+            Xli::Key KeyEvent;
+            bool KeyDown;
+            CTKeyAction(AKeyEvent keyEvent, bool keyDown)
+            {
+                this->KeyEvent = AndroidToXliKeyEvent(keyEvent);
+                this->KeyDown = keyDown;
+            }
+            void Execute()
+            {
+                Application* app = Xli::Application::SharedApp();
+                Window* win = app->RootWindow();
+                if (this->KeyDown)
+                {
+                    app->OnKeyDown(win, this->KeyEvent);
+                } else {
+                    app->OnKeyUp(win, this->KeyEvent);
+                }
+            }
+        };
+        
+        class CTTextAction : public CTAction
+        {
+        public:
+            String Text;
+            CTTextAction(String text) { this->Text = text; }
+            void Execute()
+            {
+                Application* app = Xli::Application::SharedApp();
+                Window* win = app->RootWindow();
+                app->OnTextInput(win, this->Text);
+            }
+        };
+        
+        class CTKeyboardResize : public CTAction
+        {
+        public:
+            CTKeyboardResize() {}
+            void Execute()
+            {
+                Application* app = Xli::Application::SharedApp();
+                Window* win = app->RootWindow();
+                app->OnKeyboardResized(win);
+            }
+        };        
 
         class CTTouchEvent : public CTAction
         {

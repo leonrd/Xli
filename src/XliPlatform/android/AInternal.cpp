@@ -181,7 +181,22 @@ namespace Xli
 
             void JNICALL XliJ_OnKeyboardResized (JNIEnv* env, jobject obj)
             {
-                
+                cross_thread_event_queue.Enqueue(new CTKeyboardResize());
+            }
+
+            void JNICALL XliJ_OnKeyUp (JNIEnv *env , jobject obj, jint keyCode)
+            {
+                cross_thread_event_queue.Enqueue(new CTKeyAction((AKeyEvent)keyCode, false));
+            }
+            void JNICALL XliJ_OnKeyDown (JNIEnv *env , jobject obj, jint keyCode)
+            {
+                cross_thread_event_queue.Enqueue(new CTKeyAction((AKeyEvent)keyCode, true));
+            }
+            void JNICALL XliJ_OnTextInput (JNIEnv *env , jobject obj, jstring keyChars)
+            {
+                const char* jChars = env->GetStringUTFChars((jstring)keyChars, NULL);
+                cross_thread_event_queue.Enqueue(new CTTextAction(String(jChars)));
+                env->ReleaseStringUTFChars((jstring)keyChars, jChars);
             }
         }
 
@@ -206,9 +221,12 @@ namespace Xli
                 {(char* const)"XliJ_FrameTick", (char* const)"(I)V", (void *)&XliJ_FrameTick},
                 {(char* const)"XliJ_TimerCallback", (char* const)"(I)V", (void *)&XliJ_TimerCallback},
                 {(char* const)"XliJ_OnKeyboardResized", (char* const)"()V", (void *)&XliJ_OnKeyboardResized},
+                {(char* const)"XliJ_OnKeyUp", (char* const)"(I)V", (void *)&XliJ_OnKeyUp},
+                {(char* const)"XliJ_OnKeyDown", (char* const)"(I)V", (void *)&XliJ_OnKeyDown},
+                {(char* const)"XliJ_OnTextInput", (char* const)"(Ljava/lang/String;)V", (void *)&XliJ_OnTextInput},
             };
             // the last argument is the number of native functions
-            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 7);
+            jint attached = l_env->RegisterNatives(shim_class, native_funcs, 10);
             if (attached < 0) {
                 LOGE("COULD NOT REGISTER NATIVE FUNCTIONS");
                 XLI_THROW("COULD NOT REGISTER NATIVE FUNCTIONS");
