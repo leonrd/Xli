@@ -31,8 +31,6 @@
 
 #include <Xli/Console.h>
 
-extern Xli::Application* TMP_SHARED_APP();
-
 namespace Xli
 {
     static PlatformSpecific::AWindow window_;

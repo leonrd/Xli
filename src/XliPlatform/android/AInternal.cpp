@@ -27,8 +27,10 @@
 #include "AKeyEvent.h"
 #include "ALogStream.h"
 
+// {TODO} File references Application::SharedApp() very frequently, probably best to 
+//        cache this like we used to in the old AWindow
+
 static Xli::MutexQueue<Xli::PlatformSpecific::CTAction*> cross_thread_event_queue;
-//static Xli::Application* application;
 
 namespace Xli
 {
@@ -184,8 +186,17 @@ namespace Xli
             void JNICALL XliJ_FrameTick (JNIEnv* env, jobject obj, int milliseconds)
             {
                 Window* window = Application::SharedApp()->RootWindow();
+
+                // Pump ndk message
+                // This is the Wrong place for this, it will be moved very soon, this just allowed
+                // me to get things working as an example.
+                // The touch and key events come from java now (as they are events from the SurfaceView)
+                // I will be taking control of oncreate, onpause etc on the java side soon so then the 
+                // native-glue really isnt doing much.
                 PlatformSpecific::Android::ProcessMessages();
                 PlatformSpecific::Android::ProcessCrossThreadEvents();
+
+                //
                 if (window->CurrentState() == Window::Visible)
                 {
                     Application::SharedApp()->OnUpdateFrame();
