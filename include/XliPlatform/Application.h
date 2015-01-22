@@ -28,8 +28,6 @@ extern "C" int main(int argc, char** argv);
 
 namespace Xli
 {
-    class Application;
-        
     class Application: public InputEventHandler, public WindowEventHandler
     {
     public:
@@ -37,8 +35,8 @@ namespace Xli
         {
             Uninitialized,
             Starting,
-            Visible,
-            Active,
+            Foreground,
+            Interactive,
             Background,
             Terminating,
         };
@@ -54,9 +52,9 @@ namespace Xli
         State CurrentState() const { return state_; }
 
         void Start();
-        void BecomeVisible();
-        void BecomeActive();
-        void ResignActive();
+        void EnterForeground();
+        void EnterInteractive();
+        void ExitInteractive();
         void EnterBackground();
         void Terminate();
 
@@ -93,9 +91,9 @@ namespace Xli
     protected:
         virtual void OnStart() {}
         virtual void OnDidStart() {}
-        virtual void OnEnterVisible() {}
-        virtual void OnEnterActive() {}
-        virtual void OnExitActive() {}
+        virtual void OnEnterForeground() {}
+        virtual void OnEnterInteractive() {}
+        virtual void OnExitInteractive() {}
         virtual void OnEnterBackground() {}
         virtual void OnTerminate() {}
 
@@ -110,9 +108,9 @@ namespace Xli
 
         void EmitOnStart();
         void EmitOnDidStart();
-        void EmitOnEnterVisible();
-        void EmitOnEnterActive();
-        void EmitOnExitActive();
+        void EmitOnEnterForeground();
+        void EmitOnEnterInteractive();
+        void EmitOnExitInteractive();
         void EmitOnEnterBackground();
         void EmitOnTerminate();
         void EmitOnLowMemory();

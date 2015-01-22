@@ -49,7 +49,7 @@ namespace Xli
 
         // Need the pool, but little point in actually releasing it
         (void) [[NSAutoreleasePool alloc] init];
-        
+
         // UIApplicationMain doesn't return, but exceptions may be caught here.
         return UIApplicationMain(
             argc, argv, nil, NSStringFromClass([Xli_AppDelegate class]));
@@ -98,26 +98,26 @@ namespace Xli
         OnDidStart();
     }
 
-    void Application::EmitOnEnterVisible()
+    void Application::EmitOnEnterForeground()
     {
-        PrintLine("----------------- EmitOnEnterVisible");
+        PrintLine("----------------- EmitOnEnterForeground");
         displayLink_.frameInterval = 3;
         displayLink_.paused = NO;
 
-        OnEnterVisible();
+        OnEnterForeground();
     }
 
-    void Application::EmitOnEnterActive()
+    void Application::EmitOnEnterInteractive()
     {
-        PrintLine("----------------- EmitOnEnterActive");
+        PrintLine("----------------- EmitOnEnterInteractive");
         displayLink_.frameInterval = 1;
-        OnEnterActive();
+        OnEnterInteractive();
     }
 
-    void Application::EmitOnExitActive()
+    void Application::EmitOnExitInteractive()
     {
-        PrintLine("----------------- EmitOnExitActive");
-        OnExitActive();
+        PrintLine("----------------- EmitOnExitInteractive");
+        OnExitInteractive();
         displayLink_.frameInterval = 3;
     }
 

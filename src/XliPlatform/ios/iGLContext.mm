@@ -39,11 +39,6 @@ namespace Xli
             layer_.drawableProperties = [NSDictionary
                 dictionaryWithObject:kEAGLColorFormatRGBA8
                 forKey:kEAGLDrawablePropertyColorFormat];
-
-            CGSize layerSize = layer_.bounds.size;
-            size_.X = layerSize.width;
-            size_.Y = layerSize.height;
-            size_ *= layer_.contentsScale;
         }
 
         void iGLContext::AllocateBuffersAndMakeCurrent()
@@ -51,6 +46,11 @@ namespace Xli
             assert(renderBuffer_ == 0);
             assert(frameBuffer_ == 0);
             assert(depthStencilBuffer_ == 0);
+
+            CGSize layerSize = layer_.bounds.size;
+            size_.X = layerSize.width;
+            size_.Y = layerSize.height;
+            size_ *= layer_.contentsScale;
 
             [EAGLContext setCurrentContext:context_];
 

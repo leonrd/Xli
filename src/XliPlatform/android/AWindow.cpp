@@ -84,7 +84,7 @@ namespace Xli
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnShow");
             context_.MakeCurrent(this);
-            Xli::Application::SharedApp()->BecomeVisible();
+            Xli::Application::SharedApp()->EnterForeground();
         }
 
         void AWindow::OnHide()
