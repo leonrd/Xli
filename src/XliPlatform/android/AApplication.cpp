@@ -38,6 +38,7 @@ namespace Xli
 
     int Application::Run(int argc, char** argv)
     {
+        window_.SetEventHandler(this);
     }
 
     Window* Application::RootWindow()
@@ -56,8 +57,7 @@ namespace Xli
 
     void Application::EmitOnStart()
     {
-        PrintLine("----------------- EmitOnStart");
-        window_.SetEventHandler(this);
+        PrintLine("----------------- EmitOnStart");        
         OnStart();
     }
 

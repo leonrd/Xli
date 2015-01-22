@@ -32,6 +32,7 @@
 //        cache this like we used to in the old AWindow
 
 static Xli::MutexQueue<Xli::PlatformSpecific::CTAction*> cross_thread_event_queue;
+static bool seperateCoreThread = false;
 
 namespace Xli
 {
@@ -58,94 +59,118 @@ namespace Xli
             {
                 char const* cerrorMessage = env->GetStringUTFChars(errorMessage, NULL);
                 String finalMessage = String("JavaThrown:") + String(cerrorMessage);
-                //
-                String m = "XLiError (" + String(errorCode)+ ") - " + finalMessage;
-                XLI_THROW(m.Ptr());
-                //cross_thread_event_queue.Enqueue(new CTError(finalMessage, errorCode));
+                if (!seperateCoreThread)
+                {
+                    String m = "XLiError (" + String(errorCode)+ ") - " + finalMessage;
+                    XLI_THROW(m.Ptr());
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTError(finalMessage, errorCode));
+                }
                 env->ReleaseStringUTFChars(errorMessage, cerrorMessage);
             }
 
             void JNICALL XliJ_UnoSurfaceReady (JNIEnv* env, jobject obj, jobject unoSurface)
             {
-                //
-                Window* window = Application::SharedApp()->RootWindow();
-                Application::SharedApp()->OnNativeHandleChanged(window);
-                window->Show();
-                //cross_thread_event_queue.Enqueue(new CTSurfaceReady());
+                if (!seperateCoreThread)
+                {
+                    Window* window = Application::SharedApp()->RootWindow();
+                    Application::SharedApp()->OnNativeHandleChanged(window);
+                    window->Show();
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTSurfaceReady());
+                }
             }
 
             void JNICALL XliJ_SurfaceSizeChanged (JNIEnv* env, jobject obj, int width, int height)
             {
-                //
-                Application* app = Xli::Application::SharedApp();
-                app->OnSizeChanged(app->RootWindow());
-                //cross_thread_event_queue.Enqueue(new CTSurfaceSizeChanged());
+                if (!seperateCoreThread)
+                {
+                    Application* app = Xli::Application::SharedApp();
+                    app->OnSizeChanged(app->RootWindow());
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTSurfaceSizeChanged());
+                }
             }
 
             void JNICALL XliJ_OnSurfaceTouch(JNIEnv* env, jobject obj, int pointerID, int x, int y, int type)
             {
-                //
-                Application* app = Xli::Application::SharedApp();
-                Window* win = app->RootWindow();
-                switch (type)
+                if (!seperateCoreThread)
                 {
-                case 0:
-                    app->OnTouchMove(win, Vector2(x, y), pointerID);
-                    break;
-                case 1:
-                    app->OnTouchDown(win, Vector2(x, y), pointerID);
-                    break;
-                case 2:
-                    app->OnTouchUp(win, Vector2(x, y), pointerID);
-                    break;
+                    Application* app = Xli::Application::SharedApp();
+                    Window* win = app->RootWindow();
+                    switch (type)
+                    {
+                    case 0:
+                        app->OnTouchMove(win, Vector2(x, y), pointerID);
+                        break;
+                    case 1:
+                        app->OnTouchDown(win, Vector2(x, y), pointerID);
+                        break;
+                    case 2:
+                        app->OnTouchUp(win, Vector2(x, y), pointerID);
+                        break;
+                    }
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTTouchEvent(pointerID, x, y, type));
                 }
-                //cross_thread_event_queue.Enqueue(new CTTouchEvent(pointerID, x, y, type));
             }
 
             void JNICALL XliJ_TimerCallback (JNIEnv* env, jobject obj, int timerID)
             {
-
+                if (seperateCoreThread)
+                {
+                    Android::ProcessCrossThreadEvents();
+                }
             }
 
             void JNICALL XliJ_OnKeyboardResized (JNIEnv* env, jobject obj)
             {
-                //
-                Application* app = Xli::Application::SharedApp();
-                Window* win = app->RootWindow();
-                app->OnKeyboardResized(win);
-                //cross_thread_event_queue.Enqueue(new CTKeyboardResize());
+                if (!seperateCoreThread)
+                {
+                    Application* app = Xli::Application::SharedApp();
+                    Window* win = app->RootWindow();
+                    app->OnKeyboardResized(win);
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTKeyboardResize());
+                }
             }
 
             void JNICALL XliJ_OnKeyUp (JNIEnv *env , jobject obj, jint keyCode)
             {
-                //
-                Application* app = Xli::Application::SharedApp();
-                Window* win = app->RootWindow();
-                app->OnKeyUp(win, AndroidToXliKeyEvent((AKeyEvent)keyCode));
-                //cross_thread_event_queue.Enqueue(new CTKeyAction((AKeyEvent)keyCode, false));
+                if (!seperateCoreThread)
+                {
+                    Application* app = Xli::Application::SharedApp();
+                    Window* win = app->RootWindow();
+                    app->OnKeyUp(win, AndroidToXliKeyEvent((AKeyEvent)keyCode));
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTKeyAction((AKeyEvent)keyCode, false));
+                }
             }
             void JNICALL XliJ_OnKeyDown (JNIEnv *env , jobject obj, jint keyCode)
             {
-                //
-                Application* app = Xli::Application::SharedApp();
-                Window* win = app->RootWindow();
-                app->OnKeyDown(win, AndroidToXliKeyEvent((AKeyEvent)keyCode));
-                //cross_thread_event_queue.Enqueue(new CTKeyAction((AKeyEvent)keyCode, true));
+                if (!seperateCoreThread)
+                {
+                    Application* app = Xli::Application::SharedApp();
+                    Window* win = app->RootWindow();
+                    app->OnKeyDown(win, AndroidToXliKeyEvent((AKeyEvent)keyCode));
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTKeyAction((AKeyEvent)keyCode, true));
+                }
             }
             void JNICALL XliJ_OnTextInput (JNIEnv *env , jobject obj, jstring keyChars)
             {
                 const char* jChars = env->GetStringUTFChars((jstring)keyChars, NULL);
-                //
-                Application* app = Xli::Application::SharedApp();
-                Window* win = app->RootWindow();
-                app->OnTextInput(win, String(jChars));
-                //cross_thread_event_queue.Enqueue(new CTTextAction(String(jChars)));
+                if (!seperateCoreThread)
+                {
+                    Application* app = Xli::Application::SharedApp();
+                    Window* win = app->RootWindow();
+                    app->OnTextInput(win, String(jChars));
+                } else {
+                    cross_thread_event_queue.Enqueue(new CTTextAction(String(jChars)));
+                }
                 env->ReleaseStringUTFChars((jstring)keyChars, jChars);
             }
-
-            // void JNICALL cppOnCreate(JNIEnv *env , jobject obj) see XliMain :)
-            // {
-            // }
+            
             void JNICALL cppOnDestroy(JNIEnv *env , jobject obj)
             {
                 Application::SharedApp()->Terminate();
@@ -156,6 +181,7 @@ namespace Xli
             }
             void JNICALL cppOnResume(JNIEnv *env , jobject obj)
             {
+                Application::SharedApp()->Start();
             }
             void JNICALL cppOnStart(JNIEnv *env , jobject obj)
             {
@@ -186,13 +212,16 @@ namespace Xli
             void JNICALL cppOnVSync (JNIEnv* env, jobject obj, int milliseconds)
             {
                 Window* window = Application::SharedApp()->RootWindow();
-                //Android::ProcessCrossThreadEvents(); // removed as all events in correct thread
+                // if (seperateCoreThread)
+                // {
+                //     Android::ProcessCrossThreadEvents();
+                // }
                 if (window->CurrentState() == Window::Visible)
                 {
                     window->GetContext()->MakeCurrent(window);
                     Application::SharedApp()->OnUpdateFrame();
                 }
-            }
+            }        
         }
 
         void Android::ProcessCrossThreadEvents()
@@ -246,8 +275,9 @@ namespace Xli
             AttachNativeCallbacks(env, shim_class);
         }
 
-        void Android::Init()
+        void Android::Init(bool sepCoreThread)
         {
+            seperateCoreThread = sepCoreThread;
             Out->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_INFO)));
             Error->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_WARN)));
         }

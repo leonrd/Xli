@@ -42,7 +42,7 @@ extern "C" int main(int argc, char** argv)
         Xli::CoreLib::Init();
 
 #if defined(XLI_PLATFORM_ANDROID)
-        Xli::PlatformSpecific::Android::Init();
+        Xli::PlatformSpecific::Android::Init(((int)argv)==1);
 #elif defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
@@ -78,11 +78,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "XliApp", __VA_ARGS__))
 
 extern "C" {
-    void JNICALL cppOnCreate(JNIEnv *env , jobject obj)
+    void JNICALL cppOnCreate(JNIEnv *env , jobject obj, jboolean seperateCoreThread)
     {
         LOGD ("----------");
-        LOGD ("ONCREATE!");
-        main(0,0);
+        main(0,(char**)(seperateCoreThread ? 1 : 0));
         LOGD ("----------");
     }
 }
@@ -102,7 +101,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     // attach oncreate
     static JNINativeMethod native_funcs[] = {
-        {(char* const)"cppOnCreate", (char* const)"()V", (void *)&cppOnCreate},
+        {(char* const)"cppOnCreate", (char* const)"(Z)V", (void *)&cppOnCreate},
     };
     jint attached = env->RegisterNatives(shimClass, native_funcs, 1);
     if (attached < 0) {

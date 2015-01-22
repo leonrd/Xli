@@ -78,18 +78,21 @@ namespace Xli
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnInitialize");
             context_.Initialize(Xli::GLContextAttributes::Default());
+            eventHandler->OnInitialize(this);
         }
 
         void AWindow::OnShow()
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnShow");
             context_.MakeCurrent(this);
-            Xli::Application::SharedApp()->EnterForeground();
+            eventHandler->OnShow(this);
+            Xli::Application::SharedApp()->EnterForeground();            
         }
 
         void AWindow::OnHide()
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnHide");
+            eventHandler->OnHide(this);
         }
 
         void AWindow::OnDraw()
@@ -100,10 +103,7 @@ namespace Xli
         void AWindow::OnDestroy()
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnDestroy");
-            // context_.Destroy();
-            // [window_ release];
-
-            // window_ = 0;
+            eventHandler->OnDestroy(this);
         }
 
         String AWindow::GetTitle()

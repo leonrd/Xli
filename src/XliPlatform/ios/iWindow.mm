@@ -89,16 +89,19 @@ namespace Xli
 
             window_.hidden = false;
             [window_ makeKeyWindow];
+            eventHandler->OnInitialize();
         }
 
         void iWindow::OnShow()
         {
             context_.AllocateBuffersAndMakeCurrent();
+            eventHandler->OnShow();
         }
 
         void iWindow::OnHide()
         {
             context_.FreeBuffers();
+            eventHandler->OnHide();
         }
 
         void iWindow::OnDraw()
@@ -108,6 +111,7 @@ namespace Xli
 
         void iWindow::OnDestroy()
         {
+            eventHandler->OnDestroy();
             context_.Destroy();
             [window_ release];
 

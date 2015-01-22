@@ -44,6 +44,10 @@ namespace Xli
     class WindowEventHandler: public Object
     {
     public:
+        virtual void OnInitialize(Window* wnd) {}
+        virtual void OnShow(Window* wnd) {}
+        virtual void OnHide(Window* wnd) {}
+        virtual void OnDestroy(Window* wnd) {}
         virtual void OnSizeChanged(Window* wnd) {}
         virtual void OnNativeHandleChanged(Window* wnd) {}
     };
