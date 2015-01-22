@@ -22,8 +22,6 @@
 #include <jni.h>
 #include <XliPlatform/Application.h>
 
-struct android_app;
-
 namespace Xli
 {
     namespace PlatformSpecific
@@ -34,14 +32,13 @@ namespace Xli
         class Android
         {
         public:
-            static void OnJNILoad(JNIEnv* env, jclass shim_class);
-            static void Init(struct android_app* native_app);
+            static void OnJNILoad(JavaVM* vm, JNIEnv* env, jclass shim_class);
+            static void Init();
             static void SetLogTag(const char* tag);
 
             static JavaVM* GetJavaVM();
             static jobject GetActivity();
 
-            static void ProcessMessages();
             static void ProcessCrossThreadEvents();
         };
     }

@@ -46,8 +46,6 @@ namespace Xli
             static jmethodID showStatusBar;
             static jmethodID getStatusBarHeight;
             static jmethodID getDisplayMetrics;
-            static jmethodID hasVibrator;
-            static jmethodID vibrateForMilliseconds;
             static jmethodID abortAsyncTask;
             static jmethodID holdObject;
             static jmethodID getObject;
@@ -60,9 +58,9 @@ namespace Xli
             static jmethodID getUnoSurface;
             static jmethodID getUnoSurfaceWidth;
             static jmethodID getUnoSurfaceHeight;
-            static jmethodID beginMainLooper;
             static jmethodID registerTimer;
             static jmethodID unregisterTimer;
+            static jmethodID getActivity;
 
         public:
             static int kbVisible;
@@ -78,8 +76,6 @@ namespace Xli
             static void HideStatusBar();
             static float GetStatusBarHeight();
             static int ShowMessageBox(const String& message, const String& caption, int buttons, int hints);
-            static bool HasVibrator();
-            static void VibrateForMilliseconds(int milliseconds);
 
             static bool ConnectedToNetwork();
             static String HeadersToString(const HttpRequest* req);
@@ -103,9 +99,9 @@ namespace Xli
             static jobject GetUnoSurface();
             static int GetUnoSurfaceWidth();
             static int GetUnoSurfaceHeight();
-            static int BeginMainLooper();
             static int RegisterTimer(int millisecondsDelay);
             static void UnregisterTimer(int timerID);
+            static jobject GetActivity(JNIEnv* env, jclass shim_class);
         };
     };
 };

@@ -48,8 +48,7 @@ namespace Xli
     namespace PlatformSpecific
     {
         extern ANativeActivity* AndroidActivity;
-        static struct android_app* AndroidApplication;
-
+ 
         XLI_INLINE const char* AGetAppName()
         {
             const char* name = getenv("XLI_APP_NAME");

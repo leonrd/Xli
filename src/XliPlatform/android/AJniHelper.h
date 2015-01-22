@@ -29,15 +29,16 @@ namespace Xli
         class AJniHelper
         {
             JNIEnv* env;
-            jclass shim;
             static int shim_loaded;
 
         public:
-            static void Init(JNIEnv* env, jclass shim_class);
+            static void Init(JavaVM* vm, JNIEnv* env, jclass shim_class);
 
             AJniHelper();
 
             jclass GetShim();
+            static JavaVM* GetVM();
+            static jobject GetActivity();
 
             jmethodID FindMethod(const char* className, const char* methodName, const char* methodSig);
 

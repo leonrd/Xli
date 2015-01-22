@@ -129,7 +129,7 @@ namespace Xli
             if (wnd)
                 window = wnd;
 
-            if (wnd && (ANativeWindow*)wnd->GetNativeHandle() != handle)
+            if (wnd && (ANativeWindow*)wnd->GetNativeHandle() != handle) //{TODO} cache handle?
             {
                 if (((AWindow*)wnd)->GetImplementation() == WindowImplementationAndroid) //{TODO} cast is ugly hack, fix
                 {
@@ -141,7 +141,8 @@ namespace Xli
                 if (surface != EGL_NO_SURFACE)
                     eglDestroySurface(display, surface);
 
-                surface = eglCreateWindowSurface(display, config, (ANativeWindow*)wnd->GetNativeHandle(), NULL);
+                handle = (ANativeWindow*)wnd->GetNativeHandle();
+                surface = eglCreateWindowSurface(display, config, handle, NULL);
 
                 if (surface == EGL_NO_SURFACE)
                     XLI_THROW("Unable to create EGL Surface");

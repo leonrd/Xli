@@ -23,7 +23,6 @@
 
 # include <XliPlatform/Application.h>
 #if defined(XLI_PLATFORM_ANDROID)
-# include "../../3rdparty/android_native_app_glue/android_native_app_glue.h"
 # include <XliPlatform/PlatformSpecific/Android.h>
 #elif defined(XLI_PLATFORM_IOS)
 # include <XliPlatform/PlatformSpecific/iOS.h>
@@ -41,13 +40,13 @@ extern "C" int main(int argc, char** argv)
     try
     {
         Xli::CoreLib::Init();
-        
+
 #if defined(XLI_PLATFORM_ANDROID)
-        Xli::PlatformSpecific::Android::Init((struct android_app*)*argv);
+        Xli::PlatformSpecific::Android::Init();
 #elif defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
-        Xli::Application::application_ = Xli::InitializeSharedApp();        
+        Xli::Application::application_ = Xli::InitializeSharedApp();
         result = Xli::Application::SharedApp()->Run(argc, argv);
     }
     catch (const Xli::Exception& e)
@@ -58,7 +57,7 @@ extern "C" int main(int argc, char** argv)
     {
         Xli::Exception e("An unsupported C++ exception was thrown");
         Xli::CoreLib::OnUnhandledException(e, "main");
-    }        
+    }
 
     return result;
 }
@@ -72,13 +71,51 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return main(__argc, __argv);
 }
 
-#elif defined(XLI_PLATFORM_ANDROID)
+#endif
 
-extern "C" void android_main(struct android_app* app)
-{
-    // Make sure glue isn't stripped.
-    app_dummy();
-    exit(main(0, (char**)&app));
+#if defined(XLI_PLATFORM_ANDROID)
+#include <android/log.h>
+#define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "XliApp", __VA_ARGS__))
+
+extern "C" {
+    void JNICALL cppOnCreate(JNIEnv *env , jobject obj)
+    {
+        LOGD ("----------");
+        LOGD ("ONCREATE!");
+        main(0,0);
+        LOGD ("----------");
+    }
 }
+
+jint JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+    LOGD ("----------");
+    LOGD ("Jni_OnLoad");
+
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOGD ("&&&&&&& GetEnv failed &&&&&&");
+        return -1;
+    }
+
+    jclass shimClass = env->FindClass("com/Shim/XliJ");
+
+    // attach oncreate
+    static JNINativeMethod native_funcs[] = {
+        {(char* const)"cppOnCreate", (char* const)"()V", (void *)&cppOnCreate},
+    };
+    jint attached = env->RegisterNatives(shimClass, native_funcs, 1);
+    if (attached < 0) {
+        LOGD("COULD NOT REGISTER OnCreate CALLBACK");
+        XLI_THROW("COULD NOT REGISTER OnCreate CALLBACK");
+    } else {
+        LOGD("Native functions registered");
+    }
+
+    Xli::PlatformSpecific::Android::OnJNILoad(vm, env, shimClass);
+    LOGD ("----------");
+    return JNI_VERSION_1_6;
+}
+
 
 #endif

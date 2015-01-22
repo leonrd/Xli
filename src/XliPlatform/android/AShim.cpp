@@ -45,8 +45,6 @@ namespace Xli
         jmethodID AShim::showStatusBar;
         jmethodID AShim::getStatusBarHeight;
         jmethodID AShim::getDisplayMetrics;
-        jmethodID AShim::hasVibrator;
-        jmethodID AShim::vibrateForMilliseconds;
         jmethodID AShim::abortAsyncTask;
         jmethodID AShim::holdObject;
         jmethodID AShim::getObject;
@@ -59,9 +57,9 @@ namespace Xli
         jmethodID AShim::getUnoSurfaceHeight;
         jmethodID AShim::sendHttpAsyncA;
         jmethodID AShim::sendHttpAsyncB;
-        jmethodID AShim::beginMainLooper;
         jmethodID AShim::registerTimer;
         jmethodID AShim::unregisterTimer;
+        jmethodID AShim::getActivity;
 
         void AShim::CacheMids(JNIEnv *env, jclass shimClass)
         {
@@ -81,8 +79,6 @@ namespace Xli
             holdObject = env->GetStaticMethodID(shimClass, "HoldObject", "(Ljava/lang/Object;)I");
             getObject = env->GetStaticMethodID(shimClass, "GetObject", "(I)Ljava/lang/Object;");
             tryReleaseObject = env->GetStaticMethodID(shimClass, "TryReleaseObject", "(I)Z");
-            hasVibrator = env->GetStaticMethodID(shimClass, "HasVibrator", "()Z");
-            vibrateForMilliseconds = env->GetStaticMethodID(shimClass, "VibrateForMilliseconds", "(I)V");
             asyncInputStreamToString = env->GetStaticMethodID(shimClass, "AsyncInputStreamToString", "(IJ)I");
             asyncInputStreamToByteArray = env->GetStaticMethodID(shimClass, "AsyncInputStreamToByteArray", "(IJ)I");
             getHeaderMap = env->GetStaticMethodID(shimClass, "GetHeaderMap","()Ljava/lang/Object;");
@@ -91,9 +87,9 @@ namespace Xli
             getUnoSurfaceHeight = env->GetStaticMethodID(shimClass, "GetUnoSurfaceHeight","()I");
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
-            beginMainLooper = env->GetStaticMethodID(shimClass, "BeginMainLooper", "()I");
-            registerTimer = env->GetStaticMethodID(shimClass, "RegisterTimer", "(I)I");
-            unregisterTimer = env->GetStaticMethodID(shimClass, "UnregisterTimer", "(I)V");
+            getActivity = env->GetStaticMethodID(shimClass, "GetActivity", "()Landroid/app/Activity;");
+            // registerTimer = env->GetStaticMethodID(shimClass, "RegisterTimer", "(I)I");
+            // unregisterTimer = env->GetStaticMethodID(shimClass, "UnregisterTimer", "(I)V");
 
             if (!raiseKeyboard) XLI_THROW("Cannot cache mid for raiseKeyboard.");
             if (!hideKeyboard) XLI_THROW("Cannot cache mid for hideKeyboard.");
@@ -106,8 +102,6 @@ namespace Xli
             if (!showStatusBar) XLI_THROW("Cannot cache mid for showStatusBar.");
             if (!getStatusBarHeight) XLI_THROW("Cannot cache mid for getStatusBarHeight.");
             if (!getDisplayMetrics) XLI_THROW("Cannot cache mid for getDisplayMetrics.");
-            if (!hasVibrator) XLI_THROW("Cannot cache mid for hasVibrator.");
-            if (!vibrateForMilliseconds) XLI_THROW("Cannot cache mid for vibrateForMilliseconds.");
             if (!abortAsyncTask) XLI_THROW("Cannot cache mid for asyncTask.");
             if (!holdObject) XLI_THROW("Cannot cache mid for holdObject.");
             if (!getObject) XLI_THROW("Cannot cache mid for getObject.");
@@ -120,7 +114,7 @@ namespace Xli
             if (!getUnoSurfaceHeight) XLI_THROW("Cannot cache mid for getUnoSurfaceHeight.");
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
-            if (!beginMainLooper) XLI_THROW("Cannot cache mid for beginMainLooper.");
+            if (!getActivity) XLI_THROW("Cannot cache mid for getActivity.");
             LOGD("Mids Cached");
         }
 
@@ -206,21 +200,6 @@ namespace Xli
         bool AShim::KeyboardVisible()
         {
             return kbVisible;
-        }
-
-        bool AShim::HasVibrator()
-        {
-            AJniHelper jni;
-            jclass shimClass = jni.GetShim();
-            jboolean jresult = jni->CallStaticBooleanMethod(shimClass, hasVibrator);
-            return (bool)jresult;
-        }
-
-        void AShim::VibrateForMilliseconds(int milliseconds)
-        {
-            AJniHelper jni;
-            jclass shimClass = jni.GetShim();
-            jni->CallStaticVoidMethod(shimClass, vibrateForMilliseconds, (jint)milliseconds);
         }
 
         int AShim::ShowMessageBox(const String& message, const String& caption, int buttons, int hints)
@@ -520,24 +499,23 @@ namespace Xli
             return result;
         }
 
-        int AShim::BeginMainLooper()
-        {
-            AJniHelper jni;
-            int result = (int)jni->CallStaticIntMethod(jni.GetShim(), beginMainLooper);
-            // Need to check exceptions here
-            return result;
-        }
 
         int AShim::RegisterTimer(int millisecondsDelay)
         {
-            AJniHelper jni;
-            return (int)jni->CallStaticIntMethod(jni.GetShim(), registerTimer, millisecondsDelay);
+            // AJniHelper jni;
+            // return (int)jni->CallStaticIntMethod(jni.GetShim(), registerTimer, millisecondsDelay);
+            return -1;
         }
 
         void AShim::UnregisterTimer(int timerID)
         {
-            AJniHelper jni;
-            return jni->CallStaticVoidMethod(jni.GetShim(), unregisterTimer, timerID);
+            // AJniHelper jni;
+            // jni->CallStaticVoidMethod(jni.GetShim(), unregisterTimer, timerID);
+        }
+
+        jobject AShim::GetActivity(JNIEnv* env, jclass shimClass)
+        {
+            return env->CallStaticObjectMethod(shimClass, getActivity);
         }
     }
 }

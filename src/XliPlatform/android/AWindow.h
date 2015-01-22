@@ -24,6 +24,7 @@
 #include <Xli/Shared.h>
 #include <XliGL/GLContext.h>
 #include "EGLContext.h"
+#include <jni.h>
 
 namespace Xli
 {
@@ -71,6 +72,8 @@ namespace Xli
         private:
             Shared<WindowEventHandler> eventHandler;
             AGLContext context_;
+            jobject _javaSurface;
+            ANativeWindow* _surfaceANativeWindow;
             bool _fullscreen;
 
             AWindow(AWindow const &);

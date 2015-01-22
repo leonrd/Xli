@@ -24,6 +24,7 @@
 #include <pthread.h>
 #include <stdarg.h>
 #include "AJniHelper.h"
+#include "AShim.h"
 
 #define DEBUG_JNI
 
@@ -35,84 +36,69 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
-        struct ANativeActivity* AndroidActivity = 0;
-        
+        static jobject ActivityObject = 0;
+        static jclass ShimClass = 0;
+        static JavaVM* VM;
         static pthread_key_t JniThreadKey;
-        static pthread_key_t JniShimKey;
 
         static void JniDestroyThread(void* value)
         {
             LOGD("JNI: Detaching current thread");
 
             JNIEnv* env = (JNIEnv*)value;
-            AndroidActivity->vm->DetachCurrentThread();
+            VM->DetachCurrentThread();
             pthread_setspecific(JniThreadKey, NULL);
         }
 
-        static void JniDestroyShim(void* value)
+        void AJniHelper::Init(JavaVM* vm, JNIEnv* env, jclass shimClass)
         {
-            // where can we DeleteGlobalRef(*shim) ?
-            LOGD("JNI: Freeing Shim class");
-            jclass* shim = (jclass*)value;
-            delete shim;
-            pthread_setspecific(JniShimKey, NULL);
-        }
-
-        void AJniHelper::Init(JNIEnv* env, jclass shim_class)
-        {
+            VM = vm;
             if (pthread_key_create(&JniThreadKey, JniDestroyThread))
                 LOGE("JNI ERROR: Unable to create pthread key"); // Not fatal
 
-            if (pthread_key_create(&JniShimKey, JniDestroyShim))
-                LOGE("JNI ERROR: Unable to create shim pthread key"); // Not fatal
+            ShimClass = reinterpret_cast<jclass>(env->NewGlobalRef(shimClass));
+            pthread_setspecific(JniThreadKey, (void*)env);
 
-            AShim::CacheMids(env, shim_class);        
+            AShim::CacheMids(env, shimClass);
         }
 
         AJniHelper::AJniHelper()
         {
-            int status_ = (int)AndroidActivity->vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+            int status_ = (int)VM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
             if (status_ != JNI_OK)
             {
-            	status_ = (int)AndroidActivity->vm->AttachCurrentThread(&env, NULL);
+            	status_ = (int)VM->AttachCurrentThread(&env, NULL);
                 if (status_ != JNI_OK)
                     XLI_THROW("JNI ERROR: Failed to attach current thread");
             }
-            if (!pthread_getspecific(JniShimKey))
+            if (!pthread_getspecific(JniThreadKey))
             {
-                jclass tmpCls = GetCustomClass("com/Shim/XliJ");
-                jclass *shim_class = new jclass;
-                *shim_class = reinterpret_cast<jclass>(env->NewGlobalRef(tmpCls));
-
                 pthread_setspecific(JniThreadKey, (void*)env);
-                pthread_setspecific(JniShimKey, (void*)shim_class);
             }
 
-            jclass* shim_p = reinterpret_cast<jclass*>(pthread_getspecific(JniShimKey));
-
-            if (shim_p)
+            if (ActivityObject==0)
             {
-                shim = *shim_p;
-            } 
-            else
-            {
-                LOGE("could not get shim");
+                ActivityObject = reinterpret_cast<jclass>(env->NewGlobalRef(AShim::GetActivity(env, ShimClass)));
+                if (ActivityObject==0)
+                {
+                    XLI_THROW("JNI ERROR: Failed to grab activity object");
+                }
             }
         }
 
         jclass AJniHelper::GetShim()
         {
-            return shim;
+            return ShimClass;
         }
 
         jmethodID AJniHelper::FindMethod(const char* className, const char* methodName, const char* methodSig)
         {
             jclass cls = env->FindClass(className);
-            if (!cls) 
+            if (!cls)
                 XLI_THROW((String)"Failed to get JNI class '" + className + "'");
 
             jmethodID method = env->GetMethodID(cls, methodName, methodSig);
-            if (!method) 
+            if (!method)
                 XLI_THROW((String)"Failed to get JNI method '" + className + "." + methodName + methodSig + "'");
 
             return method;
@@ -123,14 +109,14 @@ namespace Xli
             jclass cls = env->GetObjectClass(inst);
 
 #ifdef DEBUG_JNI
-            if (!cls) 
+            if (!cls)
                 XLI_THROW((String)"Failed to get JNI class for method '" + name + "'");
 #endif
 
             jmethodID method = env->GetMethodID(cls, name, sig);
 
 #ifdef DEBUG_JNI
-            if (!method) 
+            if (!method)
                 XLI_THROW((String)"Failed to get JNI method '" + name + "'");
 #endif
 
@@ -150,13 +136,17 @@ namespace Xli
             // TODO: Check jni exceptions
             return env;
         }
+        JavaVM* AJniHelper::GetVM()
+        {
+            return VM;
+        }
 
         JNIEnv* AJniHelper::operator->()
         {
             // TODO: Check jni exceptions
             return env;
         }
-        
+
         jmethodID AJniHelper::GetInstanceMethod(const char* m_name, const char* m_sig)
         {
             return GetInstanceMethod(GetInstance(), m_name, m_sig);
@@ -167,10 +157,14 @@ namespace Xli
             return env->GetMethodID(env->GetObjectClass(inst), m_name, m_sig);
         }
 
-        jobject AJniHelper::GetInstance() 
+        jobject AJniHelper::GetActivity()
         {
-            return AndroidActivity->clazz;
-        }        
+            return ActivityObject;
+        }
+        jobject AJniHelper::GetInstance()
+        {
+            return ActivityObject;
+        }
 
         jobject AJniHelper::GetInstance(const char* class_name, const char* constructor_sig, ...)
         {
@@ -209,7 +203,7 @@ namespace Xli
         {
             jclass activityClass = env->FindClass("android/app/NativeActivity");
             jmethodID getClassLoader = env->GetMethodID(activityClass,"getClassLoader", "()Ljava/lang/ClassLoader;");
-            jobject cls = env->CallObjectMethod(AndroidActivity->clazz, getClassLoader);
+            jobject cls = env->CallObjectMethod(ActivityObject, getClassLoader);
             jclass classLoader = env->FindClass("java/lang/ClassLoader");
             jmethodID findClass = env->GetMethodID(classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
             jstring strClassName = env->NewStringUTF(class_path);
@@ -217,23 +211,3 @@ namespace Xli
         }
     }
 }
-
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-    LOGE ("----------");    
-    LOGE ("Jni_OnLoad");
-
-    JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        LOGE ("&&&&&&& GetEnv failed &&&&&&");
-        return -1;
-    }
-
-    jclass shimClass = env->FindClass("com/Shim/XliJ");
-    Xli::PlatformSpecific::AJniHelper::Init(env, shimClass);
-    Xli::PlatformSpecific::Android::OnJNILoad(env, shimClass);
-    LOGE ("----------");
-    
-    return JNI_VERSION_1_6;
-}
-

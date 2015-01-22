@@ -17,8 +17,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "../../../3rdparty/android_native_app_glue/android_native_app_glue.h"
-
 #include <android/window.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
@@ -48,6 +46,8 @@ namespace Xli
         AWindow::AWindow()
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window Construct");
+            _javaSurface = 0;
+            _surfaceANativeWindow = 0;
         }
 
         AWindow::~AWindow()
@@ -140,9 +140,12 @@ namespace Xli
 
         void* AWindow::GetNativeHandle()
         {
-            jobject unoSurface = AShim::GetUnoSurface();
-            AJniHelper jni;
-            return (void*)ANativeWindow_fromSurface(jni.GetEnv(), unoSurface);
+            if (_surfaceANativeWindow==0) {                
+                AJniHelper jni;
+                _javaSurface = reinterpret_cast<jobject>(jni->NewGlobalRef(AShim::GetUnoSurface()));
+                _surfaceANativeWindow = ANativeWindow_fromSurface(jni.GetEnv(), _javaSurface);
+            }
+            return _surfaceANativeWindow;
         }
         GLContext* AWindow::GetContext() { return &context_; }
     }

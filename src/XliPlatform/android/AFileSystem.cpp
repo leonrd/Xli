@@ -34,8 +34,9 @@ namespace Xli
             {
                 if (mode != FileModeRead && mode != FileModeReadRandom) 
                     XLI_THROW("Unsupported asset file mode: " + FileModeInfo::ToString(mode));
-                
-                asset = AAssetManager_open(AndroidActivity->assetManager, filename.Ptr(), ((mode & FileModeRandom) != 0) ? AASSET_MODE_RANDOM : AASSET_MODE_STREAMING);
+                                
+                asset = AAssetManager_open(AShim::GetAssetManager(), filename.Ptr(), ((mode & FileModeRandom) != 0) ? AASSET_MODE_RANDOM : AASSET_MODE_STREAMING);
+                //asset = 0;
                 
                 if (asset == 0)
                     XLI_THROW_CANT_OPEN_FILE(filename);
@@ -99,7 +100,8 @@ namespace Xli
         public:
             AAssetBuffer(String filename)
             {
-                asset = AAssetManager_open(AndroidActivity->assetManager, filename.Ptr(), AASSET_MODE_BUFFER);
+                asset = AAssetManager_open(AShim::GetAssetManager(), filename.Ptr(), AASSET_MODE_BUFFER);
+                // asset = 0;
                 
                 if (asset == 0) 
                     XLI_THROW_CANT_OPEN_FILE(filename);
@@ -156,7 +158,7 @@ namespace Xli
             virtual String GetTempDirectory()
             {
                 AJniHelper jni;
-                jobject cacheDir = jni->CallObjectMethod(AndroidActivity->clazz, Context_getCacheDir);
+                jobject cacheDir = jni->CallObjectMethod(AJniHelper::GetActivity(), Context_getCacheDir);
                 jobject absolutePath = jni->CallObjectMethod(cacheDir, File_getAbsolutePath);
                 return jni.GetString(absolutePath);
             }
@@ -166,10 +168,10 @@ namespace Xli
                 switch (dir)
                 {
                 case SystemDirectoryConfig:
-                    return (String)AndroidActivity->externalDataPath;
+                    return "";//(String)AndroidActivity->externalDataPath;
 
                 case SystemDirectoryData:
-                    return (String)AndroidActivity->internalDataPath;
+                    return "";//(String)AndroidActivity->internalDataPath;
 
                 // TODO: Conform to Android specifications on proper handling of system directories
                 default:

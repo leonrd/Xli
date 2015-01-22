@@ -38,7 +38,6 @@ namespace Xli
 
     int Application::Run(int argc, char** argv)
     {
-        return PlatformSpecific::AShim::BeginMainLooper();
     }
 
     Window* Application::RootWindow()

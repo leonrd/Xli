@@ -17,7 +17,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "../../../3rdparty/android_native_app_glue/android_native_app_glue.h"
 #include <android/window.h>
 #include <XliPlatform/PlatformSpecific/Android.h>
 #include <XliPlatform/Display.h>
