@@ -41,6 +41,8 @@ namespace Xli
             Terminating,
         };
 
+        // NOTE: Don't cache result beyond a single callback. After Terminate,
+        // SharedApp() returns a dummy handler.
         static Application* SharedApp()
         {
             return application_;

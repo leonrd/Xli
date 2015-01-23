@@ -28,9 +28,6 @@
 #include "AKeyEvent.h"
 #include "ALogStream.h"
 
-// {TODO} File references Application::SharedApp() very frequently, probably best to
-//        cache this like we used to in the old AWindow
-
 static Xli::MutexQueue<Xli::PlatformSpecific::CTAction*> cross_thread_event_queue;
 static bool seperateCoreThread = false;
 
@@ -73,8 +70,9 @@ namespace Xli
             {
                 if (!seperateCoreThread)
                 {
-                    Window* window = Application::SharedApp()->RootWindow();
-                    Application::SharedApp()->OnNativeHandleChanged(window);
+                    Application* app = Application::SharedApp();
+                    Window* window = app->RootWindow();
+                    app->OnNativeHandleChanged(window);
                     window->Show();
                 } else {
                     cross_thread_event_queue.Enqueue(new CTSurfaceReady());
@@ -211,7 +209,8 @@ namespace Xli
             }
             void JNICALL cppOnVSync (JNIEnv* env, jobject obj, int milliseconds)
             {
-                Window* window = Application::SharedApp()->RootWindow();
+                Application* app = Application::SharedApp();
+                Window* window = app->RootWindow();
                 // if (seperateCoreThread)
                 // {
                 //     Android::ProcessCrossThreadEvents();
@@ -219,7 +218,7 @@ namespace Xli
                 if (window->CurrentState() == Window::Visible)
                 {
                     window->GetContext()->MakeCurrent(window);
-                    Application::SharedApp()->OnUpdateFrame();
+                    app->OnUpdateFrame();
                 }
             }        
         }

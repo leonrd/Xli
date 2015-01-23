@@ -36,9 +36,6 @@
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, Xli::PlatformSpecific::AGetAppName(), __VA_ARGS__))
 #define LOGF(...) ((void)__android_log_print(ANDROID_LOG_FATAL, Xli::PlatformSpecific::AGetAppName(), __VA_ARGS__))
 
-// {TODO} File references Application::SharedApp() very frequently, probably best to 
-//        cache this like we used to in the old AWindow
-
 struct android_app;
 
 namespace Xli
@@ -159,8 +156,9 @@ namespace Xli
             virtual void Execute()
             {
                 // give to context via window
-                Window* window = Application::SharedApp()->RootWindow();
-                Application::SharedApp()->OnNativeHandleChanged(window);
+                Application* app = Application::SharedApp();
+                Window* window = app->RootWindow();
+                app->OnNativeHandleChanged(window);
                 window->Show();
             }
         };

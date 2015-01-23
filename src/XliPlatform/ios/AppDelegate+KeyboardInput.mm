@@ -74,7 +74,10 @@ static UITextField *_Xli_initializeKeyboard(
         Xli::Vector2i(frame.origin.x, frame.origin.y) * scale,
         Xli::Vector2i(frame.size.width, frame.size.height) * scale);
 
-    sharedApplication->OnKeyboardResized(sharedApplication->RootWindow());
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
+    application->OnKeyboardResized(window);
 }
 
 - (BOOL)Xli_isKeyboardVisible
@@ -110,18 +113,16 @@ static UITextField *_Xli_initializeKeyboard(
 {
     assert(textField == self.Xli_textField);
 
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
     if (range.length)
     {
-        sharedApplication->OnKeyDown(
-            sharedApplication->RootWindow(), Xli::KeyBackspace);
-        sharedApplication->OnKeyUp(
-            sharedApplication->RootWindow(), Xli::KeyBackspace);
+        application->OnKeyDown(window, Xli::KeyBackspace);
+        application->OnKeyUp(window, Xli::KeyBackspace);
     }
     else if ([string length])
-    {
-        sharedApplication->OnTextInput(
-            sharedApplication->RootWindow(), Xli::String([string UTF8String]));
-    }
+        application->OnTextInput(window, Xli::String([string UTF8String]));
 
     // Reject all edits
     return NO;
@@ -131,7 +132,10 @@ static UITextField *_Xli_initializeKeyboard(
 {
     assert(textField == textField_);
 
-    sharedApplication->OnClearTextInput(sharedApplication->RootWindow());
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
+    application->OnClearTextInput(window);
 
     // Reject all edits
     return NO;
@@ -141,10 +145,11 @@ static UITextField *_Xli_initializeKeyboard(
 {
     assert(textField == textField_);
 
-    sharedApplication->OnKeyDown(
-        sharedApplication->RootWindow(), Xli::KeyEnter);
-    sharedApplication->OnKeyUp(
-        sharedApplication->RootWindow(), Xli::KeyEnter);
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
+    application->OnKeyDown(window, Xli::KeyEnter);
+    application->OnKeyUp(window, Xli::KeyEnter);
 
     return YES;
 }

@@ -1,6 +1,8 @@
 #include "AppDelegate.h"
 #include <Xli/Vector2.h>
 
+//  TODO: Associate view directly with Xli::Window, so we don't assume
+//  SharedApp()->RootWindow() here
 
 typedef uintptr_t TouchEventId;
 typedef Xli::Vector2 TouchPosition;
@@ -31,10 +33,12 @@ static inline void processTouchEvents(
 {
     [super touchesBegan:touches withEvent:event];
 
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
     processTouchEvents(self.view, touches,
         ^void (TouchPosition position, TouchEventId touchId) {
-            sharedApplication->OnTouchDown(
-                sharedApplication->RootWindow(), position, touchId); });
+            application->OnTouchDown(window, position, touchId); });
 }
 
 // Tells the receiver when one or more fingers associated with an event move within a view or window.
@@ -42,10 +46,12 @@ static inline void processTouchEvents(
 {
     [super touchesMoved:touches withEvent:event];
 
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
     processTouchEvents(self.view, touches,
         ^void (TouchPosition position, TouchEventId touchId) {
-            sharedApplication->OnTouchMove(
-                sharedApplication->RootWindow(), position, touchId); });
+            application->OnTouchMove(window, position, touchId); });
 }
 
 // Tells the receiver when one or more fingers are raised from a view or window.
@@ -53,10 +59,12 @@ static inline void processTouchEvents(
 {
     [super touchesEnded:touches withEvent:event];
 
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
     processTouchEvents(self.view, touches,
         ^void (TouchPosition position, TouchEventId touchId) {
-            sharedApplication->OnTouchUp(
-                sharedApplication->RootWindow(), position, touchId); });
+            application->OnTouchUp(window, position, touchId); });
 }
 
 // Sent to the receiver when a system event (such as a low-memory warning) cancels a touch event.
@@ -64,10 +72,12 @@ static inline void processTouchEvents(
 {
     [super touchesCancelled:touches withEvent:event];
 
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
     processTouchEvents(self.view, touches,
         ^void (TouchPosition position, TouchEventId touchId) {
-            sharedApplication->OnTouchCancel(
-                sharedApplication->RootWindow(), position, touchId); });
+            application->OnTouchCancel(window, position, touchId); });
 }
 
 @end

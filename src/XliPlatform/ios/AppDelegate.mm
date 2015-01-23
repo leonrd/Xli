@@ -7,15 +7,13 @@
 
 - (void)Xli_OnUpdateFrame:(id)sender
 {
-    sharedApplication->OnUpdateFrame();
+    Xli::Application::SharedApp()->OnUpdateFrame();
 }
 
 - (id)init
 {
     if ((self = [super init]))
     {
-        sharedApplication = Xli::Application::SharedApp();
-
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
         [center addObserver:self selector:@selector(Xli_keyboardWillShowOrHide:)
             name:UIKeyboardWillShowNotification object:nil];
@@ -29,44 +27,44 @@
 - (BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     Xli::PrintLine("------------------------------------------------------------ Test2");
-    sharedApplication->Start();
+    Xli::Application::SharedApp()->Start();
     return YES;
 }
 
 // Tells the delegate that the app is about to enter the foreground.
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-    sharedApplication->EnterForeground();
+    Xli::Application::SharedApp()->EnterForeground();
 }
 
 // Tells the delegate that the app has become active.
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-    sharedApplication->EnterInteractive();
+    Xli::Application::SharedApp()->EnterInteractive();
 }
 
 // Tells the delegate that the app is about to become inactive.
 - (void)applicationWillResignActive:(UIApplication *)application
 {
-    sharedApplication->ExitInteractive();
+    Xli::Application::SharedApp()->ExitInteractive();
 }
 
 // Tells the delegate that the app is now in the background.
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    sharedApplication->EnterBackground();
+    Xli::Application::SharedApp()->EnterBackground();
 }
 
 // Tells the delegate when the app is about to terminate.
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    sharedApplication->Terminate();
+    Xli::Application::SharedApp()->Terminate();
 }
 
 // Tells the delegate when the app receives a memory warning from the system.
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
-    sharedApplication->OnLowMemory();
+    Xli::Application::SharedApp()->OnLowMemory();
 }
 
 @end

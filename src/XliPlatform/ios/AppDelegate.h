@@ -8,7 +8,6 @@
 @interface Xli_AppDelegate : UIViewController<UIApplicationDelegate>
 {
     @public Xli::Recti _Xli_keyboardBounds;
-    @package Xli::Application *sharedApplication;
 }
 
 @property (nonatomic, retain) UITextField *Xli_textField;

@@ -1,6 +1,9 @@
 #include <XliPlatform/Window.h>
 #include "AppDelegate.h"
 
+//  TODO: Associate view directly with Xli::Window, so we don't assume
+//  SharedApp()->RootWindow() here
+
 @interface Xli_AppDelegate (ViewEvents)
 @end
 
@@ -11,22 +14,25 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    sharedApplication->RootWindow()->Show();
+    Xli::Application::SharedApp()->RootWindow()->Show();
 }
 
 // Notifies the view controller that its view was removed from a view hierarchy.
 - (void)viewDidDisappear:(BOOL)animated
 {
-    sharedApplication->RootWindow()->Hide();
+    Xli::Application::SharedApp()->RootWindow()->Hide();
     [super viewDidDisappear:animated];
 }
 
 - (void)viewWillLayoutSubviews
 {
-    Xli::Window *window = sharedApplication->RootWindow();
+    Xli::Application *application = Xli::Application::SharedApp();
+    Xli::Window *window = application->RootWindow();
+
     window->Hide();
     window->Show();
-    sharedApplication->OnSizeChanged(window);
+
+    application->OnSizeChanged(window);
 }
 
 @end
