@@ -35,17 +35,12 @@ namespace Xli
         public:
             AWindow();
 
-            virtual ~AWindow();
-
             void OnDraw();
 
             String GetTitle();
             Vector2i GetClientSize();
             Vector2i GetPosition();
             WindowImplementation GetImplementation();
-
-            void SetEventHandler(WindowEventHandler* handler);
-            WindowEventHandler* GetEventHandler();
 
             bool IsClosed();
             bool IsFullscreen();
@@ -70,14 +65,10 @@ namespace Xli
             void OnDestroy();
 
         private:
-            Shared<WindowEventHandler> eventHandler;
             AGLContext context_;
             jobject _javaSurface;
             ANativeWindow* _surfaceANativeWindow;
             bool _fullscreen;
-
-            AWindow(AWindow const &);
-            void operator=(AWindow const &);
         };
     }
 }

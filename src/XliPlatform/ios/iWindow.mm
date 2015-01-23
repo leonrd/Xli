@@ -46,21 +46,6 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
-        void iWindow::SetEventHandler(WindowEventHandler* handler)
-        {
-            if (handler != 0)
-                handler->AddRef();
-
-            if (handler != 0)
-                handler->Release();
-            eventHandler = handler;
-        }
-
-        WindowEventHandler* iWindow::GetEventHandler()
-        {
-            return eventHandler;
-        }
-
         WindowImplementation iWindow::GetImplementation()
         {
             return WindowImplementationiOS;
@@ -89,19 +74,19 @@ namespace Xli
 
             window_.hidden = false;
             [window_ makeKeyWindow];
-            eventHandler->OnInitialize();
+            GetEventHandler()->OnInitialize(this);
         }
 
         void iWindow::OnShow()
         {
             context_.AllocateBuffersAndMakeCurrent();
-            eventHandler->OnShow();
+            GetEventHandler()->OnShow(this);
         }
 
         void iWindow::OnHide()
         {
             context_.FreeBuffers();
-            eventHandler->OnHide();
+            GetEventHandler()->OnHide(this);
         }
 
         void iWindow::OnDraw()
@@ -111,7 +96,7 @@ namespace Xli
 
         void iWindow::OnDestroy()
         {
-            eventHandler->OnDestroy();
+            GetEventHandler()->OnDestroy(this);
             context_.Destroy();
             [window_ release];
 

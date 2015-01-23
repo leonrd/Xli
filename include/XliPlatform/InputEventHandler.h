@@ -216,7 +216,7 @@ namespace Xli
     /**
         \ingroup XliPlatform
     */
-    class InputEventHandler: public Object
+    class InputEventHandler
     {
     public:
         virtual bool OnKeyDown(Window* wnd, Key key) { return false; }

@@ -19,16 +19,27 @@
 #ifndef __XLI_PLATFORM_WINDOW_H__
 #define __XLI_PLATFORM_WINDOW_H__
 
-#include <Xli/Object.h>
+#include <Xli/String.h>
 #include <Xli/Vector2.h>
-#include <XliPlatform/WindowEventHandler.h>
 
 namespace Xli
 {
-
     class GLContext;
+    class WindowEventHandler;
 
-    class Window : public Object
+    /**
+        \ingroup XliPlatform
+    */
+    enum WindowImplementation
+    {
+        WindowImplementationUnknown,
+        WindowImplementationWin32,
+        WindowImplementationAndroid,
+        WindowImplementationSDL2,
+        WindowImplementationiOS,
+    };
+
+    class Window
     {
     public:
         enum State
@@ -61,11 +72,15 @@ namespace Xli
         */        
         WindowImplementation GetImplementation();
 
-        /**
-           Returns the window implementation type (enum)
-        */        
-        virtual void SetEventHandler(WindowEventHandler* handler) = 0;
-        virtual WindowEventHandler* GetEventHandler() = 0;
+        void SetEventHandler(WindowEventHandler* handler)
+        {
+            eventHandler_ = handler;
+        }
+
+        WindowEventHandler* GetEventHandler()
+        {
+            return eventHandler_;
+        }
 
         //{TODO}
         /**
@@ -184,6 +199,7 @@ namespace Xli
         void operator=(Window const &);
 
         State state_;
+        WindowEventHandler *eventHandler_;
     };
 
 }

@@ -21,13 +21,15 @@
 
 #include <stdint.h>
 
-#include <XliPlatform/Window.h>
 #include <XliPlatform/InputEventHandler.h>
+#include <XliPlatform/WindowEventHandler.h>
 
 extern "C" int main(int argc, char** argv);
 
 namespace Xli
 {
+    class Window;
+
     class Application: public InputEventHandler, public WindowEventHandler
     {
     public:

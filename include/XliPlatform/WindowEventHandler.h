@@ -19,9 +19,6 @@
 #ifndef __XLI_PLATFORM_WINDOWEVENTHANDLER_H__
 #define __XLI_PLATFORM_WINDOWEVENTHANDLER_H__
 
-#include <Xli/Object.h>
-#include <Xli/Vector2.h>
-
 namespace Xli
 {
     class Window;
@@ -29,19 +26,7 @@ namespace Xli
     /**
         \ingroup XliPlatform
     */
-    enum WindowImplementation
-    {
-        WindowImplementationUnknown,
-        WindowImplementationWin32,
-        WindowImplementationAndroid,
-        WindowImplementationSDL2,
-        WindowImplementationiOS,
-    };
-
-    /**
-        \ingroup XliPlatform
-    */
-    class WindowEventHandler: public Object
+    class WindowEventHandler
     {
     public:
         virtual void OnInitialize(Window* wnd) {}

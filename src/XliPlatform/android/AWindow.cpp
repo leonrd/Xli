@@ -50,25 +50,6 @@ namespace Xli
             _surfaceANativeWindow = 0;
         }
 
-        AWindow::~AWindow()
-        {
-            SetEventHandler(0);
-        }
-
-        void AWindow::SetEventHandler(WindowEventHandler* handler)
-        {
-            if (handler != 0)
-                handler->AddRef();
-
-            if (handler != 0)
-                handler->Release();
-            eventHandler = handler;
-        }
-        WindowEventHandler* AWindow::GetEventHandler()
-        {
-            return eventHandler;
-        }
-
         WindowImplementation AWindow::GetImplementation()
         {
             return WindowImplementationAndroid;
@@ -78,21 +59,21 @@ namespace Xli
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnInitialize");
             context_.Initialize(Xli::GLContextAttributes::Default());
-            eventHandler->OnInitialize(this);
+            GetEventHandler()->OnInitialize(this);
         }
 
         void AWindow::OnShow()
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnShow");
             context_.MakeCurrent(this);
-            eventHandler->OnShow(this);
+            GetEventHandler()->OnShow(this);
             Xli::Application::SharedApp()->EnterForeground();            
         }
 
         void AWindow::OnHide()
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnHide");
-            eventHandler->OnHide(this);
+            GetEventHandler()->OnHide(this);
         }
 
         void AWindow::OnDraw()
@@ -103,7 +84,7 @@ namespace Xli
         void AWindow::OnDestroy()
         {
             PrintLine("~~~~~~~~~~~~~~~~~ Window OnDestroy");
-            eventHandler->OnDestroy(this);
+            GetEventHandler()->OnDestroy(this);
         }
 
         String AWindow::GetTitle()
