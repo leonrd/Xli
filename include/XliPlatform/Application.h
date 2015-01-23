@@ -45,8 +45,8 @@ namespace Xli
         {
             return application_;
         }
-        
-        virtual int Run(int argc, char **argv);
+
+        int Run(int argc, char **argv);
 
         char const *GetTitle() const;
         State CurrentState() const { return state_; }
