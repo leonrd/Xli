@@ -50,7 +50,17 @@ namespace Xli
         PrintLine("----------------- Start");
 
         if (state_ != Uninitialized)
+        {
+            if (state_ == Terminating)
+            {
+                Error->WriteLine(
+                    "Xli::Application::Start() called on terminating "
+                    "Application");
+                return;
+            }
+
             XLI_THROW("Start() called on running Application");
+        }
 
         state_ = Starting;
         EmitOnStart();
@@ -64,7 +74,10 @@ namespace Xli
         switch (state_)
         {
         case Terminating:
-            XLI_THROW("EnterForeground() called on terminating Application");
+            Error->WriteLine(
+                "Xli::Application::EnterForeground() called on terminating "
+                "Application");
+            return;
 
         case Uninitialized:
             Start();
@@ -94,7 +107,10 @@ namespace Xli
         switch (state_)
         {
         case Terminating:
-            XLI_THROW("EnterInteractive() called on terminating Application");
+            Error->WriteLine(
+                "Xli::Application::EnterInteractive() called on terminating "
+                "Application");
+            return;
 
         case Uninitialized:
         case Starting:
@@ -118,7 +134,15 @@ namespace Xli
         PrintLine("----------------- ExitInteractive");
 
         if (state_ != Interactive)
+        {
+            if (state_ == Terminating)
+            {
+                Error->WriteLine(
+                    "Xli::Application::ExitInteractive() called on terminating "
+                    "Application");
+            }
             return;
+        }
 
         state_ = Foreground;
         EmitOnExitInteractive();
@@ -132,7 +156,10 @@ namespace Xli
         switch (state_)
         {
         case Terminating:
-            XLI_THROW("EnterBackground() called on terminating Application");
+            Error->WriteLine(
+                "Xli::Application::EnterBackground() called on terminating "
+                "Application");
+            return;
 
         case Uninitialized:
             Start();
