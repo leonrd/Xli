@@ -36,19 +36,24 @@ namespace Xli
 
     int Application::Run(int argc, char** argv)
     {
-        // Notes on exception handling (iOS, 64-bit):
-        //  - full interoperability between Objective C and C++ exceptions
-        //  - std::set_terminate will replace Objective C's uncaught exception
-        //  handler, typically returned as the previous handler.
-        //  - try is free, throw is expensive
+        struct Finalizer
+        {
+            Finalizer()
+            {
+                pool_ = [[NSAutoreleasePool alloc] init];
+            }
 
-        // SDL's main only calls UIApplicationMain, SDL_main called from it's
-        // application delegate after didFinishLaunchingWithOptions.
+            ~Finalizer()
+            {
+                Xli::Application::SharedApp()->Terminate();
+                [pool_ drain];
+            }
 
-        // Need the pool, but little point in actually releasing it
-        (void) [[NSAutoreleasePool alloc] init];
+        private:
+            NSAutoreleasePool *pool_;
+        };
 
-        // UIApplicationMain doesn't return, but exceptions may be caught here.
+        Finalizer finalizer;
         return UIApplicationMain(
             argc, argv, nil, NSStringFromClass([Xli_AppDelegate class]));
     }
