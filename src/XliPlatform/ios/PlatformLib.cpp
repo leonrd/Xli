@@ -17,23 +17,13 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <XliPlatform/Bundle.h>
-#include <XliPlatform/Disk.h>
-#include <XliPlatform/MessageBox.h>
-
 namespace Xli
 {
-
     void InitWindow()
     {
     }
 
     void TerminateWindow()
     {
-    }
-
-    DialogResult MessageBox::Show(Window* wnd, const String& message, const String& caption, DialogButtons buttons, int hints)
-    {
-        XLI_THROW_NOT_SUPPORTED(XLI_FUNCTION);
     }
 }

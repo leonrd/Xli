@@ -150,6 +150,7 @@ elseif (XLI_PLATFORM_IOS)
         ios/AppDelegate+KeyboardInput.mm
         ios/AppDelegate+TouchEvents.mm
         ios/AppDelegate+ViewEvents.mm
+        ios/MessageBox.mm
         ios/PlatformLib.cpp)
 
 elseif (XLI_PLATFORM_OSX)
