@@ -41,11 +41,6 @@ namespace Xli
         window_.SetEventHandler(this);
     }
 
-    Window* Application::RootWindow()
-    {
-        return &window_;
-    }
-
     unsigned Application::FrameRate() const
     {
         return 0;
@@ -57,7 +52,11 @@ namespace Xli
 
     void Application::EmitOnStart()
     {
-        PrintLine("----------------- EmitOnStart");        
+        PrintLine("----------------- EmitOnStart");
+
+        window_.SetEventHandler(this);
+        SetRootWindow(&window_);
+
         OnStart();
     }
 

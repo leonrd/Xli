@@ -17,13 +17,11 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#include <Xli/CoreLib.h>
+
 #include <XliPlatform/Application.h>
-#include <XliPlatform/Display.h>
 #include <XliPlatform/Window.h>
-#include <XliPlatform/PlatformLib.h>
-#include <Xli/Managed.h>
-#include <Xli/Thread.h>
-#include <Xli/Time.h>
+
 #include "iWindow.h"
 #include "AppDelegate.h"
 
@@ -55,11 +53,6 @@ namespace Xli
             argc, argv, nil, NSStringFromClass([Xli_AppDelegate class]));
     }
 
-    Window* Application::RootWindow()
-    {
-        return &window_;
-    }
-
     unsigned Application::FrameRate() const
     {
         if (!displayLink_ || displayLink_.paused)
@@ -79,14 +72,18 @@ namespace Xli
     void Application::EmitOnStart()
     {
         PrintLine("----------------- EmitOnStart");
-        window_.Initialize();
+
         window_.SetEventHandler(this);
+        SetRootWindow(&window_);
+
+        window_.Initialize();
 
         appDelegate_ = (Xli_AppDelegate *)
             [UIApplication sharedApplication].delegate;
 
         displayLink_ = [CADisplayLink displayLinkWithTarget:appDelegate_
-                        selector:@selector(Xli_OnUpdateFrame:)];
+            selector:@selector(Xli_OnUpdateFrame:)];
+
         [displayLink_ addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         displayLink_.paused = YES;
         OnStart();

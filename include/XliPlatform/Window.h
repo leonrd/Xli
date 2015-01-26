@@ -191,7 +191,7 @@ namespace Xli
         virtual void OnHide() {}
         virtual void OnDestroy() {}
 
-        // Called on/after OnDestroy if re-initialization is allowed
+        // Called from OnDestroy() if re-initialization is allowed
         void SetUninitialized();
 
     private:

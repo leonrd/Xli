@@ -17,6 +17,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#include <XliPlatform/Application.h>
 #include <XliPlatform/Window.h>
 #include <Xli/Console.h>
 #include <Xli/Exception.h>
@@ -101,6 +102,17 @@ namespace Xli
         case Hidden:
             state_ = Destroying;
             OnDestroy();
+
+            if (state_ == Destroying)
+            {
+                // Don't generate events on destroyed instance
+                static WindowEventHandler _postDestroyDummy;
+                eventHandler_ = &_postDestroyDummy;
+
+                Application *app = Application::SharedApp();
+                if (app->RootWindow() == this)
+                    app->SetRootWindow(0);
+            }
 
         case Destroying:
             // On it!

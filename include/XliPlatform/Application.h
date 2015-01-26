@@ -62,7 +62,8 @@ namespace Xli
         void EnterBackground();
         void Terminate();
 
-        virtual Window* RootWindow();
+        void SetRootWindow(Window *window) { rootWindow_ = window; }
+        Window* RootWindow() { return rootWindow_; }
 
         virtual unsigned FrameRate() const;
         virtual void SetFrameRate(unsigned frameRate);
@@ -102,7 +103,7 @@ namespace Xli
         virtual void OnTerminate() {}
 
 
-        Application() : state_(Uninitialized) {}
+        Application() : state_(Uninitialized), rootWindow_(0) {}
         virtual ~Application() {}
 
     private:
@@ -120,6 +121,8 @@ namespace Xli
         void EmitOnLowMemory();
 
         State state_;
+        Window *rootWindow_;
+
         static Application* application_;
         friend int ::main(int argc, char** argv);
     };
