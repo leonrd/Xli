@@ -126,8 +126,8 @@ namespace Xli
     void Application::EmitOnEnterBackground()
     {
         PrintLine("----------------- EmitOnEnterBackground");
-        OnEnterBackground();
         displayLink_.paused = YES;
+        OnEnterBackground();
     }
 
     void Application::EmitOnTerminate()
