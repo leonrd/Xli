@@ -204,6 +204,13 @@ namespace Xli
             state_ = Terminating;
             EmitOnTerminate();
 
+            {
+                static Application _postTerminateDummy;
+                _postTerminateDummy.state_ = Terminating;
+
+                application_ = &_postTerminateDummy;
+            }
+
         case Terminating:
             // On it!
             break;
