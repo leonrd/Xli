@@ -67,7 +67,7 @@ namespace Xli
 
             for (int i = 0; i < oldSize; i++)
                 if (oldBuckets[i].State == BucketStateUsed) 
-                    (*this)[oldBuckets[i].Key] = oldBuckets[i].Value;
+                    AddInternal(oldBuckets[i].Key, oldBuckets[i].Value);
 
             if (oldBuckets != internalBuckets)
                 delete [] oldBuckets;
@@ -76,6 +76,41 @@ namespace Xli
         void expand()
         {
             rehash(bucketCount * 2);
+        }
+
+        void AddInternal(const TKey& key, const TValue& value)
+        {
+            int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
+
+            while (true)
+            {
+                switch (buckets[x].State)
+                {
+                case BucketStateEmpty:
+                    buckets[x].State = BucketStateUsed;
+                    buckets[x].Key = key;
+                    buckets[x].Value = value;
+                    count++;
+                    return;
+
+                case BucketStateDummy:
+                    buckets[x].State = BucketStateUsed;
+                    buckets[x].Key = key;
+                    buckets[x].Value = value;
+                    count++;
+                    dummies--;
+                    return;
+
+                case BucketStateUsed:
+                    if (Traits<TKey>::Equals(buckets[x].Key, key))
+                        XLI_THROW("Map already contains the given key");
+                }
+
+                x++;
+
+                if (x >= bucketCount)
+                    x -= bucketCount;
+            }
         }
 
         HashMap(const HashMap& copy);
@@ -254,37 +289,7 @@ namespace Xli
             if (count + dummies > (bucketCount / 8) * 5)
                 expand();
 
-            int x = Traits<TKey>::Hash(key) & (bucketCount - 1);
-
-            while (true)
-            {
-                switch (buckets[x].State)
-                {
-		case BucketStateEmpty:
-                    buckets[x].State = BucketStateUsed;
-                    buckets[x].Key = key;
-                    buckets[x].Value = value;
-                    count++;
-                    return;
-
-		case BucketStateDummy:
-                    buckets[x].State = BucketStateUsed;
-                    buckets[x].Key = key;
-                    buckets[x].Value = value;
-                    count++;
-                    dummies--;
-                    return;
-
-                case BucketStateUsed:
-                    if (Traits<TKey>::Equals(buckets[x].Key, key))
-                        XLI_THROW("Map already contains the given key");
-                }
-
-                x++;
-
-                if (x >= bucketCount) 
-                    x -= bucketCount;
-            }
+            AddInternal(key, value);
         }
 
         void AddRange(const HashMap& map)
