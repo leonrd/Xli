@@ -27,11 +27,6 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
-        Timestamp ConvertToTimestamp(time_t time)
-        {
-            return (Timestamp)time * DateTime::PerSecond + (369 * 365 + 89) * DateTime::PerDay;
-        }
-
         Timestamp ConvertToTimestamp(const tm* const time, const suseconds_t useconds = 0)
         {
             DateTime dt;
