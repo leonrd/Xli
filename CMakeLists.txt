@@ -22,18 +22,6 @@ endif()
 
 add_subdirectory(src/Xli)
 
-if (NOT XLI_NO_PLATFORM)
-    add_subdirectory(src/XliPlatform)
-endif()
-
-if (NOT XLI_NO_MAIN)
-    add_subdirectory(src/XliMain)
-endif()
-
-if (NOT XLI_NO_GL)
-    add_subdirectory(src/XliGL)
-endif()
-
 if (NOT XLI_NO_IMAGE)
     add_subdirectory(src/XliImage)
 endif()
@@ -48,10 +36,6 @@ endif()
 
 if (NOT XLI_NO_ZIP)
     add_subdirectory(src/XliZip)
-endif()
-
-if (NOT XLI_NO_HTTP_CLIENT)
-    add_subdirectory(src/XliHttpClient)
 endif()
 
 if (NOT XLI_NO_SOUND_PLAYER)
