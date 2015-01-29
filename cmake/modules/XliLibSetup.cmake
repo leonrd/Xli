@@ -16,8 +16,6 @@ endif()
 
 if (XLI_PLATFORM_IOS)
 
-    set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/iOS)
-
     if (IOS_PLATFORM MATCHES OS)
         set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_OUTPUT_PATH}/Release-iphoneos)
         set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${LIBRARY_OUTPUT_PATH}/Debug-iphoneos)
@@ -29,25 +27,18 @@ if (XLI_PLATFORM_IOS)
 elseif (XLI_PLATFORM_OSX)
 
     set(CMAKE_OSX_ARCHITECTURES "x86_64;i386")
-    set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/OSX/x86)
 
 elseif (XLI_PLATFORM_ANDROID)
 
-    set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/android/${ANDROID_ABI})
+    set(LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH}/${ANDROID_ABI})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -frtti")
 
 elseif (XLI_PLATFORM_LINUX)
 
     if (XLI_ARCH_ARM)
-        set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/linux/arm)
-
         # GLES on RPi
         include_directories(/opt/vc/include)
         link_directories(/opt/vc/lib)
-    elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/linux/x86_64)
-    else()
-        set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/linux/x86_32)
     endif()
 
 elseif (XLI_PLATFORM_WIN32)
@@ -55,11 +46,11 @@ elseif (XLI_PLATFORM_WIN32)
     if (MSVC)
 
         if (MSVC12)
-            set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/vs2013/$(PlatformShortName))
+            set(LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH}/lib/vs2013/$(PlatformShortName))
         elseif (MSVC11)
-            set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/vs2012/$(PlatformShortName))
+            set(LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH}/lib/vs2012/$(PlatformShortName))
         elseif (MSVC10)
-            set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/vs2010/$(PlatformShortName))
+            set(LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH}/lib/vs2010/$(PlatformShortName))
         else()
             message(FATAL_ERROR "Unsupported MSVC version")
         endif()
@@ -85,14 +76,6 @@ elseif (XLI_PLATFORM_WIN32)
             set(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MTd /Zi /Ob0 /Od /RTC1")
             set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /D NDEBUG")
 
-        endif()
-
-    else() # MinGW
-
-        if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-            set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/mingw/x86_64)
-        else()
-            set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/mingw/x86_32)
         endif()
 
     endif()
