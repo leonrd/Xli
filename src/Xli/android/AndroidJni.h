@@ -16,11 +16,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_AJNI_ANDROID_H__
-#define __XLI_AJNI_ANDROID_H__
+#ifndef __XLI_PLATFORM_SPECIFIC_ANDROID_JNI_H__
+#define __XLI_PLATFORM_SPECIFIC_ANDROID_JNI_H__
 
 #include <jni.h>
-#include "AShim.h"
+#include <Xli/String.h>
 
 namespace Xli
 {
@@ -28,30 +28,24 @@ namespace Xli
     {
         class AndroidJni
         {
-            JNIEnv* env;
+            JNIEnv* _env;
 
         public:
             AndroidJni();
 
-            jclass GetShim();
             static JavaVM* GetVM();
-            static jobject GetActivity();
+
+            JNIEnv* GetEnv();
+            JNIEnv* operator->();
 
             jmethodID FindMethod(const char* className, const char* methodName, const char* methodSig);
 
             jobject CallObjectMethod(jobject inst, const char* name, const char* sig);
-
             String GetString(jobject str);
-            JNIEnv* GetEnv();
 
-            JNIEnv* operator->();
-
-            jmethodID GetInstanceMethod(const char* m_name, const char* m_sig);
             jmethodID GetInstanceMethod(jobject inst, const char* m_name, const char* m_sig);
-            jobject GetInstance();
             jobject GetInstance(const char* class_name, const char* constructor_sig, ...);
             jobject GetInstance(jclass cls, const char* constructor_sig, ...);
-            jclass GetCustomClass(const char* class_path);
         };        
     };
 };

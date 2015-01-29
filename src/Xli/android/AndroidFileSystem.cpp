@@ -18,7 +18,7 @@
 //
 
 #include "../unix/UnixFileSystemBase.h"
-#include "AJniHelper.h"
+#include "AndroidJni.h"
 
 namespace Xli
 {
@@ -26,44 +26,35 @@ namespace Xli
     {
         class AndroidFileSystem: public UnixFileSystemBase
         {
-            jmethodID Context_getCacheDir;
-            jmethodID File_getAbsolutePath;
+            //jmethodID Context_getCacheDir;
+            //jmethodID File_getAbsolutePath;
 
         public:
-            AFileSystem()
+            AndroidFileSystem()
             {
-                AJniHelper jni;
-                Context_getCacheDir = jni.FindMethod("android/content/Context", "getCacheDir", "()Ljava/io/File;");
-                File_getAbsolutePath = jni.FindMethod("java/io/File", "getAbsolutePath", "()Ljava/lang/String;");
+                //AndroidJni jni;
+                //Context_getCacheDir = jni.FindMethod("android/content/Context", "getCacheDir", "()Ljava/io/File;");
+                //File_getAbsolutePath = jni.FindMethod("java/io/File", "getAbsolutePath", "()Ljava/lang/String;");
             }
 
             virtual String GetBaseDirectory()
             {
-                return "";
+                return "/sdcard";
             }
 
             virtual String GetTempDirectory()
             {
-                AJniHelper jni;
-                jobject cacheDir = jni->CallObjectMethod(AJniHelper::GetActivity(), Context_getCacheDir);
-                jobject absolutePath = jni->CallObjectMethod(cacheDir, File_getAbsolutePath);
-                return jni.GetString(absolutePath);
+                //AndroidJni jni;
+                //jobject cacheDir = jni->CallObjectMethod(AndroidJni::GetActivity(), Context_getCacheDir);
+                //jobject absolutePath = jni->CallObjectMethod(cacheDir, File_getAbsolutePath);
+                //return jni.GetString(absolutePath);
+                return "/sdcard";
             }
 
             virtual String GetSystemDirectory(SystemDirectory dir)
             {
-                switch (dir)
-                {
-                case SystemDirectoryConfig:
-                    return "";//(String)AndroidActivity->externalDataPath;
-
-                case SystemDirectoryData:
-                    return "";//(String)AndroidActivity->internalDataPath;
-
                 // TODO: Conform to Android specifications on proper handling of system directories
-                default:
-                    return "/sdcard";
-                }
+                return "/sdcard";
             }
         };
     }
