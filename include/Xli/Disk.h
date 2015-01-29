@@ -24,7 +24,7 @@
 namespace Xli
 {
     /**
-        \ingroup XliPlatform
+        \ingroup XliIO
     */
     enum SystemDirectory
     {
@@ -41,7 +41,7 @@ namespace Xli
     };
 
     /**
-        \ingroup XliPlatform
+        \ingroup XliIO
     */
     class NativeFileSystem : public FileSystem
     {
@@ -73,7 +73,7 @@ namespace Xli
     };
 
     /**
-        \ingroup XliPlatform
+        \ingroup XliIO
     */
     class DiskAccessor
     {
@@ -83,7 +83,7 @@ namespace Xli
     };
 
     /**
-        \ingroup XliPlatform
+        \ingroup XliIO
     */
     extern DiskAccessor Disk;
 }

@@ -21,14 +21,49 @@
 #include <Xli/Path.h>
 #include <Xli/Random.h>
 #include <Xli/Unicode.h>
-#include <XliPlatform/Disk.h>
-#include <XliPlatform/PlatformSpecific/Win32.h>
+#include <Xli/Disk.h>
 #include <ShlObj.h>
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+// Undefine conflicting names
+#undef MessageBox
+#undef GetSystemDirectory
+#undef GetCurrentDirectory
+#undef SetCurrentDirectory
+#undef CreateDirectory
+#undef ChangeDirectory
+#undef DeleteFile
+#undef MoveFile
+#undef CreateMutex
+#undef GetCurrentThread
 
 namespace Xli
 {
     namespace PlatformSpecific
     {
+        String GetLastErrorString()
+        {
+            LPWSTR lpMsgBuf;
+            DWORD dw = GetLastError();
+
+            FormatMessageW(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                FORMAT_MESSAGE_FROM_SYSTEM |
+                FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL,
+                dw,
+                MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT),
+                (LPWSTR)&lpMsgBuf, // Cast because callee is allocating buffer
+                0, NULL);
+
+            String msg = Unicode::Utf16To8(lpMsgBuf);
+            LocalFree(lpMsgBuf);
+
+            return msg;
+        }
+
         static UInt64 ConvertToUInt64(const DWORD& high, const DWORD& low)
         {
             return ((UInt64)high << 32) | low;
@@ -182,7 +217,7 @@ namespace Xli
 
                 if (!RemoveDirectoryW(nameW.Ptr()))
                 {
-                    XLI_THROW("Unable to delete directory '" + name + "': " + Win32::GetLastErrorString());
+                    XLI_THROW("Unable to delete directory '" + name + "': " + GetLastErrorString());
                 }
             }
 
@@ -191,7 +226,7 @@ namespace Xli
                 Utf16String nameW = Unicode::Utf8To16(name);
 
                 if (!DeleteFileW(nameW.Ptr()))
-                    XLI_THROW("Unable to delete file '" + name + "': " + Win32::GetLastErrorString());
+                    XLI_THROW("Unable to delete file '" + name + "': " + GetLastErrorString());
             }
 
             virtual void MoveDirectory(const String& oldName, const String& newName)
@@ -200,7 +235,7 @@ namespace Xli
                 Utf16String newNameW = Unicode::Utf8To16(newName);
 
                 if (!MoveFileW(oldNameW.Ptr(), newNameW.Ptr()))
-                    XLI_THROW("Unable to move directory '" + oldName + "' to '" + newName + "': " + Win32::GetLastErrorString());
+                    XLI_THROW("Unable to move directory '" + oldName + "' to '" + newName + "': " + GetLastErrorString());
             }
 
             virtual void MoveFile(const String& oldName, const String& newName)
@@ -209,7 +244,7 @@ namespace Xli
                 Utf16String newNameW = Unicode::Utf8To16(newName);
 
                 if (!MoveFileW(oldNameW.Ptr(), newNameW.Ptr()))
-                    XLI_THROW("Unable to move file '" + oldName + "' to '" + newName + "': " + Win32::GetLastErrorString());
+                    XLI_THROW("Unable to move file '" + oldName + "' to '" + newName + "': " + GetLastErrorString());
             }
 
             virtual bool GetFileInfo(const String& path, FileInfo& info)
@@ -291,7 +326,7 @@ namespace Xli
         };
     }
 
-    NativeFileSystem* CreateNativeFileSystem()
+    NativeFileSystem* CreateDiskFileSystem()
     {
         return new PlatformSpecific::Win32FileSystem();
     }

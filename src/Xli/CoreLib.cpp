@@ -19,6 +19,7 @@
 
 #include <Xli/Console.h>
 #include <Xli/CoreLib.h>
+#include <Xli/Disk.h>
 #include <Xli/File.h>
 #include <Xli/Mutex.h>
 #include <cstdlib>
@@ -28,26 +29,33 @@ namespace Xli
     StdOutAccessor Out;
     StdErrAccessor Error;
     StdInAccessor In;
+
+    NativeFileSystem* CreateDiskFileSystem();
     
     static void(*ExceptionCallback)(const Exception&, const String&);
     static TextWriter* OutWriter;
     static TextWriter* ErrWriter;
     static TextReader* InReader;
     static MutexHandle LibMutex;
+    static NativeFileSystem* DiskFS;
     static bool LibInited;
 
     static void Terminate()
     {
-        DeleteMutex(LibMutex);
+        delete DiskFS;
+        DiskFS = 0;
+
         OutWriter->GetStream()->Flush();
         ErrWriter->GetStream()->Flush();
         delete OutWriter;
         delete ErrWriter;
         delete InReader;
-        LibInited = false;
         OutWriter = 0;
         ErrWriter = 0;
         InReader = 0;
+
+        DeleteMutex(LibMutex);
+        LibInited = false;
     }
 
     void CoreLib::Init()
@@ -56,10 +64,13 @@ namespace Xli
         {
             LibInited = true;
             LibMutex = CreateMutex();
+            atexit(Terminate);
+
             OutWriter = new TextWriter(ManagePtr(new File(stdout, FileFlagsCanWrite | FileFlagsIgnoreWriteErrors)));
             ErrWriter = new TextWriter(ManagePtr(new File(stderr, FileFlagsCanWrite | FileFlagsIgnoreWriteErrors)));
             InReader = new TextReader(ManagePtr(new File(stdin, FileFlagsCanRead)));
-            atexit(Terminate);
+
+            DiskFS = CreateDiskFileSystem();
         }
     }
 
@@ -144,5 +155,17 @@ namespace Xli
     {
         CoreLib::Init();
         return InReader;
+    }
+
+    NativeFileSystem* DiskAccessor::operator ->()
+    {
+        CoreLib::Init();
+        return DiskFS;
+    }
+
+    DiskAccessor::operator FileSystem*()
+    {
+        CoreLib::Init();
+        return DiskFS;
     }
 }
