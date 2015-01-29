@@ -37,7 +37,3 @@ endif()
 if (NOT XLI_NO_ZIP)
     add_subdirectory(src/XliZip)
 endif()
-
-if (NOT XLI_NO_SOUND_PLAYER)
-    add_subdirectory(src/XliSoundPlayer)
-endif()
