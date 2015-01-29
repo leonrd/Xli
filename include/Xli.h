@@ -95,6 +95,7 @@
 #include <Xli/CoreLib.h>
 #include <Xli/DataType.h>
 #include <Xli/DateTime.h>
+#include <Xli/Disk.h>
 #include <Xli/Exception.h>
 #include <Xli/File.h>
 #include <Xli/FileSystem.h>
@@ -120,6 +121,7 @@
 #include <Xli/Time.h>
 #include <Xli/Traits.h>
 #include <Xli/Unicode.h>
+#include <Xli/Uri.h>
 #include <Xli/Utf16String.h>
 #include <Xli/Vector2.h>
 #include <Xli/Vector3.h>

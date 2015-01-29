@@ -1,12 +1,12 @@
-#ifndef __XLI_HTTP_URI_H__
-#define __XLI_HTTP_URI_H__
+#ifndef __XLI_URI_H__
+#define __XLI_URI_H__
 
 #include <Xli/String.h>
 
 namespace Xli
 {
     /**
-        \ingroup Http
+        \ingroup XliText
     */
     class Uri
     {

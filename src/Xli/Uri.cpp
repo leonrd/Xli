@@ -17,8 +17,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <XliHttpClient/Uri.h>
 #include <Xli/StringBuilder.h>
+#include <Xli/Uri.h>
 #include <cstdio>
 #include <cctype>
 #include <cstring>
