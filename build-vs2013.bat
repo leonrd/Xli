@@ -1,7 +1,7 @@
 @echo off
 
 rem Load VS2013 environment
-call "%VS120COMNTOOLS%\vsvars32.bat"
+if not defined VSINSTALLDIR call "%VS120COMNTOOLS%\vsvars32.bat"
 
 rem Generate x86 solution
 mkdir "%~dp0\build\vs2013\x86"
