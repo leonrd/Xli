@@ -1,10 +1,10 @@
 include(${CMAKE_CURRENT_LIST_DIR}/XliVars.cmake)
 
-if (UNIX AND NOT WIN32 AND NOT IOS)
+if (UNIX AND NOT WIN32 AND NOT APPLE)
     set(BUILD_SHARED_LIBS TRUE CACHE BOOL "Build shared or static libs")
 endif()
 
-if (CMAKE_COMPILER_IS_GNUCC AND NOT APPLE)
+if (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 endif()
 
@@ -25,12 +25,12 @@ if (XLI_PLATFORM_IOS)
         set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_OUTPUT_PATH}/Release-iphonesimulator)
         set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${LIBRARY_OUTPUT_PATH}/Debug-iphonesimulator)
     endif()
-    
+
 elseif (XLI_PLATFORM_OSX)
-    
+
     set(CMAKE_OSX_ARCHITECTURES "x86_64;i386")
     set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/OSX/x86)
-    
+
 elseif (XLI_PLATFORM_ANDROID)
 
     set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/android/${ANDROID_ABI})
@@ -40,7 +40,7 @@ elseif (XLI_PLATFORM_LINUX)
 
     if (XLI_ARCH_ARM)
         set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/linux/arm)
-        
+
         # GLES on RPi
         include_directories(/opt/vc/include)
         link_directories(/opt/vc/lib)
@@ -84,7 +84,7 @@ elseif (XLI_PLATFORM_WIN32)
             set(CMAKE_C_FLAGS_RELEASE "/MT /O2 /Ob2 /D NDEBUG")
             set(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MTd /Zi /Ob0 /Od /RTC1")
             set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /D NDEBUG")
-            
+
         endif()
 
     else() # MinGW
