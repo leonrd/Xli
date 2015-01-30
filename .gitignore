@@ -8,6 +8,7 @@
 *.swp
 *.swo
 *.user
+*.zip
 .DS_Store
 /examples/*
 /3rdparty/SDL2/*
