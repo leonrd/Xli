@@ -29,7 +29,8 @@ namespace Xli
     StdOutAccessor Out;
     StdErrAccessor Error;
     StdInAccessor In;
-
+    DiskAccessor Disk;
+    
     NativeFileSystem* CreateDiskFileSystem();
     
     static void(*ExceptionCallback)(const Exception&, const String&);
