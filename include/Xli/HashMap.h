@@ -313,7 +313,7 @@ namespace Xli
                         dummies++;
 
                         if (count + dummies < (bucketCount / 8) * 3 &&
-			    bucketCount > 8)
+                            bucketCount > 8)
                             rehash(bucketCount / 2);
 
                         return true;
