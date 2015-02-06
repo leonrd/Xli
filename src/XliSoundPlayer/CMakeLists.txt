@@ -8,6 +8,14 @@ if (XLI_PLATFORM_IOS)
 
     set(SRC ${SRC} coreaudio/CoreSoundPlayer.mm)
 
+elseif (XLI_PLATFORM_OSX)
+
+    set(SRC ${SRC} coreaudio/CoreSoundPlayer.mm)
+    FIND_LIBRARY(AV_LIBRARY AVFoundation)
+    FIND_LIBRARY(CF_LIBRARY CoreFoundation)
+    FIND_LIBRARY(F_LIBRARY Foundation)
+    set(LIBS ${LIBS} ${CF_LIBRARY} ${AV_LIBRARY} ${F_LIBRARY})
+
 elseif (XLI_PLATFORM_ANDROID)
 
     set(SRC ${SRC} opensles/SlesSoundPlayer.cpp)
