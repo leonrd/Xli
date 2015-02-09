@@ -22,12 +22,13 @@
 #include <cstdlib>
 
 # include <XliPlatform/Application.h>
-#if defined(XLI_PLATFORM_ANDROID)
-# include <XliPlatform/PlatformSpecific/Android.h>
-#elif defined(XLI_PLATFORM_IOS)
+#if defined(XLI_PLATFORM_IOS)
 # include <XliPlatform/PlatformSpecific/iOS.h>
 #endif
 
+#if defined(XLI_PLATFORM_ANDROID)
+
+#else
 namespace Xli
 {
     extern Application* InitializeSharedApp();
@@ -41,9 +42,7 @@ extern "C" int main(int argc, char** argv)
     {
         Xli::CoreLib::Init();
 
-#if defined(XLI_PLATFORM_ANDROID)
-        Xli::PlatformSpecific::Android::Init(((int)argv)==1);
-#elif defined(XLI_PLATFORM_IOS)
+#if defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
         Xli::Application::application_ = Xli::InitializeSharedApp();
@@ -72,49 +71,4 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 
 #endif
-
-#if defined(XLI_PLATFORM_ANDROID)
-#include <android/log.h>
-#define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "XliApp", __VA_ARGS__))
-
-extern "C" {
-    void JNICALL cppOnCreate(JNIEnv *env , jobject obj, jboolean seperateCoreThread)
-    {
-        LOGD ("----------");
-        main(0,(char**)(seperateCoreThread ? 1 : 0));
-        LOGD ("----------");
-    }
-}
-
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-    LOGD ("----------");
-    LOGD ("Jni_OnLoad");
-
-    JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        LOGD ("&&&&&&& GetEnv failed &&&&&&");
-        return -1;
-    }
-
-    jclass shimClass = env->FindClass("com/Shim/XliJ");
-
-    // attach oncreate
-    static JNINativeMethod native_funcs[] = {
-        {(char* const)"cppOnCreate", (char* const)"(Z)V", (void *)&cppOnCreate},
-    };
-    jint attached = env->RegisterNatives(shimClass, native_funcs, 1);
-    if (attached < 0) {
-        LOGD("COULD NOT REGISTER OnCreate CALLBACK");
-        XLI_THROW("COULD NOT REGISTER OnCreate CALLBACK");
-    } else {
-        LOGD("Native functions registered");
-    }
-
-    Xli::PlatformSpecific::Android::OnJNILoad(vm, env, shimClass);
-    LOGD ("----------");
-    return JNI_VERSION_1_6;
-}
-
-
 #endif

@@ -33,7 +33,7 @@ namespace Xli
         {
         public:
             static void OnJNILoad(JavaVM* vm, JNIEnv* env, jclass shim_class);
-            static void Init(bool seperateCoreThread);
+            static void Init();
             static void SetLogTag(const char* tag);
 
             static JavaVM* GetJavaVM();

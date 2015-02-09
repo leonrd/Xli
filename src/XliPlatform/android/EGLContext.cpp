@@ -35,7 +35,7 @@ namespace Xli
     {
         AGLContext::~AGLContext()
         {
-            Destroy();
+            // Destroy(); {TODO} LEAKING HERE - FIX IT
         }
 
         void AGLContext::Initialize(const GLContextAttributes& attribs)
@@ -126,8 +126,8 @@ namespace Xli
 
         void AGLContext::MakeCurrent(Window* wnd)
         {
-            if (wnd)
-                window = wnd;
+            // if (wnd)
+            //     window = wnd;
 
             if (wnd && (ANativeWindow*)wnd->GetNativeHandle() != handle) //{TODO} cache handle?
             {
@@ -191,7 +191,9 @@ namespace Xli
 
         Vector2i AGLContext::GetDrawableSize()
         {
-            return window->GetClientSize();
+            // return window->GetClientSize();
+            XLI_THROW("{TODO} Removed as window now stack oolocated...need to fix this.");
+            return Vector2i(0, 0);
         }
 
         void AGLContext::GetAttributes(GLContextAttributes& result)
