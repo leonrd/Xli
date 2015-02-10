@@ -60,6 +60,11 @@ namespace Xli
             }
         }
 
+        void Android::OnJNILoad(JavaVM* vm, JNIEnv* env, jclass shim_class)
+        {
+            Xli::PlatformSpecific::AJniHelper::Init(vm, env, shim_class);
+        }
+
         void Android::Init()
         {
             Out->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_INFO)));

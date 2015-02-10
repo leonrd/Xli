@@ -53,6 +53,7 @@ extern "C" int main(int argc, char** argv)
         Xli::CoreLib::OnUnhandledException(e, "main");
     }
     catch (...)
+
     {
         Xli::Exception e("An unsupported C++ exception was thrown");
         Xli::CoreLib::OnUnhandledException(e, "main");

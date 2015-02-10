@@ -192,7 +192,7 @@ namespace Xli
         Vector2i AGLContext::GetDrawableSize()
         {
             // return window->GetClientSize();
-            XLI_THROW("{TODO} Removed as window now stack oolocated...need to fix this.");
+            XLI_THROW("{TODO} Removed as window now stack allocated...need to fix this.");
             return Vector2i(0, 0);
         }
 

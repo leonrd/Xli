@@ -101,12 +101,11 @@ if (XLI_PLATFORM_ANDROID)
     set(SRC ${SRC}
         android/AApplication.cpp
         android/AInternal.cpp
-        android/ALogStream.cpp 
+        android/ALogStream.cpp
         android/AFileSystem.cpp
         android/AJniHelper.cpp
         android/AMessageBox.cpp
         android/AShim.cpp
-        android/AStream.cpp
         android/AWindow.cpp
         android/ADisplay.cpp
         android/EGLContext.cpp
@@ -140,7 +139,7 @@ elseif (XLI_PLATFORM_IOS)
         generic/GenericBundle.cpp
         generic/GenericDialogs.cpp
         unix/UnixFileSystemBase.cpp
-        cocoa/CocoaFileSystem.mm        
+        cocoa/CocoaFileSystem.mm
         ios/iInit.mm
         ios/iGLContext.mm
         ios/iDisplay.mm

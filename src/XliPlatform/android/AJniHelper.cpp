@@ -43,7 +43,7 @@ namespace Xli
 
         static void JniDestroyThread(void* value)
         {
-            LOGD("JNI: Detaching current thread");
+        	LOGD("JNI: Detaching current thread");
 
             JNIEnv* env = (JNIEnv*)value;
             VM->DetachCurrentThread();
@@ -52,6 +52,8 @@ namespace Xli
 
         void AJniHelper::Init(JavaVM* vm, JNIEnv* env, jclass shimClass)
         {
+        	LOGD("-----------------------");
+        	LOGD("JNI: Initializing AJNI");
             VM = vm;
             if (pthread_key_create(&JniThreadKey, JniDestroyThread))
                 LOGE("JNI ERROR: Unable to create pthread key"); // Not fatal
@@ -60,6 +62,7 @@ namespace Xli
             pthread_setspecific(JniThreadKey, (void*)env);
 
             AShim::CacheMids(env, shimClass);
+            LOGD("-----------------------");
         }
 
         AJniHelper::AJniHelper()
@@ -78,7 +81,9 @@ namespace Xli
 
             if (ActivityObject==0)
             {
-                ActivityObject = reinterpret_cast<jclass>(env->NewGlobalRef(AShim::GetActivity(env, ShimClass)));
+                jmethodID getActivity = env->GetStaticMethodID(ShimClass, "GetActivity", "()Landroid/app/Activity;");
+                jobject activity = env->CallStaticObjectMethod(ShimClass, getActivity);
+                ActivityObject = reinterpret_cast<jclass>(env->NewGlobalRef(activity));
                 if (ActivityObject==0)
                 {
                     XLI_THROW("JNI ERROR: Failed to grab activity object");
