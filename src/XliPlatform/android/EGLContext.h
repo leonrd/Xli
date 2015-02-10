@@ -48,13 +48,12 @@ namespace Xli
             virtual void MakeCurrent(Window* window);
             virtual bool IsCurrent();
             virtual void Destroy();
-            
+
             virtual void SwapBuffers();
 
             virtual void SetSwapInterval(int value);
             virtual int GetSwapInterval();
         private:
-            Shared<Window> window;
             ANativeWindow* handle;
             EGLDisplay display;
             EGLSurface surface;

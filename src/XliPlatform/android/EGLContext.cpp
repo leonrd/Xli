@@ -19,6 +19,7 @@
 
 #include <XliGL.h>
 #include <XliPlatform/Window.h>
+#include <XliPlatform/Display.h>
 #include <Xli/Console.h>
 #include <Xli/Shared.h>
 
@@ -35,7 +36,7 @@ namespace Xli
     {
         AGLContext::~AGLContext()
         {
-            Destroy();
+            // Destroy();
         }
 
         void AGLContext::Initialize(const GLContextAttributes& attribs)
@@ -126,9 +127,6 @@ namespace Xli
 
         void AGLContext::MakeCurrent(Window* wnd)
         {
-            if (wnd)
-                window = wnd;
-
             if (wnd && (ANativeWindow*)wnd->GetNativeHandle() != handle) //{TODO} cache handle?
             {
                 if (((AWindow*)wnd)->GetImplementation() == WindowImplementationAndroid) //{TODO} cast is ugly hack, fix
@@ -191,7 +189,7 @@ namespace Xli
 
         Vector2i AGLContext::GetDrawableSize()
         {
-            return window->GetClientSize();
+            return Display::GetScreenSize();
         }
 
         void AGLContext::GetAttributes(GLContextAttributes& result)
