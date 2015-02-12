@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-extern Xli::WindowEventHandler* GlobalEventHandler;
+// extern Xli::WindowEventHandler* GlobalEventHandler;
 extern Xli::Window* GlobalWindow;
 
 namespace Xli
@@ -93,6 +93,7 @@ namespace Xli
              usingBlock:^(NSNotification *notification) {
                     UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
                     CGSize kbdSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
+                    int scale = [[UIScreen mainScreen] scale];
                     // This is to hack around the fact that when the keyboard is split you only sometimes
                     // get size events. You get them when the split keyboard is visible and you change orientation,
                     // but you get 0 if you dock and then split the keyboard again. This is really annoying but there
@@ -100,14 +101,22 @@ namespace Xli
                     // above UIKeyboardFrameBeginUserInfoKey to UIKeyboardFrameEndUserInfoKey
                     if ((float)kbdSize.width>0 && (float)kbdSize.height>0)
                     {
-                        if (orien == UIInterfaceOrientationPortrait || orien == UIInterfaceOrientationPortraitUpsideDown)
-                        {
-                            this->keyboardSize = Vector2i((float)kbdSize.width, (float)kbdSize.height);
-                        } else {
-                            this->keyboardSize = Vector2i((float)kbdSize.height, (float)kbdSize.width);
-                        }
+                        // if (statusSizeSupportsOrientation) {
+                        //     this->keyboardSize = Vector2i((int)((float)kbdSize.width * scale), (int)((float)kbdSize.height * scale));
+                        // } else {
+                        //     UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
+                        //     if (orien == UIInterfaceOrientationPortrait || orien == UIInterfaceOrientationPortraitUpsideDown)
+                        //     {
+                        //         this->keyboardSize = Vector2i((int)((float)kbdSize.width * scale), (int)((float)kbdSize.height * scale));
+                        //         this->keyboardSize = Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale), 0);
+                        //     } else {
+                        //         this->keyboardSize = Vector2i((int)((float)kbdSize.height * scale), (int)((float)kbdSize.width * scale));
+                        //     }
+                        // }
+                        this->keyboardSize = Vector2i((int)((float)kbdSize.width * scale), (int)((float)kbdSize.height * scale));
+
                         if (GlobalWindow) {
-                            GlobalEventHandler->OnKeyboardResized(GlobalWindow);
+                            GlobalWindow->GetEventHandler()->OnKeyboardResized(GlobalWindow);
                         }
                     }
                 }
