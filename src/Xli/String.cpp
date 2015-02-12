@@ -458,7 +458,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         char* trimmedData = TrimLeft(_data);
-        long res = strtol(trimmedData, &endptr, 0);
+        long res = strtol(trimmedData, &endptr, 10);
         ValidateParsingResult("int", trimmedData, endptr);
         if (res > INT_MAX || INT_MIN > res)
         {
@@ -472,7 +472,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         char* trimmedData = TrimLeft(_data);
-        unsigned long long res = strtoull(trimmedData, &endptr, 0);
+        unsigned long long res = strtoull(trimmedData, &endptr, 10);
         ValidateParsingResult("ulong", trimmedData, endptr);
         if (strchr(trimmedData, '-'))
         {
@@ -486,7 +486,7 @@ namespace Xli
         char *endptr;
         errno = 0;
         char* trimmedData = TrimLeft(_data);
-        long long res = strtoll(trimmedData, &endptr, 0);
+        long long res = strtoll(trimmedData, &endptr, 10);
         ValidateParsingResult("long", trimmedData, endptr);
         return res;
     }
