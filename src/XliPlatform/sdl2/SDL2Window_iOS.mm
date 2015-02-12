@@ -3,22 +3,25 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
+extern Xli::WindowEventHandler* GlobalEventHandler;
+extern Xli::Window* GlobalWindow;
+
 namespace Xli
 {
     namespace PlatformSpecific
     {
-        void SDL2Window::SetOnscreenKeyboardPosition(Vector2i position) 
-        { 
+        void SDL2Window::SetOnscreenKeyboardPosition(Vector2i position)
+        {
         }
-        
-        Vector2i SDL2Window::GetOnscreenKeyboardPosition() 
-        { 
+
+        Vector2i SDL2Window::GetOnscreenKeyboardPosition()
+        {
             int scale = [[UIScreen mainScreen] scale];
             return Vector2i(0, (int)((this->h - GetOnscreenKeyboardSize().Y) * scale));
         }
 
-        Vector2i SDL2Window::GetOnscreenKeyboardSize() 
-        { 
+        Vector2i SDL2Window::GetOnscreenKeyboardSize()
+        {
             int scale = [[UIScreen mainScreen] scale];
 
             if (IsOnscreenKeyboardVisible())
@@ -29,25 +32,25 @@ namespace Xli
             }
         }
 
-        bool SDL2Window::IsStatusBarVisible() 
+        bool SDL2Window::IsStatusBarVisible()
         {
             return !this->fullscreen;
         }
 
-        Vector2i SDL2Window::GetStatusBarPosition() 
+        Vector2i SDL2Window::GetStatusBarPosition()
         {
             return Vector2i(0, 0);
         }
 
         bool statusSizeSupportsOrientation;
-        Vector2i SDL2Window::GetStatusBarSize() 
+        Vector2i SDL2Window::GetStatusBarSize()
         {
             int scale = [[UIScreen mainScreen] scale];
             if (this->fullscreen)
             {
                 if (statusSizeSupportsOrientation) {
                     return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale), 0);
-                } else {                    
+                } else {
                     UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
                     if (orien == UIInterfaceOrientationPortrait || orien == UIInterfaceOrientationPortraitUpsideDown)
                     {
@@ -55,7 +58,7 @@ namespace Xli
                     } else {
                         return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.height * scale), 0);
                     }
-                }                
+                }
             } else {
                 if (statusSizeSupportsOrientation) {
                     return Vector2i((int)([UIApplication sharedApplication].statusBarFrame.size.width * scale),
@@ -71,17 +74,17 @@ namespace Xli
                                         (int)([UIApplication sharedApplication].statusBarFrame.size.width * scale));
                     }
                 }
-            }            
+            }
         }
 
-        void SDL2Window::SDL2WindowInit() 
+        void SDL2Window::SDL2WindowInit()
         {
             int width, height;
             SDL_GetWindowSize(((SDL2Window*)GetMainWindow())->window, &width, &height);
             this->keyboardSize = Vector2i(width,0);
 
             statusSizeSupportsOrientation = ([[[UIDevice currentDevice] systemVersion] compare:@"8.0" options:NSNumericSearch] != NSOrderedAscending);
-            
+
             NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
             NSOperationQueue *queue = [NSOperationQueue mainQueue];
             [center addObserverForName:UIKeyboardDidChangeFrameNotification
@@ -93,7 +96,7 @@ namespace Xli
                     // This is to hack around the fact that when the keyboard is split you only sometimes
                     // get size events. You get them when the split keyboard is visible and you change orientation,
                     // but you get 0 if you dock and then split the keyboard again. This is really annoying but there
-                    // is no good way to get the split status of the keyboard. This may be fixed after changing the 
+                    // is no good way to get the split status of the keyboard. This may be fixed after changing the
                     // above UIKeyboardFrameBeginUserInfoKey to UIKeyboardFrameEndUserInfoKey
                     if ((float)kbdSize.width>0 && (float)kbdSize.height>0)
                     {
@@ -102,6 +105,9 @@ namespace Xli
                             this->keyboardSize = Vector2i((float)kbdSize.width, (float)kbdSize.height);
                         } else {
                             this->keyboardSize = Vector2i((float)kbdSize.height, (float)kbdSize.width);
+                        }
+                        if (GlobalWindow) {
+                            GlobalEventHandler->OnKeyboardResized(GlobalWindow);
                         }
                     }
                 }

@@ -27,15 +27,16 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
+import java.lang.Math;
 
 public class KeyboardHelper {
 	static ViewTreeObserver.OnGlobalLayoutListener layoutListener;
 	static Hidden hiddenText;
     static int keyboardSize;
     static ViewGroup hiddenLayout;
-    
+
     public static int GetKeyboardSize() { return (int)keyboardSize; }
-	
+
     public static void ShowKeyboard() {
         if (hiddenText == null)
         {
@@ -68,23 +69,23 @@ public class KeyboardHelper {
             hiddenText.setVisibility(View.VISIBLE);
         }});
     }
-        
+
     public static void AttachHiddenView()
-    {    	
+    {
         Log.d("XliApp","Attempting to attach hidden view");
         if (hiddenLayout == null)
         {
-        	
+
             hiddenLayout = new FrameLayout(XliJ.nActivity);
             XliJ.nActivity.runOnUiThread(new Runnable() { public void run() {
                 try {
-                	XliJ.nActivity.setContentView(hiddenLayout);                    
+                	XliJ.nActivity.setContentView(hiddenLayout);
                     hiddenText = new Hidden(XliJ.nActivity, XliJ.nActivity);
-                    hiddenLayout.addView(hiddenText);                    
+                    hiddenLayout.addView(hiddenText);
                     hiddenText.setVisibility(View.VISIBLE);
                     hiddenText.requestFocus();
                     HideKeyboard();
-                    Log.i("XliApp","Successfully created input capture View.");                    
+                    Log.i("XliApp","Successfully created input capture View.");
                 } catch (Exception e) {
                     Log.e("XliApp","Unable to create Layout or View for input capture.");
                     XliJ.XliJ_JavaThrowError(-1, "Unable to create Layout or View for input capture.");
@@ -94,20 +95,23 @@ public class KeyboardHelper {
                 	keyboardSize = 0;
                 	layoutListener = new ViewTreeObserver.OnGlobalLayoutListener(){
                         public void onGlobalLayout() {
+                            int prevHeight = keyboardSize;
                             int rootViewHeight = hiddenLayout.getRootView().getHeight();
                             int location[] = new int[2];
                             hiddenLayout.getLocationOnScreen(location);
                             int hiddenHeight = (int)(location[1] + hiddenLayout.getMeasuredHeight());
                             keyboardSize = rootViewHeight - hiddenHeight;
-                            XliJ.XliJ_OnKeyboardResized();
+                            if (Math.abs(keyboardSize-prevHeight)>20) { // magic number crap
+                                XliJ.XliJ_OnKeyboardResized();
+                            }
                         }
                     };
                 	hiddenLayout.getViewTreeObserver().addOnGlobalLayoutListener(layoutListener);
                     Log.i("XliApp","Successfully attached View Tree Observer.");
                 } catch (Exception e) {
                     Log.e("XliApp","Unable to attach keyboard height monitor.");
-                    XliJ.XliJ_JavaThrowError(-1, "Unable to attach keyboard height monitor.");                    
-                }                
+                    XliJ.XliJ_JavaThrowError(-1, "Unable to attach keyboard height monitor.");
+                }
             }});
         }
     }
