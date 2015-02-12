@@ -93,7 +93,7 @@ namespace Xli
              usingBlock:^(NSNotification *notification) {
                     UIInterfaceOrientation orien = [UIApplication sharedApplication].statusBarOrientation;
                     CGSize kbdSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-                    int scale = [[UIScreen mainScreen] scale];
+                    int scale = 1;
                     // This is to hack around the fact that when the keyboard is split you only sometimes
                     // get size events. You get them when the split keyboard is visible and you change orientation,
                     // but you get 0 if you dock and then split the keyboard again. This is really annoying but there
