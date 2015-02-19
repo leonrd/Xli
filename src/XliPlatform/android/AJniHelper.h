@@ -41,7 +41,7 @@ namespace Xli
             static String ExternalDataPath;
             static String InternalDataPath;
 
-            static void Init(JavaVM* jvm, JNIEnv* env, jclass globalRefdShim);
+            static void Init(JavaVM* jvm, JNIEnv* env, jclass globalRefdShim, jobject optionalActivity);
             AJniHelper();
 
             JNIEnv* GetEnv();
@@ -52,23 +52,15 @@ namespace Xli
 
             static jclass GetShim();
             static JavaVM* GetVM();
-        };
 
-        class CTError : public WindowAction
-        {
-        public:
-            String message;
-            int errorCode;
-            CTError(String message, int errorCode)
-            {
-                this->message = message;
-                this->errorCode = errorCode;
-            }
-            virtual void Execute()
-            {
-                String finalMessage = "XLiError (" + String(errorCode)+ ") - " + message;
-                XLI_THROW(finalMessage.Ptr());
-            }
+            // to be remove on unocore update
+            static jmethodID GetInstanceMethod(JNIEnv* env, const char* m_name, const char* m_sig);
+            static jmethodID GetInstanceMethod(JNIEnv* env, jobject inst, const char* m_name, const char* m_sig);
+            static jobject GetInstance(JNIEnv* env, const char* class_name, const char* constructor_sig, ...);
+            static jobject GetInstance(JNIEnv* env, jclass cls, const char* constructor_sig, ...);
+            static int PrepareAssetJar(JNIEnv* env, const char* file_name, const char* class_name);
+            static int PrepareAssetJar(JNIEnv* env, const char* file_name, const char* class_name, int package);
+            static jclass GetAssetClass(JNIEnv* env, const char* file_name, const char* class_name);
         };
     };
 };

@@ -31,6 +31,11 @@ namespace Xli
         class AShim
         {
         private:
+            //to be removed on unocore update
+            static jmethodID raiseKeyboard;
+            static jmethodID hideKeyboard;
+            static jmethodID getKeyboardSize;
+            //
             static jmethodID showMessageBox;
             static jmethodID connectedToNetwork;
             static jmethodID newHttpConnection;
@@ -54,6 +59,14 @@ namespace Xli
             static jmethodID getHeaderMap;
 
         public:
+            //to be removed on unocore update
+            static void RaiseSoftKeyboard();
+            static void HideSoftKeyboard();
+            static bool KeyboardVisible();
+            static int GetKeyboardSize();
+            //
+
+
             static int kbVisible;
 
             static void CacheMids(JNIEnv *env, jclass shim_class);

@@ -31,8 +31,14 @@ namespace Xli
 {
     namespace PlatformSpecific
     {
-        int AShim::kbVisible = 0;
 
+
+        // to be removed on unocore update
+        int AShim::kbVisible = 0;
+        jmethodID AShim::raiseKeyboard;
+        jmethodID AShim::hideKeyboard;
+        jmethodID AShim::getKeyboardSize;
+        //
         jmethodID AShim::showMessageBox;
         jmethodID AShim::connectedToNetwork;
         jmethodID AShim::httpShowHeaders;
@@ -54,6 +60,11 @@ namespace Xli
         void AShim::CacheMids(JNIEnv *env, jclass shimClass)
         {
             LOGD("Caching Mids");
+            //to be removed on unocore update
+            raiseKeyboard = env->GetStaticMethodID(shimClass, "RaiseKeyboard", "()V");
+            hideKeyboard = env->GetStaticMethodID(shimClass, "HideKeyboard", "()V");
+            getKeyboardSize = env->GetStaticMethodID(shimClass, "GetKeyboardSize", "()I");
+            //
             showMessageBox = env->GetStaticMethodID(shimClass, "ShowMessageBox", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;II)I");
             connectedToNetwork = env->GetStaticMethodID(shimClass, "ConnectedToNetwork", "()Z");
             initDefaultCookieManager = env->GetStaticMethodID(shimClass, "InitDefaultCookieManager", "()V");
@@ -72,6 +83,11 @@ namespace Xli
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
 
+            // to be removed on unocore update
+            if (!raiseKeyboard) XLI_THROW("Cannot cache mid for raiseKeyboard.");
+            if (!hideKeyboard) XLI_THROW("Cannot cache mid for hideKeyboard.");
+            if (!getKeyboardSize) XLI_THROW("Cannot cache mid for getKeyboardSize.");
+            //
             if (!showMessageBox) XLI_THROW("Cannot cache mid for showMessageBox.");
             if (!connectedToNetwork) XLI_THROW("Cannot cache mid for connectedToNetwork.");
             if (!initDefaultCookieManager) XLI_THROW("Cannot cache mid for initDefaultCookieManager.");
@@ -90,6 +106,36 @@ namespace Xli
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
             LOGD("Mids Cached");
         }
+
+        //--------------------------------------------------
+        // to be removed on unocore update
+
+        void AShim::RaiseSoftKeyboard()
+        {
+            AJniHelper jni;
+            jni->CallStaticVoidMethod(jni.GetShim(), raiseKeyboard);
+            kbVisible = 1;
+        }
+        void AShim::HideSoftKeyboard()
+        {
+            AJniHelper jni;
+            jclass shimClass = jni.GetShim();
+            jni->CallStaticVoidMethod(shimClass, hideKeyboard);
+            kbVisible = 0;
+        }
+        int AShim::GetKeyboardSize()
+        {
+            AJniHelper jni;
+            jclass shimClass = jni.GetShim();
+            jint result = (jint)jni->CallStaticIntMethod(shimClass, getKeyboardSize);
+            return (int)result;
+        }
+        bool AShim::KeyboardVisible()
+        {
+            return kbVisible;
+        }
+
+        //--------------------------------------------------
 
         void AShim::HideStatusBar()
         {

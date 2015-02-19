@@ -37,8 +37,8 @@ namespace Xli
         public:
             Xli::Key KeyEvent;
             bool KeyDown;
-            CTKeyAction(AKeyEvent keyEvent, bool keyDown) 
-            { 
+            CTKeyAction(AKeyEvent keyEvent, bool keyDown)
+            {
                 this->KeyEvent = AndroidToXliKeyEvent(keyEvent);
                 this->KeyDown = keyDown;
             }
@@ -60,13 +60,26 @@ namespace Xli
             virtual void Execute();
         };
 
+        class CTError : public WindowAction
+        {
+        public:
+            String message;
+            int errorCode;
+            CTError(String message, int errorCode)
+            {
+                this->message = message;
+                this->errorCode = errorCode;
+            }
+            virtual void Execute();
+        };
+
         class CTQueue
         {
         public:
             static MutexQueue<WindowAction*> ctActionQueue;
             static void EnqueueCrossThreadEvent(WindowAction* action);
             static void ProcessCrossThreadEvents();
-        };            
+        };
     };
 };
 

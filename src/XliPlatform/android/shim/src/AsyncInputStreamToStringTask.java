@@ -1,4 +1,5 @@
-/* * Copyright (C) 2010-2014 Outracks Technologies
+/*
+ * Copyright (C) 2010-2014 Outracks Technologies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -16,32 +17,31 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_PLATFORM_SPECIFIC_ANDROID_H__
-#define __XLI_PLATFORM_SPECIFIC_ANDROID_H__
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
-#include <jni.h>
+import android.os.AsyncTask;
 
-struct android_app;
-
-namespace Xli
-{
-    namespace PlatformSpecific
-    {
-        /**
-            \ingroup XliPlatform
-        */
-        class Android
-        {
-        public:
-            static void PreInit(JavaVM* jvm, JNIEnv* env, jclass globalRefdShim);
-            static void Init(struct android_app* app);
-
-            static void SetLogTag(const char* tag);
-
-            static JavaVM* GetJavaVM();
-            static jobject GetActivity();
-        };
+public class AsyncInputStreamToStringTask extends AsyncTask<Object, Void, String> {
+	public long requestPointer;
+    @Override
+    protected String doInBackground(Object... params) {
+    	requestPointer = (long)((Long)params[1]);
+        try {
+			return XliJ.InputStreamToString((InputStream)params[0]);
+		} catch (UnsupportedEncodingException e) {
+			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "UnsupportedEncodingException: "+e.getLocalizedMessage());
+			return null;
+		} catch (IOException e) {
+			XliJ.XliJ_HttpErrorCallback(requestPointer, -1, "IOException (AsyncInputStreamToStringTask): "+e.getLocalizedMessage());
+			return null;
+		}
+    }
+    @Override
+    protected void onPostExecute(String result)
+    {    		
+    	if (result!=null)
+    		XliJ.XliJ_HttpContentStringCallback(result, requestPointer);
     }
 }
-
-#endif

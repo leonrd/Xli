@@ -1,4 +1,5 @@
-/* * Copyright (C) 2010-2014 Outracks Technologies
+/*
+ * Copyright (C) 2010-2014 Outracks Technologies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -16,32 +17,29 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __XLI_PLATFORM_SPECIFIC_ANDROID_H__
-#define __XLI_PLATFORM_SPECIFIC_ANDROID_H__
+import android.text.SpannableStringBuilder;
 
-#include <jni.h>
-
-struct android_app;
-
-namespace Xli
-{
-    namespace PlatformSpecific
-    {
-        /**
-            \ingroup XliPlatform
-        */
-        class Android
-        {
-        public:
-            static void PreInit(JavaVM* jvm, JNIEnv* env, jclass globalRefdShim);
-            static void Init(struct android_app* app);
-
-            static void SetLogTag(const char* tag);
-
-            static JavaVM* GetJavaVM();
-            static jobject GetActivity();
-        };
+public class DummyEditable extends SpannableStringBuilder {
+	public static String DUMMY;
+    DummyEditable(CharSequence source) {
+        super(source);
+    }
+    @Override
+    public SpannableStringBuilder replace(final int start, final int end, CharSequence tb, int tbstart, int tbend) {
+        if (tbend > tbstart) {
+            super.replace(0, length(), "", 0, 0);
+            return super.replace(0, 0, tb, tbstart, tbend);
+        }
+        else if (end > start) {
+            super.replace(0, length(), "", 0, 0);
+            return super.replace(0, 0, DUMMY, 0, DUMMY.length());
+        }
+        return super.replace(start, end, tb, tbstart, tbend);
+    }
+    public static void PopulateDummyString()
+    {    	
+    	DummyEditable.DUMMY = "";
+        for (int i = 0; i < Math.max(0, (500 - DummyEditable.DUMMY.length())); i++)
+            DummyEditable.DUMMY += "\0";
     }
 }
-
-#endif
