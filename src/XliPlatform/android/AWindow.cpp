@@ -460,7 +460,8 @@ namespace Xli
 
         jobject Android::GetActivity()
         {
-            return AJniHelper::GetActivity();
+            AJniHelper jni;
+            return jni.GetActivity();
         }
     }
 

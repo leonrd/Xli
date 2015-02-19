@@ -47,9 +47,10 @@ namespace Xli
             JNIEnv* GetEnv();
             JNIEnv* operator->();
 
+            jobject GetActivity();
+
             static jclass GetShim();
             static JavaVM* GetVM();
-            static jobject GetActivity();
             static AAssetManager* GetAssetManager();
         };
 

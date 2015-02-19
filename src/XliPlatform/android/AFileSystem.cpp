@@ -160,7 +160,7 @@ namespace Xli
             virtual String GetTempDirectory()
             {
                 AJniHelper jni;
-                jobject cacheDir = jni->CallObjectMethod(AJniHelper::GetActivity(), Context_getCacheDir);
+                jobject cacheDir = jni->CallObjectMethod(jni.GetActivity(), Context_getCacheDir);
                 jobject absolutePath = jni->CallObjectMethod(cacheDir, File_getAbsolutePath);
 
                 const char* utf8 = jni->GetStringUTFChars((jstring)absolutePath, NULL);

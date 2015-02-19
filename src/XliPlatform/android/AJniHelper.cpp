@@ -87,10 +87,6 @@ namespace Xli
         {
             shim = globalRefdShim;
             AShim::CacheMids(env, globalRefdShim);
-            //activity
-            jmethodID getActivity = env->GetStaticMethodID(shim, "GetActivity", "()Landroid/app/Activity;");
-            activity = reinterpret_cast<jclass>(env->NewGlobalRef(env->CallStaticObjectMethod(shim, getActivity)));
-            if (activity==0) { XLI_THROW("JNI ERROR: Failed to grab activity object"); }
             // assetManager
             jmethodID getAssetManager = env->GetStaticMethodID(shim, "GetAssetManager", "()Landroid/content/res/AssetManager;");
             jobject jAssetManager = env->NewGlobalRef(env->CallStaticObjectMethod(shim, getAssetManager));
@@ -109,6 +105,13 @@ namespace Xli
         }
         jobject AJniHelper::GetActivity()
         {
+            //activity
+            if (!activity)
+            {
+                jmethodID getActivity = env->GetStaticMethodID(shim, "GetActivity", "()Landroid/app/Activity;");
+                activity = reinterpret_cast<jclass>(env->NewGlobalRef(env->CallStaticObjectMethod(shim, getActivity)));
+                if (activity==0) { XLI_THROW("JNI ERROR: Failed to grab activity object"); }
+            }
             return activity;
         }
         AAssetManager* AJniHelper::GetAssetManager()
