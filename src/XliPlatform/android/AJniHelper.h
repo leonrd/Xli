@@ -48,10 +48,10 @@ namespace Xli
             JNIEnv* operator->();
 
             jobject GetActivity();
+            AAssetManager* GetAssetManager();
 
             static jclass GetShim();
             static JavaVM* GetVM();
-            static AAssetManager* GetAssetManager();
         };
 
         class CTError : public WindowAction

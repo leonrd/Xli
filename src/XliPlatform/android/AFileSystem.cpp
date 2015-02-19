@@ -35,7 +35,8 @@ namespace Xli
                 if (mode != FileModeRead && mode != FileModeReadRandom)
                     XLI_THROW("Unsupported asset file mode: " + FileModeInfo::ToString(mode));
 
-                asset = AAssetManager_open(AJniHelper::GetAssetManager(), filename.Ptr(), ((mode & FileModeRandom) != 0) ? AASSET_MODE_RANDOM : AASSET_MODE_STREAMING);
+                AJniHelper jni;
+                asset = AAssetManager_open(jni.GetAssetManager(), filename.Ptr(), ((mode & FileModeRandom) != 0) ? AASSET_MODE_RANDOM : AASSET_MODE_STREAMING);
 
                 if (asset == 0)
                     XLI_THROW_CANT_OPEN_FILE(filename);
@@ -99,7 +100,8 @@ namespace Xli
         public:
             AAssetBuffer(String filename)
             {
-                asset = AAssetManager_open(AJniHelper::GetAssetManager(), filename.Ptr(), AASSET_MODE_BUFFER);
+                AJniHelper jni;
+                asset = AAssetManager_open(jni.GetAssetManager(), filename.Ptr(), AASSET_MODE_BUFFER);
 
                 if (asset == 0)
                     XLI_THROW_CANT_OPEN_FILE(filename);

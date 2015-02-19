@@ -378,7 +378,8 @@ namespace Xli
 
         AAssetManager* AShim::GetAssetManager()
         {
-            return AJniHelper::GetAssetManager();
+            AJniHelper jni;
+            return jni.GetAssetManager();
         }
 
         bool AShim::RegisterNativeFunctions(JNINativeMethod native_funcs[], int funcCount)

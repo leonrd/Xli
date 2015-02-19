@@ -60,6 +60,9 @@ namespace Xli
             vm = jvm;
             if (pthread_key_create(&JniThreadKey, JniDestroyThread))
                 LOGE("JNI ERROR: Unable to create pthread key"); // Not fatal
+            jAssetManager = 0;
+            assetManager = 0;
+            activity = 0;
             SetShim(env, globalRefdShim);
         }
         AJniHelper::AJniHelper()
@@ -87,10 +90,6 @@ namespace Xli
         {
             shim = globalRefdShim;
             AShim::CacheMids(env, globalRefdShim);
-            // assetManager
-            jmethodID getAssetManager = env->GetStaticMethodID(shim, "GetAssetManager", "()Landroid/content/res/AssetManager;");
-            jobject jAssetManager = env->NewGlobalRef(env->CallStaticObjectMethod(shim, getAssetManager));
-            assetManager = AAssetManager_fromJava(env, jAssetManager);
             // paths
             ExternalDataPath = "";
             InternalDataPath = "";
@@ -116,6 +115,14 @@ namespace Xli
         }
         AAssetManager* AJniHelper::GetAssetManager()
         {
+            if (!assetManager)
+            {
+                // assetManager
+                jmethodID getAssetManager = env->GetStaticMethodID(shim, "GetAssetManager", "()Landroid/content/res/AssetManager;");
+                jobject jAssetManager = env->NewGlobalRef(env->CallStaticObjectMethod(shim, getAssetManager));
+                assetManager = AAssetManager_fromJava(env, jAssetManager);
+                if (assetManager==0) { XLI_THROW("JNI ERROR: Failed to grab assetManager object"); }
+            }
             return assetManager;
         }
     }
