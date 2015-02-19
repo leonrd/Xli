@@ -74,13 +74,6 @@ namespace Xli
 
             virtual void SetEventHandler(WindowEventHandler* handler)
             {
-                if (handler != 0)
-                    handler->AddRef();
-
-                if (GlobalEventHandler != 0)
-                    GlobalEventHandler->Release();
-
-                GlobalEventHandler = handler;
             }
 
             virtual WindowEventHandler* GetEventHandler()
@@ -90,20 +83,11 @@ namespace Xli
 
             virtual void Close()
             {
-                if (GlobalAndroidApp->destroyRequested == 1 ||
-                    (GlobalEventHandler != 0 &&
-                     GlobalEventHandler->OnClosing(this)))
-                    return;
-
-                GlobalAndroidApp->destroyRequested = 1;
-
-                if (GlobalEventHandler != 0)
-                    GlobalEventHandler->OnClosed(this);
             }
 
             virtual bool IsClosed()
             {
-                return GlobalAndroidApp->destroyRequested == 1;
+                return false;
             }
 
             virtual bool IsVisible()
@@ -205,17 +189,15 @@ namespace Xli
 
             virtual void BeginTextInput(TextInputHint hint)
             {
-                AShim::RaiseSoftKeyboard();
             }
 
             virtual void EndTextInput()
             {
-                AShim::HideSoftKeyboard();
             }
 
             virtual bool IsTextInputActive()
             {
-                return AShim::KeyboardVisible();
+                return false;
             }
 
             virtual bool HasOnscreenKeyboardSupport()
@@ -225,17 +207,17 @@ namespace Xli
 
             virtual bool IsOnscreenKeyboardVisible()
             {
-                return AShim::KeyboardVisible();
+                return false;
             }
 
             virtual Vector2i GetOnscreenKeyboardPosition()
             {
-                return Vector2i(0, GlobalHeight - AShim::GetKeyboardSize());
+                return Vector2i(0, GlobalHeight);
             }
 
             virtual Vector2i GetOnscreenKeyboardSize()
             {
-                return Vector2i(GlobalWidth, AShim::GetKeyboardSize());
+                return Vector2i(GlobalWidth, 0);
             }
 
             virtual bool GetKeyState(Key key)
@@ -420,7 +402,7 @@ namespace Xli
                     }
                     if (action == AKEY_EVENT_ACTION_UP) {
                         return GlobalEventHandler->OnKeyUp(GlobalWindow, KeyMenu);
-                    }                    
+                    }
                 };
             }
 
@@ -456,97 +438,14 @@ namespace Xli
 
         static void handle_cmd(struct android_app* app, int32_t cmd)
         {
-#ifdef XLI_DEBUG
-            LOGD(get_cmd_string(cmd));
-#endif
-            switch (cmd)
-            {
-            case APP_CMD_INIT_WINDOW:
-                GlobalInit = 1;
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnNativeHandleChanged(GlobalWindow);
-
-                break;
-
-            case APP_CMD_TERM_WINDOW:
-                GlobalInit = 0;
-                break;
-
-            case APP_CMD_START:
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppWillEnterForeground(GlobalWindow);
-
-                break;
-
-            case APP_CMD_RESUME:
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppDidEnterForeground(GlobalWindow);
-
-                break;
-
-            case APP_CMD_PAUSE:
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppWillEnterBackground(GlobalWindow);
-
-                break;
-
-            case APP_CMD_STOP:
-                if (GlobalFlags & WindowFlagsDisableBackgroundProcess)
-                    handle_cmd(app, APP_CMD_DESTROY);
-                else if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppDidEnterBackground(GlobalWindow);
-
-                break;
-
-            case APP_CMD_DESTROY:
-                if (!app->destroyRequested)
-                {
-                    if (GlobalEventHandler)
-                        GlobalEventHandler->OnAppTerminating(GlobalWindow);
-
-                    app->destroyRequested = 1;
-
-                    if (GlobalEventHandler)
-                        GlobalEventHandler->OnClosed(GlobalWindow);
-                }
-                break;
-
-            case APP_CMD_LOW_MEMORY:
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnAppLowMemory(GlobalWindow);
-
-                break;
-            }
         }
 
-        void Android::Init(struct android_app* app)
+        void Android::Init(JavaVM* jvm, JNIEnv* env, jclass globalRefdShim)
         {
-            app->userData = 0;
-            app->onAppCmd = handle_cmd;
-            app->onInputEvent = handle_input;
-
-            GlobalAndroidApp = app;
-            AndroidActivity = app->activity;
-
             Out->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_INFO)));
             Error->SetStream(ManagePtr(new ALogStream(ANDROID_LOG_WARN)));
-            
-            AJniHelper::Init();
 
-            // Wait for the native window to be initialized from another thread here.
-            // TODO: Remove this for better maintainability and faster start up.
-            while (!GlobalInit)
-            {
-                Window::ProcessMessages();
-
-                if (GlobalAndroidApp->destroyRequested)
-                {
-                    LOGF("Unable to initialize window");
-                    exit(EXIT_FAILURE);
-                }
-
-                usleep(10000);
-            }
+            AJniHelper::Init(jvm, env, globalRefdShim);
         }
 
         void Android::SetLogTag(const char* tag)
@@ -556,12 +455,12 @@ namespace Xli
 
         JavaVM* Android::GetJavaVM()
         {
-            return AndroidActivity->vm;
+            return AJniHelper::GetVM();
         }
 
         jobject Android::GetActivity()
         {
-            return AndroidActivity->clazz;
+            return AJniHelper::GetActivity();
         }
     }
 
@@ -609,31 +508,5 @@ namespace Xli
 
     void Window::ProcessMessages()
     {
-        int ident;
-        int events;
-        struct android_poll_source* source;
-
-        while ((ident = ALooper_pollAll(0, NULL, &events, (void**)&source)) >= 0)
-            if (source != NULL)
-                source->process(GlobalAndroidApp, source);
-
-        if (GlobalInit && !GlobalAndroidApp->destroyRequested)
-        {
-            // Detect window resize / screen rotation
-            int w = ANativeWindow_getWidth(GlobalAndroidApp->window);
-            int h = ANativeWindow_getHeight(GlobalAndroidApp->window);
-
-            if (w != GlobalWidth || h != GlobalHeight)
-            {
-                GlobalWidth = w;
-                GlobalHeight = h;
-
-                if (GlobalEventHandler)
-                    GlobalEventHandler->OnSizeChanged(GlobalWindow);
-            }
-        }
-
-        if (GlobalWindow)
-            PlatformSpecific::CTQueue::ProcessCrossThreadEvents();
     }
 }

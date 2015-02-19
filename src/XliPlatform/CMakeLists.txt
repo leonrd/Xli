@@ -100,11 +100,10 @@ if (XLI_PLATFORM_ANDROID)
 
     set(SRC ${SRC}
         android/AFileSystem.cpp
-        android/ACrossThread.cpp    
+        android/ACrossThread.cpp
         android/AJniHelper.cpp
         android/AMessageBox.cpp
         android/AShim.cpp
-        android/AStream.cpp
         android/AWindow.cpp
         android/ADisplay.cpp
         generic/GenericDialogs.cpp

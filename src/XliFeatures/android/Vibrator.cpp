@@ -25,21 +25,19 @@ namespace Xli
 {
     bool Vibrator::CanVibrate()
     {
-        return PlatformSpecific::AShim::HasVibrator();
+        return false;
     }
 
     bool Vibrator::CanTimedVibrate()
     {
-        return true;
+        return false;
     }
 
     void Vibrator::Vibrate()
     {
-        PlatformSpecific::AShim::VibrateForMilliseconds(400);
     }
 
     void Vibrator::VibrateForMilliseconds(int milliseconds)
     {
-        PlatformSpecific::AShim::VibrateForMilliseconds(milliseconds);
     }
 }

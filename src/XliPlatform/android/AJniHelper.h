@@ -30,44 +30,37 @@ namespace Xli
         class AJniHelper
         {
             JNIEnv* env;
-            jclass shim;
-            static int shim_loaded;
+            static JavaVM* vm;
+            static jclass shim;
+            static jobject activity;
+            static jobject jAssetManager;
+            static AAssetManager* assetManager;
 
+            static void SetShim(JNIEnv* env, jclass globalRefdShim);
         public:
-            static void Init();
+            static String ExternalDataPath;
+            static String InternalDataPath;
 
+            static void Init(JavaVM* jvm, JNIEnv* env, jclass globalRefdShim);
             AJniHelper();
 
-            jclass GetShim();
-
-            jmethodID FindMethod(const char* className, const char* methodName, const char* methodSig);
-
-            jobject CallObjectMethod(jobject inst, const char* name, const char* sig);
-
-            String GetString(jobject str);
             JNIEnv* GetEnv();
-
             JNIEnv* operator->();
 
-            jmethodID GetInstanceMethod(const char* m_name, const char* m_sig);
-            jmethodID GetInstanceMethod(jobject inst, const char* m_name, const char* m_sig);
-            jobject GetInstance();
-            jobject GetInstance(const char* class_name, const char* constructor_sig, ...);
-            jobject GetInstance(jclass cls, const char* constructor_sig, ...);
-            jclass GetCustomClass(const char* class_path);
-            int PrepareAssetJar(const char* file_name, const char* class_name);
-            int PrepareAssetJar(const char* file_name, const char* class_name, int package);
-            jclass GetAssetClass(const char* file_name, const char* class_name);
-        };        
+            static jclass GetShim();
+            static JavaVM* GetVM();
+            static jobject GetActivity();
+            static AAssetManager* GetAssetManager();
+        };
 
         class CTError : public WindowAction
         {
         public:
             String message;
             int errorCode;
-            CTError(String message, int errorCode) 
-            { 
-                this->message = message; 
+            CTError(String message, int errorCode)
+            {
+                this->message = message;
                 this->errorCode = errorCode;
             }
             virtual void Execute()

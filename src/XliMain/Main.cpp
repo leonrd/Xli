@@ -40,13 +40,13 @@ extern "C" int main(int argc, char** argv)
         Xli::CoreLib::Init();
 
 #if defined(XLI_PLATFORM_ANDROID)
-        Xli::PlatformSpecific::Android::Init((struct android_app*)*argv);
+        //android is now defunct, this is here for show
 #elif defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
 
         Xli::Array<Xli::String> args(argc);
-        for (int i = 0; i < argc; i++) 
+        for (int i = 0; i < argc; i++)
             args[i] = argv[i];
 
         result = Main(args);

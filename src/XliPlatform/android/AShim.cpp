@@ -33,20 +33,14 @@ namespace Xli
     {
         int AShim::kbVisible = 0;
 
-        jmethodID AShim::raiseKeyboard;
-        jmethodID AShim::hideKeyboard;
-        jmethodID AShim::getKeyboardSize;
         jmethodID AShim::showMessageBox;
         jmethodID AShim::connectedToNetwork;
         jmethodID AShim::httpShowHeaders;
         jmethodID AShim::initDefaultCookieManager;
-        jmethodID AShim::getAssetManager;
         jmethodID AShim::hideStatusBar;
         jmethodID AShim::showStatusBar;
         jmethodID AShim::getStatusBarHeight;
         jmethodID AShim::getDisplayMetrics;
-        jmethodID AShim::hasVibrator;
-        jmethodID AShim::vibrateForMilliseconds;
         jmethodID AShim::abortAsyncTask;
         jmethodID AShim::holdObject;
         jmethodID AShim::getObject;
@@ -60,14 +54,11 @@ namespace Xli
         void AShim::CacheMids(JNIEnv *env, jclass shimClass)
         {
             LOGD("Caching Mids");
-            raiseKeyboard = env->GetStaticMethodID(shimClass, "RaiseKeyboard", "()V");
-            hideKeyboard = env->GetStaticMethodID(shimClass, "HideKeyboard", "()V");
-            getKeyboardSize = env->GetStaticMethodID(shimClass, "GetKeyboardSize", "()I");
             showMessageBox = env->GetStaticMethodID(shimClass, "ShowMessageBox", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;II)I");
             connectedToNetwork = env->GetStaticMethodID(shimClass, "ConnectedToNetwork", "()Z");
             initDefaultCookieManager = env->GetStaticMethodID(shimClass, "InitDefaultCookieManager", "()V");
             abortAsyncTask = env->GetStaticMethodID(shimClass, "AbortAsyncTask", "(I)V");
-            getAssetManager = env->GetStaticMethodID(shimClass, "GetAssetManager", "()Landroid/content/res/AssetManager;");
+
             hideStatusBar = env->GetStaticMethodID(shimClass, "HideStatusBar", "()V");
             showStatusBar = env->GetStaticMethodID(shimClass, "ShowStatusBar", "()V");
             getStatusBarHeight = env->GetStaticMethodID(shimClass, "GetStatusBarHeight", "()F");
@@ -75,27 +66,19 @@ namespace Xli
             holdObject = env->GetStaticMethodID(shimClass, "HoldObject", "(Ljava/lang/Object;)I");
             getObject = env->GetStaticMethodID(shimClass, "GetObject", "(I)Ljava/lang/Object;");
             tryReleaseObject = env->GetStaticMethodID(shimClass, "TryReleaseObject", "(I)Z");
-            hasVibrator = env->GetStaticMethodID(shimClass, "HasVibrator", "()Z");
-            vibrateForMilliseconds = env->GetStaticMethodID(shimClass, "VibrateForMilliseconds", "(I)V");
             asyncInputStreamToString = env->GetStaticMethodID(shimClass, "AsyncInputStreamToString", "(IJ)I");
             asyncInputStreamToByteArray = env->GetStaticMethodID(shimClass, "AsyncInputStreamToByteArray", "(IJ)I");
             getHeaderMap = env->GetStaticMethodID(shimClass, "GetHeaderMap","()Ljava/lang/Object;");
             sendHttpAsyncA = env->GetStaticMethodID(shimClass, "SendHttpAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/ByteBuffer;IJZ)I");
             sendHttpAsyncB = env->GetStaticMethodID(shimClass, "SendHttpStringAsync", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)I");
 
-            if (!raiseKeyboard) XLI_THROW("Cannot cache mid for raiseKeyboard.");
-            if (!hideKeyboard) XLI_THROW("Cannot cache mid for hideKeyboard.");
-            if (!getKeyboardSize) XLI_THROW("Cannot cache mid for getKeyboardSize.");
             if (!showMessageBox) XLI_THROW("Cannot cache mid for showMessageBox.");
             if (!connectedToNetwork) XLI_THROW("Cannot cache mid for connectedToNetwork.");
             if (!initDefaultCookieManager) XLI_THROW("Cannot cache mid for initDefaultCookieManager.");
-            if (!getAssetManager) XLI_THROW("Cannot cache mid for getAssetManager.");
             if (!hideStatusBar) XLI_THROW("Cannot cache mid for hideStatusBar.");
             if (!showStatusBar) XLI_THROW("Cannot cache mid for showStatusBar.");
             if (!getStatusBarHeight) XLI_THROW("Cannot cache mid for getStatusBarHeight.");
             if (!getDisplayMetrics) XLI_THROW("Cannot cache mid for getDisplayMetrics.");
-            if (!hasVibrator) XLI_THROW("Cannot cache mid for hasVibrator.");
-            if (!vibrateForMilliseconds) XLI_THROW("Cannot cache mid for vibrateForMilliseconds.");
             if (!abortAsyncTask) XLI_THROW("Cannot cache mid for asyncTask.");
             if (!holdObject) XLI_THROW("Cannot cache mid for holdObject.");
             if (!getObject) XLI_THROW("Cannot cache mid for getObject.");
@@ -106,33 +89,6 @@ namespace Xli
             if (!sendHttpAsyncA) XLI_THROW("Cannot cache mid for sendHttpAsyncA.");
             if (!sendHttpAsyncB) XLI_THROW("Cannot cache mid for sendHttpAsyncB.");
             LOGD("Mids Cached");
-        }
-
-        void AShim::RaiseSoftKeyboard()
-        {
-            // LOGD("in_RaiseSoftKeyboard");
-            AJniHelper jni;
-            jni->CallStaticVoidMethod(jni.GetShim(), raiseKeyboard);
-            kbVisible = 1;
-            // LOGD("out_RaiseSoftKeyboard");
-        }
-
-        void AShim::HideSoftKeyboard()
-        {
-            // LOGD("in_HideSoftKeyboard");
-            AJniHelper jni;
-            jclass shimClass = jni.GetShim();
-            jni->CallStaticVoidMethod(shimClass, hideKeyboard);
-            kbVisible = 0;
-            // LOGD("out_HideSoftKeyboard");
-        }
-
-        int AShim::GetKeyboardSize()
-        {
-            AJniHelper jni;
-            jclass shimClass = jni.GetShim();
-            jint result = (jint)jni->CallStaticIntMethod(shimClass, getKeyboardSize);
-            return (int)result;
         }
 
         void AShim::HideStatusBar()
@@ -187,26 +143,6 @@ namespace Xli
             return Vector2((float)jx, (float)jy);
         }
 
-        bool AShim::KeyboardVisible()
-        {
-            return kbVisible;
-        }
-
-        bool AShim::HasVibrator()
-        {
-            AJniHelper jni;
-            jclass shimClass = jni.GetShim();
-            jboolean jresult = jni->CallStaticBooleanMethod(shimClass, hasVibrator);
-            return (bool)jresult;
-        }
-
-        void AShim::VibrateForMilliseconds(int milliseconds)
-        {
-            AJniHelper jni;
-            jclass shimClass = jni.GetShim();
-            jni->CallStaticVoidMethod(shimClass, vibrateForMilliseconds, (jint)milliseconds);
-        }
-
         int AShim::ShowMessageBox(const String& message, const String& caption, int buttons, int hints)
         {
             //setup for call
@@ -241,7 +177,7 @@ namespace Xli
             jstring jurl = jni->NewStringUTF(url.Ptr());
             jstring jmethod = jni->NewStringUTF(method.Ptr());
             jint jtimeout = (jint)req->GetTimeout();
-                
+
             String headers = HeadersToString(req);
             jstring jheaders = jni->NewStringUTF(headers.Ptr());
 
@@ -385,7 +321,10 @@ namespace Xli
                 return "";
             }
             jstring jresult = (jstring)jni->CallStaticObjectMethod(shimClass, mid, bufferedInputStream,(jint)1024);
-            String result = jni.GetString(jresult);
+
+            const char* utf8 = jni->GetStringUTFChars((jstring)jresult, NULL);
+            String result = utf8;
+            jni->ReleaseStringUTFChars((jstring)jresult, utf8);
             jni->DeleteLocalRef(jresult);
             return result;
         }
@@ -439,12 +378,7 @@ namespace Xli
 
         AAssetManager* AShim::GetAssetManager()
         {
-            AJniHelper jni;
-            jclass shimClass = jni.GetShim();
-            jobject assetManager = jni->CallStaticObjectMethod(shimClass, getAssetManager);
-            jni->NewGlobalRef(assetManager);
-            AAssetManager* result = AAssetManager_fromJava(jni.GetEnv(), assetManager);
-            return result;
+            return AJniHelper::GetAssetManager();
         }
 
         bool AShim::RegisterNativeFunctions(JNINativeMethod native_funcs[], int funcCount)

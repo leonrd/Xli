@@ -40,13 +40,11 @@ namespace Xli
 
     namespace PlatformSpecific
     {
-        extern ANativeActivity* AndroidActivity;
-
         XLI_INLINE const char* AGetAppName()
         {
             const char* name = getenv("XLI_APP_NAME");
             return name ? name : "XliApp";
-        }        
+        }
     }
 }
 

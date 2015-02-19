@@ -32,15 +32,15 @@ namespace Xli
         public:
             AAssetStream(String filename, FileMode mode)
             {
-                if (mode != FileModeRead && mode != FileModeReadRandom) 
+                if (mode != FileModeRead && mode != FileModeReadRandom)
                     XLI_THROW("Unsupported asset file mode: " + FileModeInfo::ToString(mode));
-                
-                asset = AAssetManager_open(AndroidActivity->assetManager, filename.Ptr(), ((mode & FileModeRandom) != 0) ? AASSET_MODE_RANDOM : AASSET_MODE_STREAMING);
-                
+
+                asset = AAssetManager_open(AJniHelper::GetAssetManager(), filename.Ptr(), ((mode & FileModeRandom) != 0) ? AASSET_MODE_RANDOM : AASSET_MODE_STREAMING);
+
                 if (asset == 0)
                     XLI_THROW_CANT_OPEN_FILE(filename);
             }
-            
+
             virtual ~AAssetStream()
             {
                 AAsset_close(asset);
@@ -99,9 +99,9 @@ namespace Xli
         public:
             AAssetBuffer(String filename)
             {
-                asset = AAssetManager_open(AndroidActivity->assetManager, filename.Ptr(), AASSET_MODE_BUFFER);
-                
-                if (asset == 0) 
+                asset = AAssetManager_open(AJniHelper::GetAssetManager(), filename.Ptr(), AASSET_MODE_BUFFER);
+
+                if (asset == 0)
                     XLI_THROW_CANT_OPEN_FILE(filename);
             }
 
@@ -144,8 +144,12 @@ namespace Xli
             AFileSystem()
             {
                 AJniHelper jni;
-                Context_getCacheDir = jni.FindMethod("android/content/Context", "getCacheDir", "()Ljava/io/File;");
-                File_getAbsolutePath = jni.FindMethod("java/io/File", "getAbsolutePath", "()Ljava/lang/String;");
+
+                jclass contextCls = jni->FindClass("android/content/Context");
+                Context_getCacheDir = jni->GetMethodID(contextCls, "getCacheDir", "()Ljava/io/File;");
+
+                jclass fileCls = jni->FindClass("java/io/File");
+                File_getAbsolutePath = jni->GetMethodID(fileCls, "getAbsolutePath", "()Ljava/lang/String;");
             }
 
             virtual String GetBaseDirectory()
@@ -156,9 +160,14 @@ namespace Xli
             virtual String GetTempDirectory()
             {
                 AJniHelper jni;
-                jobject cacheDir = jni->CallObjectMethod(AndroidActivity->clazz, Context_getCacheDir);
+                jobject cacheDir = jni->CallObjectMethod(AJniHelper::GetActivity(), Context_getCacheDir);
                 jobject absolutePath = jni->CallObjectMethod(cacheDir, File_getAbsolutePath);
-                return jni.GetString(absolutePath);
+
+                const char* utf8 = jni->GetStringUTFChars((jstring)absolutePath, NULL);
+                String result = utf8;
+                jni->ReleaseStringUTFChars((jstring)absolutePath, utf8);
+
+                return result;
             }
 
             virtual String GetSystemDirectory(SystemDirectory dir)
@@ -166,10 +175,10 @@ namespace Xli
                 switch (dir)
                 {
                 case SystemDirectoryConfig:
-                    return (String)AndroidActivity->externalDataPath;
+                    return AJniHelper::ExternalDataPath;
 
                 case SystemDirectoryData:
-                    return (String)AndroidActivity->internalDataPath;
+                    return AJniHelper::InternalDataPath;
 
                 // TODO: Conform to Android specifications on proper handling of system directories
                 default:

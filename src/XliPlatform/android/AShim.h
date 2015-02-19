@@ -31,9 +31,6 @@ namespace Xli
         class AShim
         {
         private:
-            static jmethodID raiseKeyboard;
-            static jmethodID hideKeyboard;
-            static jmethodID getKeyboardSize;
             static jmethodID showMessageBox;
             static jmethodID connectedToNetwork;
             static jmethodID newHttpConnection;
@@ -46,8 +43,6 @@ namespace Xli
             static jmethodID showStatusBar;
             static jmethodID getStatusBarHeight;
             static jmethodID getDisplayMetrics;
-            static jmethodID hasVibrator;
-            static jmethodID vibrateForMilliseconds;
             static jmethodID abortAsyncTask;
             static jmethodID holdObject;
             static jmethodID getObject;
@@ -57,24 +52,18 @@ namespace Xli
             static jmethodID sendHttpAsyncA;
             static jmethodID sendHttpAsyncB;
             static jmethodID getHeaderMap;
-            
+
         public:
             static int kbVisible;
 
             static void CacheMids(JNIEnv *env, jclass shim_class);
             static void CheckExceptions();
 
-            static void RaiseSoftKeyboard();
-            static void HideSoftKeyboard();
-            static bool KeyboardVisible();
-            static int GetKeyboardSize();
             static void ShowStatusBar();
             static void HideStatusBar();
             static float GetStatusBarHeight();
             static int ShowMessageBox(const String& message, const String& caption, int buttons, int hints);
-            static bool HasVibrator();
-            static void VibrateForMilliseconds(int milliseconds);
-            
+
             static bool ConnectedToNetwork();
             static String HeadersToString(const HttpRequest* req);
             static JObjRef SendHttpAsync(const HttpRequest* req, const void* content, long byteLength);

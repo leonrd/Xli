@@ -33,7 +33,7 @@ namespace Xli
         class Android
         {
         public:
-            static void Init(struct android_app* app);
+            static void Init(JavaVM* jvm, JNIEnv* env, jclass globalRefdShim);
 
             static void SetLogTag(const char* tag);
 
