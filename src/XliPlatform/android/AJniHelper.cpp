@@ -151,19 +151,21 @@ namespace Xli
                 //--------------------------------------------------
                 // REMOVE THIS PART ON UNOCORE UPDATE
                 activity = optionalActivity;
-                JNIEnv* env_;
-                if (vm->GetEnv(reinterpret_cast<void**>(&env_), JNI_VERSION_1_6) != JNI_OK)
+                JNIEnv* ENVIR;
+                if (vm->GetEnv(reinterpret_cast<void**>(&ENVIR), JNI_VERSION_1_6) != JNI_OK)
                 {
-                    if (vm->AttachCurrentThread(&env_, NULL) != JNI_OK)
+                    if (vm->AttachCurrentThread(&ENVIR, NULL) != JNI_OK)
                         XLI_THROW("JNI ERROR: Failed to attach current thread");
                 }
                 LOGD("--Loading shim apk");
-                PrepareAssetJar(env_, "XliShimJ.apk","XliJ");
-                globalRefdShim = GetAssetClass(env_, "XliShimJ.apk","XliJ");
-                SetShim(env, globalRefdShim);
-                jmethodID cacheAct = env->GetStaticMethodID(shim, "CacheActivity", "(Landroid/app/NativeActivity;)V");
-                env->CallStaticVoidMethod(shim, cacheAct, activity);
-                AttachNativeCallbacks(shim, env_);
+                PrepareAssetJar(ENVIR, "XliShimJ.apk","XliJ");
+                globalRefdShim = GetAssetClass(ENVIR, "XliShimJ.apk","XliJ");
+                SetShim(ENVIR, globalRefdShim);
+                bool err = ENVIR->ExceptionCheck();
+                jmethodID cacheAct = ENVIR->GetStaticMethodID(shim, "CacheActivity", "(Landroid/app/NativeActivity;)V");
+                err = ENVIR->ExceptionCheck();
+                ENVIR->CallStaticVoidMethod(shim, cacheAct, activity);
+                AttachNativeCallbacks(shim, ENVIR);
                 LOGD("--Done loading");
                 //--------------------------------------------------
             } else {

@@ -40,7 +40,7 @@ extern "C" int main(int argc, char** argv)
         Xli::CoreLib::Init();
 
 #if defined(XLI_PLATFORM_ANDROID)
-        //android is now defunct, this is here for show
+        Xli::PlatformSpecific::Android::Init((struct android_app*)*argv);
 #elif defined(XLI_PLATFORM_IOS)
         Xli::PlatformSpecific::iOS::Init();
 #endif
