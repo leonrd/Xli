@@ -323,7 +323,7 @@ namespace Xli
                 CFRelease(this->responseMessage);
             if (uploadData!=0)
                 CFRelease(this->uploadData);
-        }        
+        }
 
         virtual void NHeadersToHeaders(CFDictionaryRef dictRef)
         {
@@ -332,8 +332,12 @@ namespace Xli
         static void NHeaderToHeader(const void* key, const void* value, void* ptr)
         {
             CHttpRequest* request = (CHttpRequest*)ptr;
-            if (!request->responseHeaders.ContainsKey((char*)key))
-                request->responseHeaders.Add((char*)key, (char*)value);
+
+            const char* kc = CFStringGetCStringPtr ((CFStringRef)key, kCFStringEncodingUTF8);
+            String k = kc;
+            String v = CFStringGetCStringPtr ((CFStringRef)value, kCFStringEncodingUTF8);
+            if (!request->responseHeaders.ContainsKey(kc))
+                request->responseHeaders.Add(k,v);
         }
 
         static void OnStateChanged(CHttpRequest* request, HttpRequestState status, CFReadStreamRef stream, CFStreamEventType event)
@@ -391,14 +395,14 @@ namespace Xli
                 if (eh!=0) eh->OnRequestError(request,error);
             }
         }
-        
+
         static void OnByteDataRecieved(CHttpRequest* request, CFReadStreamRef stream, CFStreamEventType event)
         {
             UInt8 buff[1024];
             CFIndex nBytesRead = CFReadStreamRead(stream, buff, 1024);
 
             if(nBytesRead>0)
-            {                
+            {
                 if (!CFHTTPMessageAppendBytes(request->responseMessage, buff, nBytesRead)) {
                     request->HardStop();
                     HttpEventHandler* eh = request->client->GetEventHandler();
@@ -421,12 +425,12 @@ namespace Xli
             CFHTTPMessageRef response = (CFHTTPMessageRef) CFReadStreamCopyProperty (stream, kCFStreamPropertyHTTPResponseHeader);
 
             //CFHTTPMessageRef response = request->responseMessage;
-            
+
             //headers
             CFDictionaryRef nHeaders = CFHTTPMessageCopyAllHeaderFields(response); //(request->responseMessage);
             request->NHeadersToHeaders(nHeaders);
             CFRelease(nHeaders);
-            
+
             //responseStatus
             CFIndex code = CFHTTPMessageGetResponseStatusCode(response); //request->responseMessage
             request->responseStatus = (int)code;
@@ -458,15 +462,15 @@ namespace Xli
                 // {TODO} not currently used but will be needed for upload progress
                 break;
             case kCFStreamEventHasBytesAvailable:
-                
+
                 CHttpRequest::OnByteDataRecieved(request, stream, event);
-                
+
                 if (request->state == HttpRequestStateSent) {
                     //CFHTTPMessageRef response = (CFHTTPMessageRef) CFReadStreamCopyProperty (stream, kCFStreamPropertyHTTPResponseHeader);
                     CFHTTPMessageRef response = request->responseMessage;
                     if (CFHTTPMessageIsHeaderComplete(response)) {
                         CHttpRequest::OnHeadersRecieved(request, stream, event);
-                    }                    
+                    }
                 }
                 break;
             case kCFStreamEventErrorOccurred:
@@ -481,7 +485,7 @@ namespace Xli
                 {
                     request->getContentArray();
                     CHttpRequest::OnStateChanged(request, HttpRequestStateDone, stream, event);
-                    
+
                     if (request->uploadData!=0) CFRelease(request->uploadData);
                     if (request->cachedReadStream!=0)
                     {
